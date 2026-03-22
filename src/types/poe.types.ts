@@ -14,6 +14,7 @@ export type PublicItem = {
   baseType?: string;
   rarity?: string;
   frameType?: number;
+  league?: string | null;
   note?: string;
   forum_note?: string;
   ilvl: number;

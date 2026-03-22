@@ -1,14 +1,17 @@
-import { env } from "../config/env";
 import type {
   NormalizedPricedItem,
   PublicItem,
   PublicStashChange,
   PublicStashResponse,
 } from "../types/poe.types";
+import { LeagueFilterService } from "./league-filter.service";
 import { PriceNoteParserService } from "./price-note-parser.service";
 
 export class NormalizeService {
-  constructor(private readonly priceNoteParser = new PriceNoteParserService()) {}
+  constructor(
+    private readonly priceNoteParser = new PriceNoteParserService(),
+    private readonly leagueFilterService = new LeagueFilterService(),
+  ) {}
 
   normalizeResponse(response: PublicStashResponse): NormalizedPricedItem[] {
     const rows: NormalizedPricedItem[] = [];
@@ -18,11 +21,15 @@ export class NormalizeService {
         return;
       }
 
-      if (env.TARGET_LEAGUE && stashChange.league !== env.TARGET_LEAGUE) {
+      if (!this.leagueFilterService.isTargetLeague(stashChange.league)) {
         return;
       }
 
       stashChange.items.forEach((item, index) => {
+        if (!this.leagueFilterService.isTargetLeague(item.league)) {
+          return;
+        }
+
         const extracted = this.extractPricedItem(stashChange, item, index);
         if (extracted) {
           rows.push(extracted);

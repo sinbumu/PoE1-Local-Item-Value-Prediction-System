@@ -5,16 +5,17 @@ import { CollectorService } from "../services/collector.service";
 async function main(): Promise<void> {
   const collectorService = new CollectorService();
   const once = process.argv.includes("--once");
+  const startLatest = process.argv.includes("--start-latest");
 
   await pool.query("SELECT 1");
-  logger.info({ once }, "Database connection verified");
+  logger.info({ once, startLatest }, "Database connection verified");
 
   if (once) {
-    await collectorService.runOnce();
+    await collectorService.runOnce({ startLatest });
     return;
   }
 
-  await collectorService.runForever();
+  await collectorService.runForever({ startLatest });
 }
 
 main()

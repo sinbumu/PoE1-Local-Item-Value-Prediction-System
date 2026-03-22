@@ -6,7 +6,34 @@ import { withRetry } from "../utils/retry";
 
 const API_BASE_URL = "https://api.pathofexile.com";
 
+type TradeChangeIdsResponse = {
+  psapi: string;
+  forum: string;
+};
+
 export class PoeApiService {
+  async getLatestPublicStashChangeId(): Promise<string> {
+    const response = await axios.get<TradeChangeIdsResponse>(
+      "https://www.pathofexile.com/api/trade/data/change-ids",
+      {
+        headers: {
+          "User-Agent": env.POE_USER_AGENT,
+          Accept: "application/json",
+        },
+        timeout: 15000,
+      },
+    );
+
+    logger.info(
+      {
+        latestPsapiChangeId: response.data.psapi,
+      },
+      "Fetched latest public stash change id",
+    );
+
+    return response.data.psapi;
+  }
+
   async getPublicStashes(
     accessToken: string,
     nextChangeId?: string,

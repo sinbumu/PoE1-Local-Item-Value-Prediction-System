@@ -22,6 +22,10 @@ function parseMinutesArgument(): number {
   return minutes;
 }
 
+function parseStartLatestArgument(): boolean {
+  return process.argv.includes("--start-latest");
+}
+
 function incrementCount(map: Record<string, number>, key: string): void {
   map[key] = (map[key] ?? 0) + 1;
 }
@@ -51,6 +55,17 @@ function registerFirstSeen(
     },
     "Observed new league value",
   );
+
+  if (key === "Mirage") {
+    logger.warn(
+      {
+        league: key,
+        page,
+        kind,
+      },
+      "Observed Mirage league value",
+    );
+  }
 }
 
 function observeResponse(
@@ -99,6 +114,7 @@ function observeResponse(
 
 async function main(): Promise<void> {
   const minutes = parseMinutesArgument();
+  const startLatest = parseStartLatestArgument();
   const durationMs = minutes * 60 * 1000;
   const startedAt = Date.now();
   const endsAt = startedAt + durationMs;
@@ -107,11 +123,15 @@ async function main(): Promise<void> {
   const poeApiService = new PoeApiService();
   const accessToken = await authService.getAccessToken();
 
-  let nextChangeId: string | undefined;
+  let nextChangeId: string | undefined = startLatest
+    ? await poeApiService.getLatestPublicStashChangeId()
+    : undefined;
   let page = 0;
   let totalStashes = 0;
   let totalItems = 0;
   let emptyPages = 0;
+  let mirageStashes = 0;
+  let mirageItems = 0;
 
   const aggregateStashLeagues: Record<string, number> = {};
   const aggregateItemLeagues: Record<string, number> = {};
@@ -122,6 +142,8 @@ async function main(): Promise<void> {
     {
       minutes,
       endsAt: new Date(endsAt).toISOString(),
+      startLatest,
+      initialNextChangeId: nextChangeId ?? null,
     },
     "Starting league observation run",
   );
@@ -142,6 +164,11 @@ async function main(): Promise<void> {
 
       totalStashes += observation.stashCount;
       totalItems += observation.itemCount;
+      const pageMirageStashes =
+        observation.stashLeagueCounts.Mirage ?? 0;
+      const pageMirageItems = observation.itemLeagueCounts.Mirage ?? 0;
+      mirageStashes += pageMirageStashes;
+      mirageItems += pageMirageItems;
 
       logger.info(
         {
@@ -150,6 +177,8 @@ async function main(): Promise<void> {
           responseNextChangeId: response.next_change_id,
           stashCount: observation.stashCount,
           itemCount: observation.itemCount,
+          mirageStashes: pageMirageStashes,
+          mirageItems: pageMirageItems,
           topStashLeagues: Object.entries(observation.stashLeagueCounts)
             .sort((a, b) => b[1] - a[1])
             .slice(0, 5),
@@ -159,6 +188,19 @@ async function main(): Promise<void> {
         },
         "Processed observation page",
       );
+
+      if (pageMirageStashes > 0 || pageMirageItems > 0) {
+        logger.warn(
+          {
+            page,
+            requestedChangeId: nextChangeId ?? null,
+            responseNextChangeId: response.next_change_id,
+            mirageStashes: pageMirageStashes,
+            mirageItems: pageMirageItems,
+          },
+          "Mirage data detected in observation stream",
+        );
+      }
 
       if (observation.stashCount === 0) {
         emptyPages += 1;
@@ -181,10 +223,13 @@ async function main(): Promise<void> {
 
   const summary = {
     minutes,
+    startLatest,
     pagesChecked: page,
     emptyPages,
     totalStashes,
     totalItems,
+    mirageStashes,
+    mirageItems,
     finalNextChangeId: nextChangeId ?? null,
     observedStashLeagues: seenStashLeagues,
     observedItemLeagues: seenItemLeagues,

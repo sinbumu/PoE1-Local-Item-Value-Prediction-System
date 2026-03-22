@@ -5,6 +5,7 @@ import { RawResponseRepository } from "../repositories/raw-response.repository";
 import { logger } from "../utils/logger";
 import { sleep } from "../utils/time";
 import { AuthService } from "./auth.service";
+import { LeagueFilterService } from "./league-filter.service";
 import { NormalizeService } from "./normalize.service";
 import { formatAxiosError, PoeApiService } from "./poe-api.service";
 
@@ -12,6 +13,10 @@ type CollectorCycleResult = {
   nextChangeId: string;
   normalizedCount: number;
   stashCount: number;
+};
+
+type CollectorRunOptions = {
+  startLatest?: boolean;
 };
 
 export class CollectorService {
@@ -22,18 +27,36 @@ export class CollectorService {
     private readonly collectorStateRepository = new CollectorStateRepository(),
     private readonly normalizedItemRepository = new NormalizedItemRepository(),
     private readonly normalizeService = new NormalizeService(),
+    private readonly leagueFilterService = new LeagueFilterService(),
   ) {}
 
-  async runOnce(): Promise<CollectorCycleResult> {
+  private async resolveRequestedChangeId(
+    options?: CollectorRunOptions,
+  ): Promise<string | undefined> {
     const savedNextChangeId =
       await this.collectorStateRepository.getLatestNextChangeId();
-    const requestedChangeId = savedNextChangeId ?? env.START_NEXT_CHANGE_ID;
+    if (savedNextChangeId) {
+      return savedNextChangeId;
+    }
+
+    if (options?.startLatest) {
+      return this.poeApiService.getLatestPublicStashChangeId();
+    }
+
+    return env.START_NEXT_CHANGE_ID ?? undefined;
+  }
+
+  async runOnce(options?: CollectorRunOptions): Promise<CollectorCycleResult> {
+    const savedNextChangeId =
+      await this.collectorStateRepository.getLatestNextChangeId();
+    const requestedChangeId = await this.resolveRequestedChangeId(options);
 
     logger.info(
       {
         requestedChangeId: requestedChangeId ?? null,
         savedNextChangeId,
         configuredStartNextChangeId: env.START_NEXT_CHANGE_ID ?? null,
+        startLatest: options?.startLatest ?? false,
       },
       "Starting collector cycle",
     );
@@ -43,9 +66,13 @@ export class CollectorService {
       accessToken,
       requestedChangeId ?? undefined,
     );
+    const filteredResponse = this.leagueFilterService.filterResponse(response);
 
-    await this.rawResponseRepository.insert(response, requestedChangeId ?? undefined);
-    const normalizedRows = this.normalizeService.normalizeResponse(response);
+    await this.rawResponseRepository.insert(
+      filteredResponse,
+      requestedChangeId ?? undefined,
+    );
+    const normalizedRows = this.normalizeService.normalizeResponse(filteredResponse);
     const normalizedCount =
       await this.normalizedItemRepository.upsertMany(normalizedRows);
     await this.collectorStateRepository.saveLatestNextChangeId(
@@ -56,7 +83,8 @@ export class CollectorService {
       {
         requestedChangeId: requestedChangeId ?? null,
         nextChangeId: response.next_change_id,
-        stashCount: response.stashes.length,
+        fetchedStashCount: response.stashes.length,
+        filteredStashCount: filteredResponse.stashes.length,
         normalizedCount,
       },
       "Collector cycle completed",
@@ -65,14 +93,14 @@ export class CollectorService {
     return {
       nextChangeId: response.next_change_id,
       normalizedCount,
-      stashCount: response.stashes.length,
+      stashCount: filteredResponse.stashes.length,
     };
   }
 
-  async runForever(): Promise<void> {
+  async runForever(options?: CollectorRunOptions): Promise<void> {
     while (true) {
       try {
-        const result = await this.runOnce();
+        const result = await this.runOnce(options);
         const delayMs = result.stashCount === 0 ? env.POLL_INTERVAL_MS : 1000;
 
         logger.info(
