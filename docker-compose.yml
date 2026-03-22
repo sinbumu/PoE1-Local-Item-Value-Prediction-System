@@ -1,0 +1,17 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: poe-stash-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: poe_stash
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./src/db/schema.sql:/docker-entrypoint-initdb.d/001-schema.sql:ro
+
+volumes:
+  postgres-data:

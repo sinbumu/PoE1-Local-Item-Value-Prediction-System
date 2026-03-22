@@ -1,0 +1,39 @@
+{
+  "name": "poe1-local-item-value-prediction-system",
+  "version": "1.0.0",
+  "description": "Local PoC collector for Path of Exile 1 public stash data.",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "collector": "tsx src/scripts/run-collector.ts",
+    "collector:once": "tsx src/scripts/run-collector.ts --once",
+    "inspect": "tsx src/scripts/inspect-sample.ts",
+    "observe:leagues": "tsx src/scripts/observe-leagues.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sinbumu/PoE1-Local-Item-Value-Prediction-System.git"
+  },
+  "keywords": [],
+  "author": "blockoxyz",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/sinbumu/PoE1-Local-Item-Value-Prediction-System/issues"
+  },
+  "homepage": "https://github.com/sinbumu/PoE1-Local-Item-Value-Prediction-System#readme",
+  "dependencies": {
+    "axios": "^1.13.6",
+    "dotenv": "^17.3.1",
+    "pg": "^8.20.0",
+    "pino": "^10.3.1",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "@types/pg": "^8.20.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  }
+}
