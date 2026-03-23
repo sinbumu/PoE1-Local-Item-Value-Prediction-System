@@ -6,7 +6,13 @@ import { logger } from "../utils/logger";
 const TOKEN_URL = "https://www.pathofexile.com/oauth/token";
 
 export class AuthService {
-  async getAccessToken(): Promise<string> {
+  private cachedAccessToken: string | null = null;
+
+  async getAccessToken(forceRefresh = false): Promise<string> {
+    if (!forceRefresh && this.cachedAccessToken) {
+      return this.cachedAccessToken;
+    }
+
     const body = new URLSearchParams({
       client_id: env.POE_CLIENT_ID,
       client_secret: env.POE_CLIENT_SECRET,
@@ -31,6 +37,11 @@ export class AuthService {
       "Successfully fetched OAuth token",
     );
 
+    this.cachedAccessToken = response.data.access_token;
     return response.data.access_token;
+  }
+
+  clearCachedAccessToken(): void {
+    this.cachedAccessToken = null;
   }
 }

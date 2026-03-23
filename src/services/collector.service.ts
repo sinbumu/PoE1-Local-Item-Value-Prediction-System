@@ -1,3 +1,4 @@
+import axios from "axios";
 import { env } from "../config/env";
 import { CollectorStateRepository } from "../repositories/collector-state.repository";
 import { NormalizedItemRepository } from "../repositories/normalized-item.repository";
@@ -30,6 +31,35 @@ export class CollectorService {
     private readonly leagueFilterService = new LeagueFilterService(),
   ) {}
 
+  private async fetchPublicStashesWithAuthRetry(
+    requestedChangeId?: string,
+  ) {
+    let accessToken = await this.authService.getAccessToken();
+
+    try {
+      return await this.poeApiService.getPublicStashes(
+        accessToken,
+        requestedChangeId,
+      );
+    } catch (error) {
+      if (!axios.isAxiosError(error) || error.response?.status !== 401) {
+        throw error;
+      }
+
+      logger.warn(
+        {
+          requestedChangeId: requestedChangeId ?? null,
+        },
+        "Cached access token rejected, refreshing token",
+      );
+
+      this.authService.clearCachedAccessToken();
+      accessToken = await this.authService.getAccessToken(true);
+
+      return this.poeApiService.getPublicStashes(accessToken, requestedChangeId);
+    }
+  }
+
   private async resolveRequestedChangeId(
     options?: CollectorRunOptions,
   ): Promise<string | undefined> {
@@ -61,9 +91,7 @@ export class CollectorService {
       "Starting collector cycle",
     );
 
-    const accessToken = await this.authService.getAccessToken();
-    const response = await this.poeApiService.getPublicStashes(
-      accessToken,
+    const response = await this.fetchPublicStashesWithAuthRetry(
       requestedChangeId ?? undefined,
     );
     const filteredResponse = this.leagueFilterService.filterResponse(response);
