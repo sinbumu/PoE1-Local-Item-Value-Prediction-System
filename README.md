@@ -213,6 +213,10 @@ gunzip -c backup.sql.gz | psql "postgres://postgres:postgres@localhost:5432/poe_
 
 - 계획 원문: `docs/PLAN.md`
 - 변경사항 및 운영 메모: `docs/IMPLEMENTATION_NOTES.md`
+- 모델 스코프: `docs/MODEL_SCOPE.md`
+- 아이템 라우팅 분류표: `docs/ITEM_ROUTING.md`
+- 학습 피처 초안: `docs/TRAINING_FEATURES.md`
+- 저장 정책 초안: `docs/STORAGE_POLICY.md`
 
 ## Third-party notice
 
