@@ -32,6 +32,10 @@
 - 일반 Maps
 - 옵션이 사실상 고정된 유니크 일부
 
+판정 기준:
+
+- `poe.ninja`나 공식 API의 환율/시세 계층으로 안정적으로 커버 가능한 품목
+
 이유:
 
 - 개별 옵션 차이가 작거나 없음
@@ -48,6 +52,11 @@
 - Cluster Jewel
 - 옵션 roll 차이가 큰 Unique 장비
 - Skill Gem
+
+Unique 포함 기준:
+
+- 초기 allowlist는 NeverSink `4-VERY-STRICT` 필터에서 의미 있게 취급되는 유니크 목록을 기준으로 잡는다.
+- 그 안에서도 roll range가 실제 가격 차이에 영향을 주는 유니크를 우선 포함한다.
 
 이유:
 
@@ -105,11 +114,11 @@ Skill Gem은 장비류와 달리 affix 기반 해석보다 다음 요소가 더 
 현재 1차 합의안은 다음과 같다.
 
 - 외부 시세 API 추종:
-  - Currency/Fragment/Scarab/Essence/Fossil/Resonator/Oil/Card/일반 Map
+  - `poe.ninja`/공식 환율성 데이터로 커버 가능한 품목 전체
 - 모델 예측:
   - Rare 장비
   - Rare Jewel / Abyss Jewel / Cluster Jewel
-  - 옵션 roll 영향이 큰 Unique 장비
+  - NeverSink strict unique allowlist 기반 Unique 장비
   - Skill Gem
 
 이 합의안은 이후 `docs/ITEM_ROUTING.md`, `docs/TRAINING_FEATURES.md`, `docs/STORAGE_POLICY.md`의 기준이 된다.

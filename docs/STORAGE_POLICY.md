@@ -15,7 +15,7 @@
 
 1. raw는 디버깅/재처리 용도이지 장기 보관 본체가 아니다.
 2. normalized도 "무조건 오래 보관"하지 않는다.
-3. 장기 보관의 핵심은 `training_features` 같은 압축된 학습용 테이블이다.
+3. 장기 보관의 핵심은 압축된 학습용 산출물과 그에 준하는 compact snapshot이다.
 4. 저장 주기는 collector와 분리해서 배치 정리한다.
 
 ## 저장 계층
@@ -30,7 +30,7 @@
 
 권장 정책:
 
-- 최근 `24~72시간`만 유지
+- 최근 `24시간`만 유지
 - 기간 초과 시 삭제
 
 추가 고려:
@@ -48,9 +48,9 @@
 
 권장 정책:
 
-- 최근 `7~14일`만 유지
-- 학습 제외 대상 아이템은 더 짧게 유지하거나 즉시 폐기
-- 장기 보관은 별도 feature table로 이전 후 정리
+- DB에는 최근 `24시간`만 유지
+- 오래된 행은 압축 export 후 Google Drive 업로드
+- 업로드 확인 후 DB에서 삭제
 
 ### Layer 3: Training features
 
@@ -63,25 +63,27 @@
 
 - 8주 이하 프로젝트 기간 동안 장기 보관 가능
 - raw/normalized보다 훨씬 작은 구조로 유지
+- 최종적으로는 이 계층만 전체 보관 대상이 되도록 수렴
 
 ## 권장 보관 기간 초안
 
 | 계층 | 권장 기간 | 비고 |
 | --- | --- | --- |
-| `raw_api_responses` | 2일 | 디버깅용 |
-| `normalized_priced_items` | 7일 | feature 추출용 |
+| `raw_api_responses` | 1일 | 디버깅용 |
+| `normalized_priced_items` | 1일 | 업로드 성공 전 임시 보관 |
 | `training_features` | 프로젝트 전체 기간 | 장기 보관 |
 
 ## 권장 삭제 정책
 
 ### Raw
 
-- `fetched_at < now() - interval '2 days'` 삭제
+- `fetched_at < now() - interval '1 day'` 삭제
 
 ### Normalized
 
-- 학습 제외 대상은 더 짧게 정리
-- 학습 대상도 feature 추출이 끝난 뒤 오래된 행 삭제
+- 압축 export 후 Google Drive 업로드
+- 업로드 성공 확인 뒤 `inserted_at < now() - interval '1 day'` 범위를 우선 정리
+- 장기 보관은 DB가 아니라 외부 스토리지 쪽에 둔다
 
 ### Candidate routing 기준 삭제
 
@@ -95,7 +97,8 @@
 
 1. `item_json` 전체 장기 보관 지양
 2. feature 추출 뒤 `jsonb` 대신 구조화된 컬럼만 남긴다
-3. 필요 시 오래된 raw를 SQL dump + gzip로 외부 보관
+3. 과도기에는 normalized snapshot을 `ndjson.gz`로 압축 업로드
+4. 최종적으로는 `training_features` 계층만 전체 보관
 
 ## 운영 전략 초안
 
@@ -109,22 +112,23 @@
 
 예시 주기:
 
-- 1시간마다 feature extraction 배치
-- 하루 1회 retention cleanup
+- 1시간마다 feature extraction 또는 normalized export 배치
+- 1시간마다 normalized 압축 업로드
+- 하루 1회 raw retention cleanup
 
 ## 500GB 내 운영 가능성
 
 다음 조건이면 가능성이 있습니다.
 
-1. raw를 2일 내외로 제한
-2. normalized를 1~2주 내외로 제한
+1. raw를 1일 내외로 제한
+2. normalized를 업로드 성공 뒤 1일 내외로 제한
 3. 외부 시세 추종 대상은 장기 저장 최소화
-4. 장기 보관은 `training_features` 중심
+4. 장기 보관은 압축된 학습용 산출물 중심
 
 반대로 다음 조건이면 위험합니다.
 
 - raw 장기 무제한 보관
-- normalized 전체를 몇 주 이상 그대로 유지
+- normalized 전체를 DB에 몇 주 이상 그대로 유지
 - 학습 제외 대상까지 계속 누적
 
 ## 권장 후속 작업

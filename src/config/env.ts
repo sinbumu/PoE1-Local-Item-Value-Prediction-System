@@ -10,7 +10,7 @@ function readOptionalString(value: string | undefined): string | undefined {
     return undefined;
   }
 
-  const trimmed = value.trim();
+  const trimmed = value.replace(/\s+#.*$/, "").trim();
   return trimmed.length > 0 ? trimmed : undefined;
 }
 
@@ -28,6 +28,18 @@ const resolvedEnv = {
   TARGET_LEAGUE: readOptionalString(rawEnv.TARGET_LEAGUE) ?? "Mirage",
   POE_REALM: readOptionalString(rawEnv.POE_REALM) ?? "pc",
   POLL_INTERVAL_MS: readOptionalString(rawEnv.POLL_INTERVAL_MS) ?? "10000",
+  GOOGLE_CLIENT_ID: readOptionalString(rawEnv.GOOGLE_CLIENT_ID),
+  GOOGLE_CLIENT_SECRET: readOptionalString(rawEnv.GOOGLE_CLIENT_SECRET),
+  GOOGLE_REDIRECT_URI: readOptionalString(rawEnv.GOOGLE_REDIRECT_URI),
+  GOOGLE_REFRESH_TOKEN: readOptionalString(rawEnv.GOOGLE_REFRESH_TOKEN),
+  GOOGLE_DRIVE_FOLDER_ID: readOptionalString(rawEnv.GOOGLE_DRIVE_FOLDER_ID),
+  ARCHIVE_OUTPUT_DIR:
+    readOptionalString(rawEnv.ARCHIVE_OUTPUT_DIR) ?? ".archive/normalized",
+  RAW_RETENTION_HOURS: readOptionalString(rawEnv.RAW_RETENTION_HOURS) ?? "24",
+  NORMALIZED_RETENTION_HOURS:
+    readOptionalString(rawEnv.NORMALIZED_RETENTION_HOURS) ?? "24",
+  NORMALIZED_ARCHIVE_LIMIT:
+    readOptionalString(rawEnv.NORMALIZED_ARCHIVE_LIMIT) ?? "10000",
 };
 
 const envSchema = z.object({
@@ -44,6 +56,15 @@ const envSchema = z.object({
   TARGET_LEAGUE: z.string().min(1).default("Mirage"),
   POE_REALM: z.enum(["pc", "xbox", "sony"]).default("pc"),
   POLL_INTERVAL_MS: z.coerce.number().int().positive().default(10000),
+  GOOGLE_CLIENT_ID: z.string().min(1).optional(),
+  GOOGLE_CLIENT_SECRET: z.string().min(1).optional(),
+  GOOGLE_REDIRECT_URI: z.string().url().optional(),
+  GOOGLE_REFRESH_TOKEN: z.string().min(1).optional(),
+  GOOGLE_DRIVE_FOLDER_ID: z.string().min(1).optional(),
+  ARCHIVE_OUTPUT_DIR: z.string().min(1).default(".archive/normalized"),
+  RAW_RETENTION_HOURS: z.coerce.number().int().positive().default(24),
+  NORMALIZED_RETENTION_HOURS: z.coerce.number().int().positive().default(24),
+  NORMALIZED_ARCHIVE_LIMIT: z.coerce.number().int().positive().default(10000),
 });
 
 export const env = envSchema.parse(resolvedEnv);

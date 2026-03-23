@@ -14,7 +14,7 @@
 
 | 분류 | 예시 | 기본 처리 | 이유 |
 | --- | --- | --- | --- |
-| `external_price_candidate` | Currency, Fragment, Scarab, Essence, Fossil, Resonator, Oil, Divination Card | 외부 시세 API 우선 | 시장 평균가가 강하게 작동 |
+| `external_price_candidate` | Currency, Fragment, Scarab, Essence, Fossil, Resonator, Oil, Divination Card | 외부 시세 API 우선 | `poe.ninja`/공식 환율 계층으로 커버 가능 |
 | `external_price_candidate` | 일반 Map | 외부 시세 API 우선 | 개별 옵션 변동성이 상대적으로 작음 |
 | `external_price_candidate` | 옵션이 사실상 고정된 유니크 일부 | 외부 시세 API 우선 | 아이템 개체별 차이가 작음 |
 | `model_candidate` | Rare 장비 | 모델 예측 | 접두/접미와 roll 값 영향이 큼 |
@@ -78,6 +78,7 @@
 
 1차 기준:
 
+- NeverSink `4-VERY-STRICT` 필터의 유니크 목록을 초기 allowlist 소스로 사용
 - roll range가 가격에 직접 영향 주는 유니크만 모델 후보
 - roll 차이가 거의 없는 고정형 유니크는 외부 시세 추종
 
@@ -92,6 +93,7 @@
 - Divination Card
 - Fragment성 카테고리
 - Essence / Fossil / Oil / Scarab 류
+- `poe.ninja`나 공식 환율성 데이터로 직접 커버 가능한 품목
 
 ### model_candidate
 
@@ -108,7 +110,7 @@
 
 ## 향후 refine 포인트
 
-1. Unique 장비 allowlist 만들기
+1. NeverSink 기반 Unique allowlist를 실제 코드/테이블로 분리
 2. Maps 중에서도 특별한 roll 변수가 큰 항목을 별도 분기할지 검토
 3. `external_price_candidate`를 poe.ninja type과 직접 매핑
 4. `model_candidate`를 타입별 feature extractor와 연결
