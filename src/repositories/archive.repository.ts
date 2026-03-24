@@ -64,18 +64,28 @@ export class ArchiveRepository {
     return result.rows;
   }
 
-  async deleteNormalizedRowsByIds(ids: string[]): Promise<number> {
+  async deleteNormalizedRowsByIds(
+    ids: string[],
+    olderThanHours?: number,
+  ): Promise<number> {
     if (ids.length === 0) {
       return 0;
     }
 
+    const staleCondition =
+      olderThanHours === undefined
+        ? ""
+        : "AND updated_at < NOW() - ($2 * INTERVAL '1 hour')";
+    const parameters =
+      olderThanHours === undefined ? [ids] : [ids, olderThanHours];
     const result = await pool.query<{ id: string }>(
       `
         DELETE FROM normalized_priced_items
         WHERE id = ANY($1::bigint[])
+        ${staleCondition}
         RETURNING id::text
       `,
-      [ids],
+      parameters,
     );
 
     return result.rowCount ?? result.rows.length;

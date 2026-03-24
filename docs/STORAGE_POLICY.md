@@ -49,7 +49,7 @@
 권장 정책:
 
 - DB에는 최근에 다시 관측된 hot listing만 유지
-- `updated_at` 기준 `72시간` 이상 미갱신된 stale listing은 압축 export 후 Google Drive 업로드
+- `updated_at` 기준 `7일` 이상 미갱신된 stale listing은 압축 export 후 Google Drive 업로드
 - 업로드 확인 후 DB에서 삭제
 
 ### Layer 3: Training features
@@ -70,7 +70,7 @@
 | 계층 | 권장 기간 | 비고 |
 | --- | --- | --- |
 | `raw_api_responses` | 1일 | 디버깅용 |
-| `normalized_priced_items` | 3일 | `updated_at` 기준 stale listing 정리 |
+| `normalized_priced_items` | 7일 | `updated_at` 기준 stale listing 정리 |
 | `training_features` | 프로젝트 전체 기간 | 장기 보관 |
 
 ## 권장 삭제 정책
@@ -82,7 +82,7 @@
 ### Normalized
 
 - 압축 export 후 Google Drive 업로드
-- 업로드 성공 확인 뒤 `updated_at < now() - interval '3 day'` 범위를 우선 정리
+- 업로드 성공 확인 뒤 `updated_at < now() - interval '7 day'` 범위를 우선 정리
 - 장기 보관은 DB가 아니라 외부 스토리지 쪽에 둔다
 
 ### Candidate routing 기준 삭제
@@ -121,7 +121,7 @@
 다음 조건이면 가능성이 있습니다.
 
 1. raw를 1일 내외로 제한
-2. normalized를 `updated_at` 기준 3일 내외 stale listing만 유지
+2. normalized를 `updated_at` 기준 7일 내외 stale listing만 유지
 3. 외부 시세 추종 대상은 장기 저장 최소화
 4. 장기 보관은 압축된 학습용 산출물 중심
 

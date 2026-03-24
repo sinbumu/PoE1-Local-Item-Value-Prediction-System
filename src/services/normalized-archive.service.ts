@@ -83,6 +83,7 @@ export class NormalizedArchiveService {
     if (purgeAfterUpload) {
       purgedRowCount = await this.archiveRepository.deleteNormalizedRowsByIds(
         rows.map((row) => row.id),
+        olderThanHours,
       );
     }
 
@@ -103,6 +104,7 @@ export class NormalizedArchiveService {
       kind: "archive_metadata",
       sourceTable: "normalized_priced_items",
       exportedAt: new Date().toISOString(),
+      staleBy: "updated_at",
       olderThanHours,
       rowCount: rows.length,
     });

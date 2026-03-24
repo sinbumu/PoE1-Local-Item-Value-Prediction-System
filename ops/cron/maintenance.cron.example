@@ -1,0 +1,1 @@
+0 * * * * cd /ABSOLUTE/PATH/PoE1-Local-Item-Value-Prediction-System && /usr/bin/env npm run maintenance -- --once >> /tmp/poe1-maintenance.log 2>&1

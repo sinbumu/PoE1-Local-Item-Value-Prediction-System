@@ -10,6 +10,7 @@
     "collector:once": "tsx src/scripts/run-collector.ts --once",
     "drive:test": "tsx src/scripts/test-drive-upload.ts",
     "archive:normalized": "tsx src/scripts/archive-normalized.ts",
+    "maintenance": "tsx src/scripts/run-maintenance.ts",
     "inspect": "tsx src/scripts/inspect-sample.ts",
     "observe:leagues": "tsx src/scripts/observe-leagues.ts",
     "typecheck": "tsc --noEmit"
