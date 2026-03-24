@@ -81,7 +81,7 @@ Google Drive 업로드를 쓰려면:
 - `GOOGLE_DRIVE_FOLDER_ID`: 특정 Google Drive 폴더에 업로드
 - `ARCHIVE_OUTPUT_DIR`: 로컬 압축 파일 임시 저장 경로
 - `RAW_RETENTION_HOURS`: raw 보관 시간
-- `NORMALIZED_RETENTION_HOURS`: normalized export 대상 기준 시간
+- `NORMALIZED_RETENTION_HOURS`: normalized stale listing 판단 기준 시간 (`updated_at` 기준)
 - `NORMALIZED_ARCHIVE_LIMIT`: 1회 export 최대 행 수
 
 주의:
@@ -115,7 +115,7 @@ Google Drive 업로드를 쓰려면:
 | `GOOGLE_DRIVE_FOLDER_ID` | 선택 | 업로드 대상 Drive 폴더 ID |
 | `ARCHIVE_OUTPUT_DIR` | 선택 | 로컬 압축 파일 임시 저장 경로 |
 | `RAW_RETENTION_HOURS` | 선택 | `raw_api_responses` 삭제 기준 시간 |
-| `NORMALIZED_RETENTION_HOURS` | 선택 | `normalized_priced_items` export 기준 시간 |
+| `NORMALIZED_RETENTION_HOURS` | 선택 | `normalized_priced_items` stale listing 판단 기준 시간 (`updated_at` 기준, 기본 `72`) |
 | `NORMALIZED_ARCHIVE_LIMIT` | 선택 | 1회 export 최대 행 수 |
 
 ## 로컬 PostgreSQL 실행
@@ -200,7 +200,7 @@ npm run inspect
 npm run drive:test
 ```
 
-오래된 normalized 행을 압축 후 Google Drive 업로드:
+오랫동안 다시 보이지 않은 normalized 행을 압축 후 Google Drive 업로드:
 
 ```bash
 npm run archive:normalized
@@ -221,7 +221,7 @@ npm run cleanup:retention
 옵션 예시:
 
 ```bash
-npm run archive:normalized -- --older-than-hours=24 --limit=5000 --purge
+npm run archive:normalized -- --older-than-hours=72 --limit=5000 --purge
 ```
 
 ```bash
@@ -296,7 +296,7 @@ gunzip -c backup.sql.gz | psql "postgres://postgres:postgres@localhost:5432/poe_
 
 - 실제 운영 단계에서는 raw subset만 저장하더라도 장기 보관 정책은 따로 정하는 편이 좋음
 - MVP 학습용 데이터는 결국 `Mirage` 소프트코어 중심으로 더 좁혀야 할 가능성이 높음
-- 현재 권장 운영은 `raw_api_responses` 24시간 보관, `normalized_priced_items`는 압축 업로드 후 24시간 내 삭제
+- 현재 권장 운영은 `raw_api_responses` 24시간 보관, `normalized_priced_items`는 `updated_at` 기준 72시간 이상 미갱신된 stale listing만 압축 업로드 후 정리
 
 ## 현재 범위 밖
 

@@ -54,8 +54,8 @@ export class ArchiveRepository {
           inserted_at::text,
           updated_at::text
         FROM normalized_priced_items
-        WHERE inserted_at < NOW() - ($1 * INTERVAL '1 hour')
-        ORDER BY inserted_at ASC
+        WHERE updated_at < NOW() - ($1 * INTERVAL '1 hour')
+        ORDER BY updated_at ASC
         LIMIT $2
       `,
       [olderThanHours, limit],
@@ -85,7 +85,7 @@ export class ArchiveRepository {
     const result = await pool.query<{ id: string }>(
       `
         DELETE FROM normalized_priced_items
-        WHERE inserted_at < NOW() - ($1 * INTERVAL '1 hour')
+        WHERE updated_at < NOW() - ($1 * INTERVAL '1 hour')
         RETURNING id::text
       `,
       [olderThanHours],

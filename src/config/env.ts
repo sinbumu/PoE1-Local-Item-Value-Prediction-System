@@ -37,7 +37,7 @@ const resolvedEnv = {
     readOptionalString(rawEnv.ARCHIVE_OUTPUT_DIR) ?? ".archive/normalized",
   RAW_RETENTION_HOURS: readOptionalString(rawEnv.RAW_RETENTION_HOURS) ?? "24",
   NORMALIZED_RETENTION_HOURS:
-    readOptionalString(rawEnv.NORMALIZED_RETENTION_HOURS) ?? "24",
+    readOptionalString(rawEnv.NORMALIZED_RETENTION_HOURS) ?? "72",
   NORMALIZED_ARCHIVE_LIMIT:
     readOptionalString(rawEnv.NORMALIZED_ARCHIVE_LIMIT) ?? "10000",
 };
@@ -63,7 +63,7 @@ const envSchema = z.object({
   GOOGLE_DRIVE_FOLDER_ID: z.string().min(1).optional(),
   ARCHIVE_OUTPUT_DIR: z.string().min(1).default(".archive/normalized"),
   RAW_RETENTION_HOURS: z.coerce.number().int().positive().default(24),
-  NORMALIZED_RETENTION_HOURS: z.coerce.number().int().positive().default(24),
+  NORMALIZED_RETENTION_HOURS: z.coerce.number().int().positive().default(72),
   NORMALIZED_ARCHIVE_LIMIT: z.coerce.number().int().positive().default(10000),
 });
 
