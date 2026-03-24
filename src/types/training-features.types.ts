@@ -148,3 +148,12 @@ export type TrainingFeatureClean = {
   isSupportGem: boolean | null;
   gemTags: string[];
 };
+
+export type TrainingFeatureLabeled = TrainingFeatureClean & {
+  exchangeRateSource: "poe_ninja";
+  exchangeRateSampleTimeUtc: string;
+  exchangeRateChaosEquivalent: string;
+  targetPriceChaos: string;
+  targetPriceLog1p: number;
+  labelReason: string;
+};

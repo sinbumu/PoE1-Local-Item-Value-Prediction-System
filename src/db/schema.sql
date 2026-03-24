@@ -202,3 +202,107 @@ CREATE INDEX IF NOT EXISTS idx_training_features_clean_model_segment
 
 CREATE INDEX IF NOT EXISTS idx_training_features_clean_target_currency
   ON training_features_clean (target_price_currency);
+
+CREATE TABLE IF NOT EXISTS exchange_rate_snapshots (
+  id BIGSERIAL PRIMARY KEY,
+  source TEXT NOT NULL,
+  league TEXT NOT NULL,
+  overview_type TEXT NOT NULL,
+  details_id TEXT NOT NULL,
+  currency_type_name TEXT NOT NULL,
+  normalized_currency_code TEXT,
+  sample_time_utc TIMESTAMPTZ NOT NULL,
+  chaos_equivalent NUMERIC NOT NULL,
+  pay_value NUMERIC,
+  receive_value NUMERIC,
+  pay_count INTEGER,
+  receive_count INTEGER,
+  pay_listing_count INTEGER,
+  receive_listing_count INTEGER,
+  collected_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE (source, league, overview_type, details_id, sample_time_utc)
+);
+
+CREATE INDEX IF NOT EXISTS idx_exchange_rate_snapshots_lookup
+  ON exchange_rate_snapshots (league, normalized_currency_code, sample_time_utc DESC);
+
+CREATE INDEX IF NOT EXISTS idx_exchange_rate_snapshots_details
+  ON exchange_rate_snapshots (league, details_id, sample_time_utc DESC);
+
+CREATE TABLE IF NOT EXISTS training_features_labeled (
+  id BIGSERIAL PRIMARY KEY,
+  listing_key TEXT NOT NULL UNIQUE,
+  source_updated_at TIMESTAMPTZ NOT NULL,
+  league TEXT,
+  model_segment TEXT NOT NULL,
+  clean_reason TEXT NOT NULL,
+  target_price_amount NUMERIC NOT NULL,
+  target_price_currency TEXT NOT NULL,
+  item_class TEXT NOT NULL,
+  base_type TEXT,
+  rarity TEXT,
+  frame_type INTEGER,
+  ilvl INTEGER,
+  identified BOOLEAN NOT NULL,
+  corrupted BOOLEAN NOT NULL,
+  fractured BOOLEAN NOT NULL,
+  synthesised BOOLEAN NOT NULL,
+  duplicated BOOLEAN NOT NULL,
+  influence_shaper BOOLEAN NOT NULL,
+  influence_elder BOOLEAN NOT NULL,
+  influence_crusader BOOLEAN NOT NULL,
+  influence_redeemer BOOLEAN NOT NULL,
+  influence_hunter BOOLEAN NOT NULL,
+  influence_warlord BOOLEAN NOT NULL,
+  influence_searing BOOLEAN NOT NULL,
+  influence_tangled BOOLEAN NOT NULL,
+  socket_count INTEGER NOT NULL,
+  link_count INTEGER NOT NULL,
+  white_socket_count INTEGER NOT NULL,
+  prefix_count INTEGER,
+  suffix_count INTEGER,
+  explicit_mod_count INTEGER NOT NULL,
+  implicit_mod_count INTEGER NOT NULL,
+  crafted_mod_count INTEGER NOT NULL,
+  fractured_mod_count INTEGER NOT NULL,
+  enchant_mod_count INTEGER NOT NULL,
+  quality NUMERIC,
+  armour NUMERIC,
+  evasion NUMERIC,
+  energy_shield NUMERIC,
+  ward NUMERIC,
+  physical_dps NUMERIC,
+  elemental_dps NUMERIC,
+  attack_speed NUMERIC,
+  crit_chance NUMERIC,
+  move_speed NUMERIC,
+  life_roll_sum NUMERIC,
+  resistance_roll_sum NUMERIC,
+  attribute_roll_sum NUMERIC,
+  jewel_type TEXT,
+  cluster_size TEXT,
+  cluster_passive_count INTEGER,
+  notable_count INTEGER,
+  damage_mod_count INTEGER,
+  defence_mod_count INTEGER,
+  utility_mod_count INTEGER,
+  gem_level INTEGER,
+  gem_quality NUMERIC,
+  is_awakened BOOLEAN,
+  is_vaal BOOLEAN,
+  is_support_gem BOOLEAN,
+  gem_tags TEXT[] NOT NULL DEFAULT '{}',
+  exchange_rate_source TEXT NOT NULL,
+  exchange_rate_sample_time_utc TIMESTAMPTZ NOT NULL,
+  exchange_rate_chaos_equivalent NUMERIC NOT NULL,
+  target_price_chaos NUMERIC NOT NULL,
+  target_price_log1p DOUBLE PRECISION NOT NULL,
+  label_reason TEXT NOT NULL,
+  labeled_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_training_features_labeled_source_updated_at
+  ON training_features_labeled (source_updated_at DESC);
+
+CREATE INDEX IF NOT EXISTS idx_training_features_labeled_model_segment
+  ON training_features_labeled (model_segment);

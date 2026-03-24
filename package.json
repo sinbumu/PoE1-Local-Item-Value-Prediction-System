@@ -13,6 +13,8 @@
     "maintenance": "tsx src/scripts/run-maintenance.ts",
     "build:training-features": "tsx src/scripts/build-training-features.ts",
     "build:training-features-clean": "tsx src/scripts/build-training-features-clean.ts",
+    "build:training-features-labeled": "tsx src/scripts/build-training-features-labeled.ts",
+    "collect:exchange-rates": "tsx src/scripts/collect-exchange-rates.ts",
     "inspect": "tsx src/scripts/inspect-sample.ts",
     "observe:leagues": "tsx src/scripts/observe-leagues.ts",
     "typecheck": "tsc --noEmit"

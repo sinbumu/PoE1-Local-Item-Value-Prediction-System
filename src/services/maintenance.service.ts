@@ -3,6 +3,7 @@ import { pool } from "../db/client";
 import { ArchiveRepository } from "../repositories/archive.repository";
 import { logger } from "../utils/logger";
 import { sleep } from "../utils/time";
+import { ExchangeRateService } from "./exchange-rate.service";
 import {
   NormalizedArchiveService,
   type NormalizedArchiveResult,
@@ -14,6 +15,7 @@ type MaintenanceLoopOptions = {
   outputDirectory?: string;
   archiveIntervalMs?: number;
   rawCleanupIntervalMs?: number;
+  exchangeRateIntervalMs?: number;
   pollIntervalMs?: number;
   archiveMaxBatches?: number;
 };
@@ -25,6 +27,8 @@ type MaintenanceOnceResult = {
   exportedRowCount: number;
   purgedRowCount: number;
   archiveSkipped: boolean;
+  exchangeRateInsertedCount: number | null;
+  exchangeRateSkipped: boolean;
 };
 
 type ArchiveSweepResult = {
@@ -36,16 +40,19 @@ type ArchiveSweepResult = {
 
 const ARCHIVE_LOCK_KEY = 71001;
 const RAW_CLEANUP_LOCK_KEY = 71002;
+const EXCHANGE_RATE_LOCK_KEY = 71003;
 
 export class MaintenanceService {
   constructor(
     private readonly archiveRepository = new ArchiveRepository(),
     private readonly normalizedArchiveService = new NormalizedArchiveService(),
+    private readonly exchangeRateService = new ExchangeRateService(),
   ) {}
 
   async runOnce(options?: MaintenanceLoopOptions): Promise<MaintenanceOnceResult> {
     const rawCleanup = await this.runRawCleanup(env.RAW_RETENTION_HOURS);
     const archiveSweep = await this.runArchiveSweep(options);
+    const exchangeRateCollection = await this.runExchangeRateCollection();
 
     return {
       deletedRawCount: rawCleanup.deletedRawCount,
@@ -54,6 +61,8 @@ export class MaintenanceService {
       exportedRowCount: archiveSweep.exportedRowCount,
       purgedRowCount: archiveSweep.purgedRowCount,
       archiveSkipped: archiveSweep.skipped,
+      exchangeRateInsertedCount: exchangeRateCollection.insertedCount,
+      exchangeRateSkipped: exchangeRateCollection.skipped,
     };
   }
 
@@ -62,10 +71,13 @@ export class MaintenanceService {
       options?.archiveIntervalMs ?? env.MAINTENANCE_ARCHIVE_INTERVAL_MS;
     const rawCleanupIntervalMs =
       options?.rawCleanupIntervalMs ?? env.MAINTENANCE_RAW_CLEANUP_INTERVAL_MS;
+    const exchangeRateIntervalMs =
+      options?.exchangeRateIntervalMs ?? env.MAINTENANCE_EXCHANGE_RATE_INTERVAL_MS;
     const pollIntervalMs =
       options?.pollIntervalMs ?? env.MAINTENANCE_POLL_INTERVAL_MS;
     let lastArchiveRunAt = 0;
     let lastRawCleanupRunAt = 0;
+    let lastExchangeRateRunAt = 0;
 
     while (true) {
       const startedAt = Date.now();
@@ -107,6 +119,23 @@ export class MaintenanceService {
             "Maintenance raw cleanup tick completed",
           );
           lastRawCleanupRunAt = Date.now();
+        }
+
+        if (
+          lastExchangeRateRunAt === 0 ||
+          startedAt - lastExchangeRateRunAt >= exchangeRateIntervalMs
+        ) {
+          const exchangeRateCollection = await this.runExchangeRateCollection();
+
+          logger.info(
+            {
+              exchangeRateIntervalMs,
+              exchangeRateInsertedCount: exchangeRateCollection.insertedCount,
+              exchangeRateSkipped: exchangeRateCollection.skipped,
+            },
+            "Maintenance exchange rate tick completed",
+          );
+          lastExchangeRateRunAt = Date.now();
         }
       } catch (error) {
         logger.error({ err: error }, "Maintenance loop iteration failed");
@@ -216,6 +245,36 @@ export class MaintenanceService {
 
     return {
       deletedRawCount: result.result ?? null,
+      skipped: result.skipped,
+    };
+  }
+
+  private async runExchangeRateCollection(): Promise<{
+    insertedCount: number | null;
+    skipped: boolean;
+  }> {
+    const result = await this.withAdvisoryLock(
+      "exchange_rate_collection",
+      EXCHANGE_RATE_LOCK_KEY,
+      async () => {
+        const collectionResult = await this.exchangeRateService.collectSnapshots();
+
+        logger.info(
+          {
+            league: collectionResult.league,
+            insertedCount: collectionResult.insertedCount,
+            sampleTimeUtc: collectionResult.sampleTimeUtc,
+            divineChaosEquivalent: collectionResult.divineChaosEquivalent,
+          },
+          "Maintenance exchange rate collection completed",
+        );
+
+        return collectionResult.insertedCount;
+      },
+    );
+
+    return {
+      insertedCount: result.result ?? null,
       skipped: result.skipped,
     };
   }

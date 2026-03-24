@@ -1,18 +1,19 @@
+import { TrainingFeatureLabeledRepository } from "../repositories/training-feature-labeled.repository";
+import { TrainingFeatureLabeledSourceRepository } from "../repositories/training-feature-labeled-source.repository";
+import { TrainingFeatureLabeledStateRepository } from "../repositories/training-feature-labeled-state.repository";
 import { TrainingFeatureCleanRepository } from "../repositories/training-feature-clean.repository";
-import { TrainingFeatureCleanSourceRepository } from "../repositories/training-feature-clean-source.repository";
-import { TrainingFeatureCleanStateRepository } from "../repositories/training-feature-clean-state.repository";
-import { TrainingFeatureRepository } from "../repositories/training-feature.repository";
 import type { TrainingFeatureCursor } from "../types/training-features.types";
 import { logger } from "../utils/logger";
-import { TrainingFeatureCleanerService } from "./training-feature-cleaner.service";
+import { TrainingFeatureLabelerService } from "./training-feature-labeler.service";
+import { ExchangeRateRepository } from "../repositories/exchange-rate.repository";
 
-type BuildTrainingFeatureCleanOptions = {
+type BuildTrainingFeatureLabeledOptions = {
   limit?: number;
   maxBatches?: number;
   resetCursor?: boolean;
 };
 
-export type BuildTrainingFeatureCleanResult = {
+export type BuildTrainingFeatureLabeledResult = {
   processedRows: number;
   keptRows: number;
   droppedRows: number;
@@ -24,23 +25,25 @@ export type BuildTrainingFeatureCleanResult = {
 const DEFAULT_BATCH_LIMIT = 500;
 const DEFAULT_MAX_BATCHES = 10;
 
-export class TrainingFeatureCleanPipelineService {
+export class TrainingFeatureLabeledPipelineService {
   constructor(
-    private readonly sourceRepository = new TrainingFeatureCleanSourceRepository(),
+    private readonly sourceRepository = new TrainingFeatureLabeledSourceRepository(),
+    private readonly labeledRepository = new TrainingFeatureLabeledRepository(),
+    private readonly stateRepository = new TrainingFeatureLabeledStateRepository(),
+    private readonly labeler = new TrainingFeatureLabelerService(),
     private readonly cleanRepository = new TrainingFeatureCleanRepository(),
-    private readonly stateRepository = new TrainingFeatureCleanStateRepository(),
-    private readonly cleaner = new TrainingFeatureCleanerService(),
-    private readonly rawRepository = new TrainingFeatureRepository(),
+    private readonly exchangeRateRepository = new ExchangeRateRepository(),
   ) {}
 
-  async buildCleanFeatures(
-    options?: BuildTrainingFeatureCleanOptions,
-  ): Promise<BuildTrainingFeatureCleanResult> {
+  async buildLabeledFeatures(
+    options?: BuildTrainingFeatureLabeledOptions,
+  ): Promise<BuildTrainingFeatureLabeledResult> {
     const limit = options?.limit ?? DEFAULT_BATCH_LIMIT;
     const maxBatches = options?.maxBatches ?? DEFAULT_MAX_BATCHES;
 
+    await this.labeledRepository.ensureSchema();
     await this.cleanRepository.ensureSchema();
-    await this.rawRepository.ensureSchema();
+    await this.exchangeRateRepository.ensureSchema();
 
     if (options?.resetCursor) {
       await this.stateRepository.resetCursor();
@@ -64,7 +67,7 @@ export class TrainingFeatureCleanPipelineService {
       const dropReasons = new Map<string, number>();
 
       for (const row of sourceRows) {
-        const decision = this.cleaner.clean(row);
+        const decision = this.labeler.label(row);
         if (decision.keep) {
           kept.push(decision.feature);
         } else {
@@ -72,7 +75,7 @@ export class TrainingFeatureCleanPipelineService {
         }
       }
 
-      await this.cleanRepository.upsertMany(kept);
+      await this.labeledRepository.upsertMany(kept);
 
       const lastRow = sourceRows[sourceRows.length - 1];
       cursor = {
@@ -99,7 +102,7 @@ export class TrainingFeatureCleanPipelineService {
           cursorUpdatedAt: cursor.updatedAt,
           cursorListingKey: cursor.listingKey,
         },
-        "Training feature clean batch completed",
+        "Training feature labeled batch completed",
       );
 
       if (sourceRows.length < limit) {
