@@ -291,6 +291,45 @@ collector와 동시 실행:
 3. `~/Library/LaunchAgents/` 아래에 배치
 4. `launchctl load ~/Library/LaunchAgents/com.blockoxyz.poe1-maintenance.plist`
 
+## Training Feature ETL
+
+초기 CatBoost용 중간 계층으로 `training_features_raw`를 생성할 수 있습니다.
+
+기본 실행:
+
+```bash
+npm run build:training-features
+```
+
+커서를 리셋하고 처음부터 다시 스캔:
+
+```bash
+npm run build:training-features -- --reset-cursor
+```
+
+배치 크기/배치 수 조절 예시:
+
+```bash
+npm run build:training-features -- --limit=500 --max-batches=20
+```
+
+현재 `training_features_raw`에 들어가는 항목:
+
+- 공통: `listing_key`, `source_inserted_at`, `source_updated_at`, `league`, `base_type`, `rarity`, `frame_type`, `ilvl`, 가격 정보
+- 상태/구조: `identified`, `corrupted`, `fractured`, `synthesised`, influence 플래그, 소켓/링크 수
+- mod 요약: prefix/suffix 수, explicit/implicit/crafted/fractured/enchant mod 수
+- 장비 요약: `quality`, `armour`, `evasion`, `energy_shield`, `physical_dps`, `elemental_dps`, `attack_speed`, `crit_chance`, `move_speed`
+- 간단 요약합: `life_roll_sum`, `resistance_roll_sum`, `attribute_roll_sum`
+- 주얼 요약: `jewel_type`, `cluster_size`, `cluster_passive_count`, `notable_count`
+- 젬 요약: `gem_level`, `gem_quality`, `is_awakened`, `is_vaal`, `is_support_gem`, `gem_tags`
+
+현재 ETL 특성:
+
+1. `normalized_priced_items`를 `updated_at + listing_key` 커서 기준으로 증분 처리
+2. `training_features_raw`는 `listing_key` 기준 upsert
+3. 초기 규칙은 보수적인 요약 피처 중심
+4. mod의 세부 정규화 key/roll 파싱은 아직 다음 단계
+
 ## league 관측 스크립트
 
 10분 동안 league 값 관측:
@@ -363,11 +402,11 @@ gunzip -c backup.sql.gz | psql "postgres://postgres:postgres@localhost:5432/poe_
 
 ## 현재 범위 밖
 
-- ML 학습
+- 최종 ML 학습 파이프라인
 - overlay/UI
 - AWS 배포
 - 모든 가격 메모 edge case 대응
-- 고급 파이프라인/모니터링
+- 고급 mod 정규화/환율 타깃 파이프라인
 
 ## 관련 문서
 

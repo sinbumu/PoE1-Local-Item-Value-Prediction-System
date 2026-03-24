@@ -194,3 +194,10 @@ Skill Gem은 별도 피처 세트가 필요하다.
 2. `training_features_raw` -> `training_features_clean`
 
 2단계 파이프라인을 만드는 것이 좋다.
+
+현재 구현 상태:
+
+- `training_features_raw` 생성 스크립트가 추가됨
+- `updated_at + listing_key` 커서 기반 증분 처리
+- 공통 구조/장비/주얼/젬 요약 피처까지 1차 추출
+- mod key 정규화와 `chaos equivalent` 타깃 생성은 아직 미구현

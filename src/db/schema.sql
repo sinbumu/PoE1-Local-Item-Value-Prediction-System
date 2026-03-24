@@ -51,3 +51,79 @@ CREATE INDEX IF NOT EXISTS idx_normalized_priced_items_price_currency
 
 CREATE INDEX IF NOT EXISTS idx_normalized_priced_items_type_line
   ON normalized_priced_items (type_line);
+
+CREATE TABLE IF NOT EXISTS training_features_raw (
+  id BIGSERIAL PRIMARY KEY,
+  listing_key TEXT NOT NULL UNIQUE,
+  source_item_id TEXT,
+  source_inserted_at TIMESTAMPTZ NOT NULL,
+  source_updated_at TIMESTAMPTZ NOT NULL,
+  league TEXT,
+  item_class TEXT NOT NULL,
+  base_type TEXT,
+  rarity TEXT,
+  frame_type INTEGER,
+  ilvl INTEGER,
+  identified BOOLEAN NOT NULL,
+  corrupted BOOLEAN NOT NULL,
+  fractured BOOLEAN NOT NULL,
+  synthesised BOOLEAN NOT NULL,
+  duplicated BOOLEAN NOT NULL,
+  influence_shaper BOOLEAN NOT NULL,
+  influence_elder BOOLEAN NOT NULL,
+  influence_crusader BOOLEAN NOT NULL,
+  influence_redeemer BOOLEAN NOT NULL,
+  influence_hunter BOOLEAN NOT NULL,
+  influence_warlord BOOLEAN NOT NULL,
+  influence_searing BOOLEAN NOT NULL,
+  influence_tangled BOOLEAN NOT NULL,
+  socket_count INTEGER NOT NULL,
+  link_count INTEGER NOT NULL,
+  white_socket_count INTEGER NOT NULL,
+  prefix_count INTEGER,
+  suffix_count INTEGER,
+  explicit_mod_count INTEGER NOT NULL,
+  implicit_mod_count INTEGER NOT NULL,
+  crafted_mod_count INTEGER NOT NULL,
+  fractured_mod_count INTEGER NOT NULL,
+  enchant_mod_count INTEGER NOT NULL,
+  price_amount NUMERIC,
+  price_currency TEXT,
+  listing_mode TEXT,
+  quality NUMERIC,
+  armour NUMERIC,
+  evasion NUMERIC,
+  energy_shield NUMERIC,
+  ward NUMERIC,
+  physical_dps NUMERIC,
+  elemental_dps NUMERIC,
+  attack_speed NUMERIC,
+  crit_chance NUMERIC,
+  move_speed NUMERIC,
+  life_roll_sum NUMERIC,
+  resistance_roll_sum NUMERIC,
+  attribute_roll_sum NUMERIC,
+  jewel_type TEXT,
+  cluster_size TEXT,
+  cluster_passive_count INTEGER,
+  notable_count INTEGER,
+  damage_mod_count INTEGER,
+  defence_mod_count INTEGER,
+  utility_mod_count INTEGER,
+  gem_level INTEGER,
+  gem_quality NUMERIC,
+  is_awakened BOOLEAN,
+  is_vaal BOOLEAN,
+  is_support_gem BOOLEAN,
+  gem_tags TEXT[] NOT NULL DEFAULT '{}',
+  extracted_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_training_features_raw_source_updated_at
+  ON training_features_raw (source_updated_at DESC);
+
+CREATE INDEX IF NOT EXISTS idx_training_features_raw_item_class
+  ON training_features_raw (item_class);
+
+CREATE INDEX IF NOT EXISTS idx_training_features_raw_price_currency
+  ON training_features_raw (price_currency);
