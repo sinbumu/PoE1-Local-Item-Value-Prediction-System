@@ -200,4 +200,7 @@ Skill Gem은 별도 피처 세트가 필요하다.
 - `training_features_raw` 생성 스크립트가 추가됨
 - `updated_at + listing_key` 커서 기반 증분 처리
 - 공통 구조/장비/주얼/젬 요약 피처까지 1차 추출
+- `training_features_clean` 생성 스크립트가 추가됨
+- 현재 clean 단계는 `chaos/divine` 가격의 `Rare equipment`, `Jewel`, `Skill Gem`, NeverSink strict allowlist 기반 `Unique equipment`를 선별
+- `Map`, `Timeless Jewel`, allowlist 밖 `Unique equipment`는 현재 제외
 - mod key 정규화와 `chaos equivalent` 타깃 생성은 아직 미구현

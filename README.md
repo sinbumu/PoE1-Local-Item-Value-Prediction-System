@@ -330,6 +330,28 @@ npm run build:training-features -- --limit=500 --max-batches=20
 3. 초기 규칙은 보수적인 요약 피처 중심
 4. mod의 세부 정규화 key/roll 파싱은 아직 다음 단계
 
+`training_features_clean` 생성:
+
+```bash
+npm run build:training-features-clean
+```
+
+처음부터 다시 스캔:
+
+```bash
+npm run build:training-features-clean -- --reset-cursor
+```
+
+현재 `training_features_clean` 기준:
+
+1. `training_features_raw`에서 모델 후보군만 선별
+2. 가격 통화는 우선 `chaos`, `divine`만 허용
+3. `Rare equipment`, `Jewel`, `Skill Gem`, NeverSink strict allowlist 기반 `Unique equipment` 포함
+4. `Map`은 외부 시세 추종 대상으로 제외
+5. `Timeless Jewel`은 2차 대상으로 현재 제외
+6. `unidentified Rare/Jewel/Unique`는 학습 피처가 부족하므로 현재 제외
+7. Unique는 NeverSink strict 상위 블록과 예외 조건을 코드화한 초기 allowlist를 사용
+
 ## league 관측 스크립트
 
 10분 동안 league 값 관측:
