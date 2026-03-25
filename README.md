@@ -325,6 +325,90 @@ npm run collect:exchange-rates -- --league=Mirage
 3. `~/Library/LaunchAgents/` 아래에 배치
 4. `launchctl load ~/Library/LaunchAgents/com.blockoxyz.poe1-maintenance.plist`
 
+## 실제 운영 가이드
+
+로컬에서 지금 기준으로 가장 단순한 운영 방식은 `collector`와 `maintenance`를 각각 별도 터미널에서 계속 실행하는 것입니다.
+
+### 권장 구성
+
+터미널 1:
+
+```bash
+npm run collector
+```
+
+터미널 2:
+
+```bash
+npm run maintenance
+```
+
+역할 분리:
+
+- `collector`: public stash 수집, `raw_api_responses`, `normalized_priced_items`, `collector_state` 갱신
+- `maintenance`: raw 정리, stale normalized archive/purge, 환율 스냅샷 수집
+
+현재 구현 기준에서는 이 2개만 계속 켜두면 됩니다.
+
+### 처음 시작할 때
+
+1. PostgreSQL이 켜져 있는지 확인
+2. 처음 수집이면 `collector`를 `--start-latest`로 시작
+3. 이후 재시작부터는 저장된 `collector_state`를 사용하므로 보통 `npm run collector`만 실행
+
+예시:
+
+```bash
+npm run collector -- --start-latest
+```
+
+```bash
+npm run maintenance
+```
+
+### 평소 운영 중
+
+- `collector`는 계속 실행
+- `maintenance`도 계속 실행
+- `collect:exchange-rates`는 `maintenance`가 이미 담당하므로 따로 상시 실행할 필요 없음
+- `archive:normalized`, `cleanup:retention`도 `maintenance`가 이미 담당하므로 수동 실행은 점검/디버깅용일 때만 사용
+
+### ETL 실행 시점
+
+`training_features_raw`, `training_features_clean`, `training_features_labeled`는 상시 서버가 아니라 배치 작업입니다.
+
+권장 방식:
+
+- 수집을 하루 이상 돌린 뒤 수동 실행
+- 또는 별도 `cron`/`launchd`로 주기 실행
+
+대표 예시:
+
+```bash
+npm run build:training-features
+```
+
+```bash
+npm run build:training-features-clean
+```
+
+```bash
+npm run build:training-features-labeled
+```
+
+### 현재 시점의 중요한 주의사항
+
+1. `training_features_labeled`는 `source_updated_at` 이전 최신 환율 스냅샷이 있어야 생성됩니다.
+2. 환율 스냅샷을 모으기 시작하기 전의 과거 매물은 당장은 `missing_historical_exchange_rate`로 제외될 수 있습니다.
+3. 따라서 앞으로 `collector + maintenance`를 함께 계속 돌릴수록 labeled 데이터가 점점 정상적으로 쌓이게 됩니다.
+
+### 운영 팁
+
+- `collector`와 `maintenance`는 동시에 실행해도 되도록 구현되어 있습니다.
+- `maintenance`의 purge는 삭제 직전에 stale 조건을 다시 확인하므로 collector와 병행 가능하도록 처리되어 있습니다.
+- DB I/O가 부담되면 `NORMALIZED_ARCHIVE_LIMIT`, `MAINTENANCE_ARCHIVE_INTERVAL_MS`, `MAINTENANCE_EXCHANGE_RATE_INTERVAL_MS`를 조절하면 됩니다.
+- 규칙을 크게 바꾼 뒤에는 `training_features_clean`, `training_features_labeled`를 다시 만드는 편이 깔끔합니다.
+
 ## Training Feature ETL
 
 초기 CatBoost용 중간 계층으로 `training_features_raw`를 생성할 수 있습니다.
