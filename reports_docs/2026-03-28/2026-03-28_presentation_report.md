@@ -74,6 +74,8 @@
 
 ## 수집 데이터의 특징
 
+#### (normalized_priced_items의 TABLESAMPLE SYSTEM (0.2) 로 0.2% 샘플 기반)
+
 현재 수집된 시장 데이터는 가격 통화가 `chaos`와 `divine`에 크게 집중되어 있습니다. 이 특성 때문에 통화 단위를 통합하는 환율 정규화가 필수적입니다.
 
 ![가격 통화 분포](./2026-03-28_currency_share_sample.png)
