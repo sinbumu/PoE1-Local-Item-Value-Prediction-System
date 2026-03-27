@@ -17,6 +17,7 @@
     "collect:exchange-rates": "tsx src/scripts/collect-exchange-rates.ts",
     "inspect": "tsx src/scripts/inspect-sample.ts",
     "observe:leagues": "tsx src/scripts/observe-leagues.ts",
+    "report:charts": "bash reports_docs/render_report_charts.sh",
     "typecheck": "tsc --noEmit"
   },
   "repository": {

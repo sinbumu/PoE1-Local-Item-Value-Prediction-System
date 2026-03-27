@@ -178,6 +178,47 @@ ORDER BY total_bytes DESC;
 
 이 흐름이 가장 가볍고 실용적입니다.
 
+## 현재 추가된 스크립트
+
+차트 PNG를 자동 생성하는 스크립트:
+
+```bash
+npm run report:charts
+```
+
+기본 동작:
+
+- 최근 `72시간` raw 수집량 차트 생성
+- 최근 `72시간` Divine 환율 추이 차트 생성
+- 현재 PostgreSQL 주요 테이블 크기 차트 생성
+
+출력 위치:
+
+- `reports_docs/YYYY-MM-DD_raw_collection_last_72h.png`
+- `reports_docs/YYYY-MM-DD_divine_exchange_last_72h.png`
+- `reports_docs/YYYY-MM-DD_table_sizes.png`
+
+옵션 예시:
+
+```bash
+bash reports_docs/render_report_charts.sh --hours 96 --prefix 2026-03-28
+```
+
+의존성:
+
+- `matplotlib`
+
+실행 방식:
+
+```bash
+npm run report:charts
+```
+
+참고:
+
+- macOS의 관리형 Python 환경에서는 전역 `pip install`이 막힐 수 있습니다.
+- 그래서 현재 스크립트는 `/tmp/poe1-report-venv` 임시 가상환경을 자동으로 만들고 `matplotlib`를 설치한 뒤 차트를 생성합니다.
+
 원하면 다음 단계로 바로:
 
 - 발표용 차트 생성용 Python 스크립트
