@@ -8,6 +8,7 @@ import { sleep } from "../utils/time";
 import { AuthService } from "./auth.service";
 import { LeagueFilterService } from "./league-filter.service";
 import { NormalizeService } from "./normalize.service";
+import { IngestionActivitySummaryService } from "./ingestion-activity-summary.service";
 import { formatAxiosError, PoeApiService } from "./poe-api.service";
 
 type CollectorCycleResult = {
@@ -29,6 +30,7 @@ export class CollectorService {
     private readonly normalizedItemRepository = new NormalizedItemRepository(),
     private readonly normalizeService = new NormalizeService(),
     private readonly leagueFilterService = new LeagueFilterService(),
+    private readonly ingestionActivitySummaryService = new IngestionActivitySummaryService(),
   ) {}
 
   private async fetchPublicStashesWithAuthRetry(
@@ -106,6 +108,18 @@ export class CollectorService {
     await this.collectorStateRepository.saveLatestNextChangeId(
       response.next_change_id,
     );
+
+    try {
+      await this.ingestionActivitySummaryService.recordCollectorCycle({
+        rawStashCount: filteredResponse.stashes.length,
+        normalizedCount,
+      });
+    } catch (error) {
+      logger.warn(
+        { err: error, requestedChangeId: requestedChangeId ?? null },
+        "Collector activity summary update failed",
+      );
+    }
 
     logger.info(
       {

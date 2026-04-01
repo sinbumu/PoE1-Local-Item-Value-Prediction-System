@@ -186,6 +186,14 @@ Skill Gem은 별도 피처 세트가 필요하다.
 2. 외부 환율로 `chaos equivalent`를 계산
 3. CatBoost 회귀 타깃은 `log1p(target_price_chaos)`
 
+현재 이 문서에서 말하는 학습 타깃은 어디까지나 **관측 시점의 가격 회귀**다.
+
+중요:
+
+- `updated_at` / `source_updated_at`는 **판매 시각**이 아니라 **마지막 관측 시각**이다.
+- 현재 파이프라인은 `sold_at`, `removed_at`, `time_to_sale` 같은 라벨을 만들지 않는다.
+- public stash 기반 `inferred_removed_from_public_listing` 같은 약한 신호는 추후 별도 실험 대상으로 둘 수 있지만, 1차 CatBoost 가격 회귀의 핵심 타깃에는 포함하지 않는다.
+
 ## 이후 구현 메모
 
 다음 단계에서는 실제 SQL/ETL로:

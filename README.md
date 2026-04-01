@@ -269,6 +269,7 @@ npm run maintenance -- --once --older-than-hours=168 --limit=10000 --max-batches
 4. purge 직전에 다시 stale 조건을 검사해서 collector가 갱신한 row는 삭제하지 않음
 5. advisory lock으로 maintenance 작업끼리의 중복 실행 방지
 6. `poe.ninja` currencyoverview 기준 환율 스냅샷 수집
+7. collector / 환율 수집 시점에 `ingestion_activity_summaries`를 시간/일 단위로 누적 갱신
 
 collector와 동시 실행:
 
@@ -347,6 +348,7 @@ npm run maintenance
 
 - `collector`: public stash 수집, `raw_api_responses`, `normalized_priced_items`, `collector_state` 갱신
 - `maintenance`: raw 정리, stale normalized archive/purge, 환율 스냅샷 수집
+- `maintenance`: raw 정리, stale normalized archive/purge, 환율 스냅샷 수집, 수집량 summary 누적
 
 현재 구현 기준에서는 이 2개만 계속 켜두면 됩니다.
 
@@ -394,6 +396,34 @@ npm run build:training-features-clean
 
 ```bash
 npm run build:training-features-labeled
+```
+
+## Ingestion Activity Summary
+
+장기 추세 확인용으로 작은 summary 테이블을 유지합니다.
+
+저장 테이블:
+
+- `ingestion_activity_summaries`
+
+핵심 컬럼:
+
+- `summary_source`: `raw_response`, `normalized_listing`, `exchange_rate_snapshot`
+- `bucket_granularity`: `hour`, `day`
+- `bucket_start`
+- `event_count`
+- `auxiliary_count`
+
+의도:
+
+- `raw_api_responses`가 24시간 retention으로 지워져도 일별/시간별 수집량 추세는 계속 남김
+- 시즌 말 유저 감소처럼 장기 추세를 나중에 비교 가능하게 만듦
+- `reports_docs`용 차트의 원천 테이블로 활용 가능
+
+수동 확인:
+
+```bash
+npm run inspect:summary
 ```
 
 ### 현재 시점의 중요한 주의사항
@@ -447,6 +477,8 @@ npm run build:training-features -- --limit=500 --max-batches=20
 2. `training_features_raw`는 `listing_key` 기준 upsert
 3. 초기 규칙은 보수적인 요약 피처 중심
 4. mod의 세부 정규화 key/roll 파싱은 아직 다음 단계
+5. `updated_at` / `source_updated_at`는 판매 시각이 아니라 마지막 관측 시각
+6. 현재 ETL은 가격 회귀용 스냅샷 라벨만 만들며, `sold_at` 또는 inferred removal 라벨은 만들지 않음
 
 `training_features_clean` 생성:
 
@@ -493,6 +525,7 @@ npm run build:training-features-labeled -- --reset-cursor
 
 - 환율 스냅샷을 최근에 모으기 시작했다면, 그 이전 시점의 `training_features_clean` row는 일단 `missing_historical_exchange_rate`로 라벨링에서 제외될 수 있습니다.
 - 즉 과거 이미 수집된 매물에 대해서는 시점 이전 환율 스냅샷이 없으면 `training_features_labeled`에 아직 안 들어갈 수 있습니다.
+- 현재 `training_features_labeled`의 타깃은 `target_price_chaos`, `target_price_log1p`뿐이며, public listing에서의 disappearance 추정은 추후 별도 실험 과제입니다.
 
 ## league 관측 스크립트
 

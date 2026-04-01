@@ -52,6 +52,27 @@ CREATE INDEX IF NOT EXISTS idx_normalized_priced_items_price_currency
 CREATE INDEX IF NOT EXISTS idx_normalized_priced_items_type_line
   ON normalized_priced_items (type_line);
 
+CREATE INDEX IF NOT EXISTS idx_normalized_priced_items_updated_at
+  ON normalized_priced_items (updated_at DESC);
+
+CREATE TABLE IF NOT EXISTS ingestion_activity_summaries (
+  id BIGSERIAL PRIMARY KEY,
+  summary_source TEXT NOT NULL,
+  bucket_granularity TEXT NOT NULL,
+  bucket_start TIMESTAMPTZ NOT NULL,
+  target_league TEXT NOT NULL,
+  event_count INTEGER NOT NULL DEFAULT 0,
+  auxiliary_count INTEGER,
+  refreshed_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE (summary_source, bucket_granularity, bucket_start, target_league)
+);
+
+CREATE INDEX IF NOT EXISTS idx_ingestion_activity_summaries_bucket
+  ON ingestion_activity_summaries (bucket_granularity, bucket_start DESC);
+
+CREATE INDEX IF NOT EXISTS idx_ingestion_activity_summaries_source
+  ON ingestion_activity_summaries (summary_source, target_league, bucket_start DESC);
+
 CREATE TABLE IF NOT EXISTS training_features_raw (
   id BIGSERIAL PRIMARY KEY,
   listing_key TEXT NOT NULL UNIQUE,

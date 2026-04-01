@@ -2,6 +2,7 @@ import { env } from "../config/env";
 import { ExchangeRateRepository } from "../repositories/exchange-rate.repository";
 import type { ExchangeRateSnapshot } from "../types/exchange-rate.types";
 import { logger } from "../utils/logger";
+import { IngestionActivitySummaryService } from "./ingestion-activity-summary.service";
 import { PoeNinjaService } from "./poe-ninja.service";
 
 export type CollectExchangeRatesResult = {
@@ -16,6 +17,7 @@ export class ExchangeRateService {
   constructor(
     private readonly poeNinjaService = new PoeNinjaService(),
     private readonly exchangeRateRepository = new ExchangeRateRepository(),
+    private readonly ingestionActivitySummaryService = new IngestionActivitySummaryService(),
   ) {}
 
   async collectSnapshots(
@@ -38,6 +40,27 @@ export class ExchangeRateService {
       },
       "Collected exchange rate snapshots",
     );
+
+    try {
+      await this.ingestionActivitySummaryService.recordExchangeRateCollection({
+        targetLeague: league,
+        observedAt: divineLine?.sampleTimeUtc
+          ? new Date(divineLine.sampleTimeUtc)
+          : snapshots[0]?.sampleTimeUtc
+            ? new Date(snapshots[0].sampleTimeUtc)
+            : new Date(),
+        insertedCount,
+      });
+    } catch (error) {
+      logger.warn(
+        {
+          err: error,
+          league,
+          insertedCount,
+        },
+        "Exchange rate activity summary update failed",
+      );
+    }
 
     return {
       insertedCount,
