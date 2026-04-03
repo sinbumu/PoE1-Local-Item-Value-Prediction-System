@@ -118,7 +118,7 @@ def humanize_gb(total_bytes: int) -> str:
     return f"{total_bytes / (1024 ** 3):.2f} GB"
 
 
-def plot_raw_volume(database_url: str, hours: int, prefix: str) -> Path:
+def plot_raw_volume(database_url: str, output_dir: Path, hours: int, prefix: str) -> Path:
     result = run_psql_csv(
         database_url,
         f"""
@@ -142,11 +142,16 @@ ORDER BY 1;
     axis.xaxis.set_major_formatter(mdates.DateFormatter("%m-%d\n%H:%M"))
     figure.autofmt_xdate()
 
-    output_path = REPORTS_DIR / f"{prefix}_raw_collection_last_{hours}h.png"
+    output_path = output_dir / f"{prefix}_raw_collection_last_{hours}h.png"
     return save_figure(figure, output_path)
 
 
-def plot_divine_exchange(database_url: str, hours: int, prefix: str) -> Path:
+def plot_divine_exchange(
+    database_url: str,
+    output_dir: Path,
+    hours: int,
+    prefix: str,
+) -> Path:
     result = run_psql_csv(
         database_url,
         f"""
@@ -171,11 +176,11 @@ ORDER BY sample_time_utc;
     axis.xaxis.set_major_formatter(mdates.DateFormatter("%m-%d\n%H:%M"))
     figure.autofmt_xdate()
 
-    output_path = REPORTS_DIR / f"{prefix}_divine_exchange_last_{hours}h.png"
+    output_path = output_dir / f"{prefix}_divine_exchange_last_{hours}h.png"
     return save_figure(figure, output_path)
 
 
-def plot_table_sizes(database_url: str, prefix: str) -> Path:
+def plot_table_sizes(database_url: str, output_dir: Path, prefix: str) -> Path:
     result = run_psql_csv(
         database_url,
         """
@@ -206,11 +211,16 @@ ORDER BY total_bytes DESC;
             fontsize=9,
         )
 
-    output_path = REPORTS_DIR / f"{prefix}_table_sizes.png"
+    output_path = output_dir / f"{prefix}_table_sizes.png"
     return save_figure(figure, output_path)
 
 
-def plot_currency_share_sample(database_url: str, prefix: str, sample_percent: float) -> Path:
+def plot_currency_share_sample(
+    database_url: str,
+    output_dir: Path,
+    prefix: str,
+    sample_percent: float,
+) -> Path:
     result = run_psql_csv(
         database_url,
         f"""
@@ -244,11 +254,16 @@ LIMIT 10;
             fontsize=8,
         )
 
-    output_path = REPORTS_DIR / f"{prefix}_currency_share_sample.png"
+    output_path = output_dir / f"{prefix}_currency_share_sample.png"
     return save_figure(figure, output_path)
 
 
-def plot_top_type_lines_sample(database_url: str, prefix: str, sample_percent: float) -> Path:
+def plot_top_type_lines_sample(
+    database_url: str,
+    output_dir: Path,
+    prefix: str,
+    sample_percent: float,
+) -> Path:
     result = run_psql_csv(
         database_url,
         f"""
@@ -281,11 +296,16 @@ LIMIT 15;
             fontsize=8,
         )
 
-    output_path = REPORTS_DIR / f"{prefix}_top_item_types_sample.png"
+    output_path = output_dir / f"{prefix}_top_item_types_sample.png"
     return save_figure(figure, output_path)
 
 
-def plot_rarity_share_sample(database_url: str, prefix: str, sample_percent: float) -> Path:
+def plot_rarity_share_sample(
+    database_url: str,
+    output_dir: Path,
+    prefix: str,
+    sample_percent: float,
+) -> Path:
     result = run_psql_csv(
         database_url,
         f"""
@@ -312,11 +332,16 @@ ORDER BY listing_count DESC;
     )
     axis.set_title(f"Rarity Composition (sample-based, {sample_percent:.1f}% table sample)")
 
-    output_path = REPORTS_DIR / f"{prefix}_rarity_share_sample.png"
+    output_path = output_dir / f"{prefix}_rarity_share_sample.png"
     return save_figure(figure, output_path)
 
 
-def plot_chaos_price_hist_sample(database_url: str, prefix: str, sample_percent: float) -> Path:
+def plot_chaos_price_hist_sample(
+    database_url: str,
+    output_dir: Path,
+    prefix: str,
+    sample_percent: float,
+) -> Path:
     result = run_psql_csv(
         database_url,
         f"""
@@ -354,11 +379,16 @@ ORDER BY bucket;
     axis.grid(axis="y", alpha=0.25)
     axis.tick_params(axis="x", rotation=45)
 
-    output_path = REPORTS_DIR / f"{prefix}_chaos_price_hist_sample.png"
+    output_path = output_dir / f"{prefix}_chaos_price_hist_sample.png"
     return save_figure(figure, output_path)
 
 
-def plot_listing_lifetime_sample(database_url: str, prefix: str, sample_percent: float) -> Path:
+def plot_listing_lifetime_sample(
+    database_url: str,
+    output_dir: Path,
+    prefix: str,
+    sample_percent: float,
+) -> Path:
     result = run_psql_csv(
         database_url,
         f"""
@@ -395,13 +425,19 @@ ORDER BY bucket;
     axis.grid(axis="y", alpha=0.25)
     axis.tick_params(axis="x", rotation=35)
 
-    output_path = REPORTS_DIR / f"{prefix}_listing_lifetime_sample.png"
+    output_path = output_dir / f"{prefix}_listing_lifetime_sample.png"
     return save_figure(figure, output_path)
 
 
-def write_visual_report(prefix: str, hours: int, sample_percent: float, created_paths: list[Path]) -> Path:
+def write_visual_report(
+    output_dir: Path,
+    prefix: str,
+    hours: int,
+    sample_percent: float,
+    created_paths: list[Path],
+) -> Path:
     image_names = {path.name for path in created_paths}
-    report_path = REPORTS_DIR / f"{prefix}_visual_report.md"
+    report_path = output_dir / f"{prefix}_visual_report.md"
 
     def image_block(name: str, title: str, summary: str) -> str:
         return "\n".join(
@@ -466,8 +502,8 @@ def write_visual_report(prefix: str, hours: int, sample_percent: float, created_
         ),
         (
             f"{prefix}_listing_lifetime_sample.png",
-            "매물 생존 시간 분포",
-            "매물이 등록 직후 바로 사라지는 것만은 아니며, 일정 시간 이상 유지되는 매물이 많다는 점을 보여줍니다.",
+            "관측 유지 시간 분포",
+            "한 번 관측된 매물이 짧은 시간 안에 다시 보이지 않게 되는 경우만 있는 것이 아니라, 일정 시간 이상 반복 관측되는 경우도 많다는 점을 보여줍니다.",
         ),
     ]
 
@@ -504,23 +540,42 @@ def main() -> int:
         default=DEFAULT_SAMPLE_PERCENT,
         help=f"sample-based 차트에 사용할 TABLESAMPLE 비율(퍼센트). 기본값: {DEFAULT_SAMPLE_PERCENT}",
     )
+    parser.add_argument(
+        "--output-dir",
+        default=str(REPORTS_DIR),
+        help="차트와 visual report를 저장할 출력 디렉토리",
+    )
     args = parser.parse_args()
 
     database_url = resolve_database_url()
     plt.style.use("default")
+    output_dir = Path(args.output_dir).resolve()
+    output_dir.mkdir(parents=True, exist_ok=True)
 
     created_paths = [
-        plot_raw_volume(database_url, args.hours, args.prefix),
-        plot_divine_exchange(database_url, args.hours, args.prefix),
-        plot_table_sizes(database_url, args.prefix),
-        plot_currency_share_sample(database_url, args.prefix, args.sample_percent),
-        plot_top_type_lines_sample(database_url, args.prefix, args.sample_percent),
-        plot_rarity_share_sample(database_url, args.prefix, args.sample_percent),
-        plot_chaos_price_hist_sample(database_url, args.prefix, args.sample_percent),
-        plot_listing_lifetime_sample(database_url, args.prefix, args.sample_percent),
+        plot_raw_volume(database_url, output_dir, args.hours, args.prefix),
+        plot_divine_exchange(database_url, output_dir, args.hours, args.prefix),
+        plot_table_sizes(database_url, output_dir, args.prefix),
+        plot_currency_share_sample(
+            database_url, output_dir, args.prefix, args.sample_percent
+        ),
+        plot_top_type_lines_sample(
+            database_url, output_dir, args.prefix, args.sample_percent
+        ),
+        plot_rarity_share_sample(
+            database_url, output_dir, args.prefix, args.sample_percent
+        ),
+        plot_chaos_price_hist_sample(
+            database_url, output_dir, args.prefix, args.sample_percent
+        ),
+        plot_listing_lifetime_sample(
+            database_url, output_dir, args.prefix, args.sample_percent
+        ),
     ]
     created_paths.append(
-        write_visual_report(args.prefix, args.hours, args.sample_percent, created_paths)
+        write_visual_report(
+            output_dir, args.prefix, args.hours, args.sample_percent, created_paths
+        )
     )
 
     print_created(created_paths)

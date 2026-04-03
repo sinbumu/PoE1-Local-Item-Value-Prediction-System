@@ -5,7 +5,8 @@ ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 REPORTS_DIR="$ROOT_DIR/reports_docs"
 VENV_DIR="/tmp/poe1-report-venv"
 
-if [[ ! -x "$VENV_DIR/bin/python" ]]; then
+if [[ ! -x "$VENV_DIR/bin/python" || ! -x "$VENV_DIR/bin/pip" ]]; then
+  rm -rf "$VENV_DIR"
   python3 -m venv "$VENV_DIR"
 fi
 
