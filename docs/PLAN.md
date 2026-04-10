@@ -1,5 +1,19 @@
 # PLAN.md
 
+## 문서 상태
+
+이 문서는 프로젝트 초기에 작성된 **초기 collector 계획 문서**다.
+
+즉, 현재 구현 상태의 기준 문서가 아니라 역사적 기록에 가깝다.
+
+현재 상태를 보려면 아래 문서를 우선 참고한다.
+
+- `docs/TRAINING_ETL_OVERVIEW.md`
+- `docs/TRAINING_FEATURES.md`
+- `docs/STORAGE_POLICY.md`
+- `docs/REPORT_HANDOFF.md`
+- `docs/CLIPBOARD_COMPATIBILITY_AUDIT.md`
+
 ## Project
 
 PoE1 Local Item Value Prediction System - Public Stash Collector PoC
@@ -8,8 +22,9 @@ PoE1 Local Item Value Prediction System - Public Stash Collector PoC
 
 Build a local PoC on macOS for collecting and analyzing PoE1 public stash data.
 
-This phase is **not** about model training yet.  
-This phase is about proving that we can:
+작성 당시 이 단계는 **모델 학습 이전의 collector 검증 단계**를 전제로 했다.
+
+즉, 아래 목표는 현재의 최종 상태가 아니라 프로젝트 출발점이다.
 
 1. authenticate with the approved OAuth app,
 2. collect public stash data continuously,

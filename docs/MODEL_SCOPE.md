@@ -85,7 +85,7 @@ Skill Gem은 장비류와 달리 affix 기반 해석보다 다음 요소가 더 
 
 즉 Skill Gem은 모델 대상이되, 장비처럼 접두/접미 파싱에 집중할 필요는 없다.
 
-## 장비/주얼에서 절대 버리면 안 되는 정보
+## 장비/주얼에서 가능하면 보존해야 하는 정보
 
 다음 정보는 학습 의미를 유지하려면 반드시 보존해야 한다.
 
@@ -97,17 +97,35 @@ Skill Gem은 장비류와 달리 affix 기반 해석보다 다음 요소가 더 
 - influence 정보
 - sockets / links / colors
 - corrupted / fractured / synthesised / mirrored 등 상태 플래그
-- prefixes / suffixes 개수
 - 숫자형 roll 값
+
+단, 현재 v1 학습 입력에서는 아래 항목을 보수적으로 제외하고 있다.
+
+- `prefix_count`
+- `suffix_count`
+
+이유:
+
+- 장기적으로는 중요하지만
+- 현재는 clipboard parity와 affix dictionary 이슈가 아직 정리되지 않았기 때문이다
 
 ## 현재 프로젝트에서의 실질적 의미
 
-이 문서 기준으로 보면 현재 collector는 너무 넓은 범위를 저장하고 있다.
+현재 프로젝트는 이미 단순 collector 단계에서 더 나아가:
 
-다음 단계에서는:
+1. `training_features_raw`
+2. `training_features_clean`
+3. `training_features_labeled`
 
-1. 저장 대상 자체를 모델 후보군 중심으로 줄이거나
-2. 저장은 하되 장기 보관은 모델 후보군 중심으로 압축해야 한다.
+계층까지 운영 중이다.
+
+따라서 현재 스코프 문서의 실질적 의미는:
+
+- 어떤 row가 clean 단계에서 모델 후보가 되는지
+- 어떤 피처를 v1에서 학습 입력으로 승인할지
+- 어떤 항목을 v2 이슈로 미룰지
+
+를 정하는 기준에 가깝다.
 
 ## 초기 합의안
 
@@ -121,4 +139,4 @@ Skill Gem은 장비류와 달리 affix 기반 해석보다 다음 요소가 더 
   - NeverSink strict unique allowlist 기반 Unique 장비
   - Skill Gem
 
-이 합의안은 이후 `docs/ITEM_ROUTING.md`, `docs/TRAINING_FEATURES.md`, `docs/STORAGE_POLICY.md`의 기준이 된다.
+이 합의안은 이후 `docs/ITEM_ROUTING.md`, `docs/TRAINING_FEATURES.md`, `docs/TRAINING_ETL_OVERVIEW.md`, `docs/STORAGE_POLICY.md`의 기준이 된다.

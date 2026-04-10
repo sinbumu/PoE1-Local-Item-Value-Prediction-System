@@ -10,50 +10,12 @@ import numpy as np
 import pandas as pd
 from catboost import CatBoostRegressor, Pool
 
-
-BOOL_COLUMNS = [
-    "identified",
-    "corrupted",
-    "fractured",
-    "synthesised",
-    "duplicated",
-    "influence_shaper",
-    "influence_elder",
-    "influence_crusader",
-    "influence_redeemer",
-    "influence_hunter",
-    "influence_warlord",
-    "influence_searing",
-    "influence_tangled",
-    "is_awakened",
-    "is_vaal",
-    "is_support_gem",
-]
-
-CATEGORICAL_COLUMNS = [
-    "league",
-    "model_segment",
-    "clean_reason",
-    "item_class",
-    "base_type",
-    "rarity",
-    "jewel_type",
-    "cluster_size",
-    "gem_tags",
-]
-
-IGNORED_FEATURE_COLUMNS = [
-    "listing_key",
-    "source_updated_at",
-    "target_price_amount",
-    "target_price_currency",
-    "exchange_rate_source",
-    "exchange_rate_sample_time_utc",
-    "exchange_rate_chaos_equivalent",
-    "target_price_chaos",
-    "target_price_log1p",
-    "label_reason",
-]
+DEFAULT_FEATURE_POLICY_PATH = (
+    Path(__file__).resolve().parents[1]
+    / "src"
+    / "config"
+    / "clipboard-safe-feature-policy.json"
+)
 
 
 def parse_args() -> argparse.Namespace:
@@ -76,6 +38,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--iterations", type=int, default=2000)
     parser.add_argument("--learning-rate", type=float, default=0.05)
     parser.add_argument("--depth", type=int, default=8)
+    parser.add_argument(
+        "--feature-policy",
+        default=str(DEFAULT_FEATURE_POLICY_PATH),
+        help="Path to clipboard-safe feature policy JSON",
+    )
     return parser.parse_args()
 
 
@@ -99,7 +66,27 @@ def validate_split_ratios(train_ratio: float, valid_ratio: float) -> None:
         raise ValueError("train_ratio + valid_ratio must be less than 1")
 
 
-def load_dataset(dataset_path: Path) -> pd.DataFrame:
+def load_feature_policy(policy_path: Path) -> dict[str, object]:
+    feature_policy = json.loads(policy_path.read_text(encoding="utf-8"))
+    required_keys = [
+        "policyName",
+        "version",
+        "activeFeatureColumns",
+        "derivedFeatureColumns",
+        "categoricalColumns",
+        "booleanColumns",
+    ]
+
+    missing_keys = [key for key in required_keys if key not in feature_policy]
+    if missing_keys:
+        raise ValueError(
+            f"Feature policy is missing required keys: {', '.join(missing_keys)}"
+        )
+
+    return feature_policy
+
+
+def load_dataset(dataset_path: Path, feature_policy: dict[str, object]) -> pd.DataFrame:
     dataframe = pd.read_csv(dataset_path)
     if dataframe.empty:
         raise ValueError("Dataset is empty")
@@ -115,7 +102,10 @@ def load_dataset(dataset_path: Path) -> pd.DataFrame:
     dataframe["observed_hour_utc"] = dataframe["source_updated_at"].dt.hour
     dataframe["observed_weekday_utc"] = dataframe["source_updated_at"].dt.weekday
 
-    for column in BOOL_COLUMNS:
+    boolean_columns = feature_policy["booleanColumns"]
+    categorical_columns = feature_policy["categoricalColumns"]
+
+    for column in boolean_columns:
         if column in dataframe.columns:
             dataframe[column] = (
                 dataframe[column]
@@ -123,21 +113,34 @@ def load_dataset(dataset_path: Path) -> pd.DataFrame:
                 .astype("float64")
             )
 
-    for column in CATEGORICAL_COLUMNS:
+    for column in categorical_columns:
         if column in dataframe.columns:
             dataframe[column] = dataframe[column].fillna("missing").astype(str)
 
     return dataframe
 
 
-def build_feature_frame(dataframe: pd.DataFrame, target_column: str) -> tuple[pd.DataFrame, list[str]]:
-    feature_columns = [
-        column
-        for column in dataframe.columns
-        if column not in IGNORED_FEATURE_COLUMNS and column != target_column
-    ]
+def build_feature_frame(
+    dataframe: pd.DataFrame,
+    feature_policy: dict[str, object],
+) -> tuple[pd.DataFrame, list[str], list[str]]:
+    dataset_feature_columns = feature_policy["activeFeatureColumns"]
+    derived_feature_columns = feature_policy["derivedFeatureColumns"]
+    categorical_policy_columns = feature_policy["categoricalColumns"]
 
-    categorical_columns = [column for column in CATEGORICAL_COLUMNS if column in feature_columns]
+    missing_feature_columns = [
+        column for column in dataset_feature_columns if column not in dataframe.columns
+    ]
+    if missing_feature_columns:
+        raise ValueError(
+            "Dataset is missing clipboard-safe feature columns: "
+            + ", ".join(missing_feature_columns)
+        )
+
+    feature_columns = [*dataset_feature_columns, *derived_feature_columns]
+    categorical_columns = [
+        column for column in categorical_policy_columns if column in feature_columns
+    ]
 
     feature_frame = dataframe[feature_columns].copy()
     for column in feature_columns:
@@ -146,7 +149,7 @@ def build_feature_frame(dataframe: pd.DataFrame, target_column: str) -> tuple[pd
         else:
             feature_frame[column] = pd.to_numeric(feature_frame[column], errors="coerce")
 
-    return feature_frame, categorical_columns
+    return feature_frame, categorical_columns, missing_feature_columns
 
 
 def split_time_ordered(
@@ -218,15 +221,20 @@ def main() -> int:
 
     dataset_path = Path(args.dataset).resolve()
     output_dir = ensure_output_dir(args.output_dir)
+    feature_policy_path = Path(args.feature_policy).resolve()
+    feature_policy = load_feature_policy(feature_policy_path)
 
-    dataframe = load_dataset(dataset_path)
+    dataframe = load_dataset(dataset_path, feature_policy)
     train_df, valid_df, test_df = split_time_ordered(
         dataframe,
         args.train_ratio,
         args.valid_ratio,
     )
 
-    feature_frame, categorical_columns = build_feature_frame(dataframe, args.target_column)
+    feature_frame, categorical_columns, missing_feature_columns = build_feature_frame(
+        dataframe,
+        feature_policy,
+    )
     train_x = feature_frame.loc[train_df.index]
     valid_x = feature_frame.loc[valid_df.index]
     test_x = feature_frame.loc[test_df.index]
@@ -297,9 +305,13 @@ def main() -> int:
     run_info = {
       "generated_at": datetime.now(timezone.utc).isoformat(),
       "dataset_path": str(dataset_path),
+      "feature_policy_path": str(feature_policy_path),
+      "feature_policy_name": feature_policy["policyName"],
+      "feature_policy_version": feature_policy["version"],
       "target_column": args.target_column,
       "feature_columns": train_x.columns.tolist(),
       "categorical_columns": categorical_columns,
+      "missing_feature_columns": missing_feature_columns,
       "metrics": metrics,
       "split": {
           "train_ratio": args.train_ratio,

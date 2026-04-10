@@ -80,17 +80,22 @@ python ml/train_catboost.py \
 
 - 시간 순서 기준 `train / valid / test` 분할
 - 기본 타깃은 `target_price_log1p`
-- feature leakage 방지를 위해 아래 컬럼은 자동 제외
-  - `target_price_amount`
-  - `target_price_currency`
-  - `exchange_rate_*`
-  - `target_price_chaos`
-  - `target_price_log1p`
+- 기본적으로 `src/config/clipboard-safe-feature-policy.json`의 `clipboard_safe_v1` 화이트리스트만 feature로 사용
+- 즉 "CSV에 있는 컬럼 전체"가 아니라, 현재 클립보드 호환으로 승인된 컬럼만 학습 입력으로 사용
+- `observed_hour_utc`, `observed_weekday_utc`는 `source_updated_at`에서 파생 생성
 - 실행 결과로 아래 파일 생성
   - `model.cbm`
   - `metrics.json`
   - `feature_importance.csv`
   - `run_info.json`
+
+정책 파일을 바꾸고 싶다면:
+
+```bash
+python ml/train_catboost.py \
+  --dataset artifacts/datasets/YOUR_FILE.csv \
+  --feature-policy src/config/clipboard-safe-feature-policy.json
+```
 
 ## 다음 확장 후보
 

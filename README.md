@@ -662,8 +662,9 @@ python ml/train_catboost.py --dataset artifacts/datasets/YOUR_FILE.csv
 
 1. 시간 순서 기준 `train / valid / test` 분할
 2. 기본 타깃은 `target_price_log1p`
-3. leakage 방지를 위해 `target_price_amount`, `target_price_currency`, `exchange_rate_*`, `target_price_*` 등 직접 라벨 관련 컬럼은 feature에서 자동 제외
-4. 결과물로 `model.cbm`, `metrics.json`, `feature_importance.csv`, `run_info.json` 저장
+3. 기본적으로 `src/config/clipboard-safe-feature-policy.json`의 클립보드 호환 화이트리스트만 feature로 사용
+4. `observed_hour_utc`, `observed_weekday_utc`는 `source_updated_at`에서 파생 생성
+5. 결과물로 `model.cbm`, `metrics.json`, `feature_importance.csv`, `run_info.json` 저장
 
 ## league 관측 스크립트
 

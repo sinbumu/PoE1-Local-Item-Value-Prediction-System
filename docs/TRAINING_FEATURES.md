@@ -2,215 +2,178 @@
 
 ## 문서 목적
 
-이 문서는 `CatBoost` 학습용으로 최종 정제될 `training_features` 테이블 또는 파일 포맷의 1차 초안을 정의합니다.
+이 문서는 현재 프로젝트에서 실제로 사용 중인 `training_features_*` 계층의 의미와, 학습 입력으로 어떤 피처를 볼 것인지 정리한다.
 
-목표:
+예전의 "초안" 문서가 아니라, 현재 ETL 구조 기준의 운영 문서로 본다.
 
-- raw/normalized JSON을 그대로 학습에 쓰지 않기
-- 장기 보관 가능한 압축된 feature row 만들기
-- 아이템 타입별로 필요한 피처를 분리해서 관리하기
+## 현재 계층 구조
 
-## 기본 원칙
+현재 학습용 데이터는 3단계 테이블로 관리된다.
 
-1. 학습 타깃은 우선 `price_amount + price_currency`를 유지한다.
-2. 추후 `chaos equivalent`로 변환 가능한 구조를 남긴다.
-3. `account_name`, `stash_name` 같은 고카디널리티 식별성 필드는 기본적으로 학습 제외한다.
-4. `type_line` 원문은 보조 정보로만 보고, 핵심은 `base_type`와 구조화된 mod 피처다.
+1. `training_features_raw`
+2. `training_features_clean`
+3. `training_features_labeled`
 
-## 공통 컬럼 초안
+상세 흐름은 `docs/TRAINING_ETL_OVERVIEW.md`를 기준 문서로 본다.
 
-모든 모델 후보군에 공통으로 들어갈 수 있는 컬럼:
+## 각 계층의 의미
 
-| 컬럼명 | 타입 예시 | 설명 |
-| --- | --- | --- |
-| `listing_key` | text | 매물 식별 키 |
-| `observed_at` | timestamptz | 관측 시각 |
-| `league` | text | 기본적으로 `Mirage` |
-| `item_id` | text | PoE item id |
-| `item_class` | text | 장비/주얼/젬 등 대분류 |
-| `base_type` | text | 핵심 base |
-| `rarity` | text | Normal/Magic/Rare/Unique |
-| `frame_type` | int | PoE frame type |
-| `ilvl` | int | item level |
-| `identified` | bool | 식별 여부 |
-| `corrupted` | bool | 타락 여부 |
-| `fractured` | bool | 분열 여부 |
-| `synthesised` | bool | 합성 여부 |
-| `influence_shaper` | bool | influence |
-| `influence_elder` | bool | influence |
-| `influence_searing` | bool | influence |
-| `influence_tangled` | bool | influence |
-| `socket_count` | int | 총 소켓 수 |
-| `link_count` | int | 최대 링크 수 |
-| `white_socket_count` | int | 흰소켓 수 |
-| `prefix_count` | int | prefix 개수 |
-| `suffix_count` | int | suffix 개수 |
-| `explicit_mod_count` | int | explicit mod 수 |
-| `implicit_mod_count` | int | implicit mod 수 |
-| `crafted_mod_count` | int | crafted mod 수 |
-| `fractured_mod_count` | int | fractured mod 수 |
-| `enchant_mod_count` | int | enchant mod 수 |
-| `price_amount` | numeric | note 파싱 금액 |
-| `price_currency` | text | chaos/divine 등 |
-| `listing_mode` | text | `b/o`, `price` |
+### `training_features_raw`
 
-## 장비류 추가 피처
+역할:
 
-Rare/Unique 장비류에 특히 중요한 항목:
+- `normalized_priced_items`에서 추출한 1차 구조화 피처
 
-| 컬럼명 | 타입 예시 | 설명 |
-| --- | --- | --- |
-| `armour` | numeric | 방어 수치 |
-| `evasion` | numeric | 회피 수치 |
-| `energy_shield` | numeric | 에쉴 수치 |
-| `ward` | numeric | PoE2면 제외, PoE1은 보통 null |
-| `quality` | numeric | 품질 |
-| `physical_dps` | numeric | 무기일 때 |
-| `elemental_dps` | numeric | 무기일 때 |
-| `attack_speed` | numeric | 무기일 때 |
-| `crit_chance` | numeric | 무기일 때 |
-| `move_speed` | numeric | 부츠 등 |
-| `life_roll_sum` | numeric | 생명 관련 mod 합 |
-| `resistance_roll_sum` | numeric | 저항 관련 mod 합 |
-| `attribute_roll_sum` | numeric | 힘/민/지 합 |
+성격:
 
-## 주얼류 추가 피처
+- 아직 모델 입력으로 바로 쓰는 최종본은 아님
+- stash API 기반 정보와 요약 피처가 혼재
+- 이후 cleaner 단계에서 범위 제한 필요
 
-Jewel / Abyss Jewel / Cluster Jewel:
+주요 컬럼 예:
 
-| 컬럼명 | 타입 예시 | 설명 |
-| --- | --- | --- |
-| `jewel_type` | text | normal/abyss/cluster/timeless |
-| `cluster_size` | text | Large/Medium/Small |
-| `cluster_passive_count` | int | cluster jewel용 |
-| `notable_count` | int | notable 개수 |
-| `socketed_variant_flag` | bool | abyss 등 |
-| `damage_mod_count` | int | 공격 관련 mod 수 |
-| `defence_mod_count` | int | 방어 관련 mod 수 |
-| `utility_mod_count` | int | 유틸 mod 수 |
+- `item_class`, `base_type`, `rarity`, `ilvl`
+- `identified`, `corrupted`, `fractured`, `synthesised`
+- `influence_*`
+- `socket_count`, `link_count`, `white_socket_count`
+- `explicit_mod_count`, `implicit_mod_count`, `crafted_mod_count`
+- `quality`, `armour`, `evasion`, `energy_shield`
+- `physical_dps`, `elemental_dps`, `attack_speed`, `crit_chance`
+- `life_roll_sum`, `resistance_roll_sum`, `attribute_roll_sum`
+- `jewel_type`, `cluster_size`, `cluster_passive_count`, `notable_count`
+- `gem_level`, `gem_quality`, `is_awakened`, `is_vaal`
 
-## 스킬젬 추가 피처
+### `training_features_clean`
 
-Skill Gem은 별도 피처 세트가 필요하다.
+역할:
 
-| 컬럼명 | 타입 예시 | 설명 |
-| --- | --- | --- |
-| `gem_level` | int | gem level |
-| `gem_quality` | int | quality |
-| `is_awakened` | bool | awakened 여부 |
-| `is_vaal` | bool | vaal 여부 |
-| `is_support_gem` | bool | support 여부 |
-| `gem_tags` | text[] 또는 요약 컬럼 | spell/attack/minion 등 |
+- 현재 모델 범위에 맞는 row만 선별
+- `model_segment`와 `clean_reason`를 부여
 
-## mod 표현 방식
+현재 주요 세그먼트:
 
-초기 CatBoost에서는 완전 자유 텍스트 mod를 그대로 넣는 것보다 아래 2층 구조를 추천한다.
+- `rare_equipment`
+- `jewel`
+- `skill_gem`
+- `unique_equipment`
 
-### 1층: 요약 수치 피처
+현재 clean 단계의 핵심은 "모든 row를 모델에 넣지 않고, 현재 범위 안의 학습 후보만 정리하는 것"이다.
 
-- explicit mod 수
-- implicit mod 수
-- crafted mod 수
-- 저항 총합
-- 생명 총합
-- 속성 총합
-- 이동속도
-- 공격속도
-- 치명타
+### `training_features_labeled`
 
-### 2층: 정규화된 mod key
+역할:
 
-예시:
+- clean row에 환율 스냅샷을 붙여 최종 학습 라벨을 생성
 
-- `has_+max_life`
-- `has_%fire_resistance`
-- `has_+1_all_spell_skill_gems`
-- `has_attack_speed`
+주요 라벨 컬럼:
 
-그리고 가능하면:
+- `target_price_chaos`
+- `target_price_log1p`
+- `exchange_rate_chaos_equivalent`
+- `label_reason`
 
-- `roll_+max_life = 86`
-- `roll_attack_speed = 14`
+현재 `CatBoost` 학습 전 최종 입력 원본은 이 테이블이다.
 
-처럼 수치값도 함께 둔다.
+## 현재 타깃 정의
 
-## 초기 제외할 피처
+현재 모델 타깃은 **관측 시점 listing price**다.
 
-초기 버전에서 제외 권장:
+구체적으로는:
 
-- `account_name`
-- `stash_name`
-- 원문 `type_line` 전체
-- 원문 `note_raw` 텍스트 전체
-- 지나치게 희소한 문자열 식별자
+1. `target_price_amount` + `target_price_currency`
+2. 환율 스냅샷 결합
+3. `target_price_chaos`
+4. `target_price_log1p`
+
+현재 주의점:
+
+- `updated_at` / `source_updated_at`는 판매 시각이 아니다
+- 현재 라벨은 판매 완료 가격이 아니다
+- `sold_at`, `removed_at`, `time_to_sale` 계열 라벨은 아직 없다
+
+즉, 지금은 "거래 성사 예측"이 아니라 "관측 시점 가격 회귀" 문제다.
+
+## 현재 학습 입력 정책
+
+현재 `ml/train_catboost.py`는 labeled CSV의 컬럼을 임의로 넓게 쓰지 않는다.
+
+대신:
+
+- `src/config/clipboard-safe-feature-policy.json`
+
+에 정의된 `clipboard_safe_v1` 화이트리스트만 사용한다.
+
+즉, 현재 모델 입력은 "이미 클립보드 호환으로 승인한 컬럼"만 사용한다.
+
+## 현재 유지 중인 주요 피처
+
+현재 v1 기준으로 유지하는 대표 피처:
+
+- `item_class`, `base_type`, `rarity`, `ilvl`
+- `identified`, `corrupted`, `fractured`, `synthesised`
+- `influence_*`
+- `socket_count`, `link_count`, `white_socket_count`
+- `explicit_mod_count`, `implicit_mod_count`, `crafted_mod_count`, `fractured_mod_count`, `enchant_mod_count`
+- `quality`, `armour`, `evasion`, `energy_shield`, `ward`
+- `physical_dps`, `elemental_dps`, `attack_speed`, `crit_chance`
+- `move_speed`, `life_roll_sum`, `resistance_roll_sum`, `attribute_roll_sum`
+- `jewel_type`, `cluster_size`, `cluster_passive_count`, `notable_count`
+- `damage_mod_count`, `defence_mod_count`, `utility_mod_count`
+- `gem_level`, `gem_quality`, `is_awakened`, `is_vaal`
+- `model_segment`
+- `observed_hour_utc`, `observed_weekday_utc`
+
+## 현재 보수적으로 제외한 피처
+
+현재 v1 학습 입력에서는 아래를 보수적으로 제외한다.
+
+- `duplicated`
+- `frame_type`
+- `clean_reason`
+- `prefix_count`
+- `suffix_count`
+- `is_support_gem`
+- `gem_tags`
 
 이유:
 
-- 카디널리티가 너무 높음
-- 일반화보다 과적합 유도가 쉬움
+- stash API 전용 의미가 섞여 있거나
+- clipboard parity가 아직 부족하거나
+- parser / dictionary / rule engine 공유가 먼저 필요한 항목이기 때문이다
 
-## 타깃 설계 초안
+## affix 관련 현재 상태
 
-초기 타깃은 두 가지 후보가 있다.
+`prefix_count`, `suffix_count`는 완전히 폐기된 것이 아니라, 현재는 조건부 보류 상태다.
 
-### 후보 A: 원 통화 유지
+즉:
 
-- `price_amount`
-- `price_currency`
+- 장기적으로는 다시 도입 가능
+- 단, affix dictionary source와 counting rule이 먼저 정리돼야 함
 
-장점:
+관련 문서:
 
-- 정보 손실 적음
+- `docs/CLIPBOARD_COMPATIBILITY_AUDIT.md`
+- `docs/AFFIX_DICTIONARY_REQUIREMENTS.md`
 
-단점:
+## 현재 미구현 또는 향후 확장 후보
 
-- chaos/divine 혼합 처리 필요
+향후 확장 가능 항목:
 
-### 후보 B: chaos equivalent 회귀
+- affix dictionary 기반 `prefix_count`, `suffix_count`
+- locale-aware mod canonicalization
+- `is_support_gem`, `gem_tags`
+- mod key 기반 sparse feature
+- segment별 별도 모델
 
-- `target_price_chaos`
+## 정리
 
-장점:
+현재 `training_features` 계층은 더 이상 단순 설계 초안이 아니다.
 
-- 단일 회귀 문제로 단순화
+현재 기준으로 보면:
 
-단점:
+- ETL 3단계 구조는 이미 구현됨
+- labeled 테이블까지 실제 누적 중
+- 학습 입력은 clipboard-safe whitelist로 제한됨
+- affix 관련 피처는 v2 이슈로 분리됨
 
-- 외부 환율 테이블 필요
-
-## 권장 1차안
-
-처음에는 다음을 추천한다.
-
-1. `price_currency in ('chaos', 'divine')`만 우선 사용
-2. 외부 환율로 `chaos equivalent`를 계산
-3. CatBoost 회귀 타깃은 `log1p(target_price_chaos)`
-
-현재 이 문서에서 말하는 학습 타깃은 어디까지나 **관측 시점의 가격 회귀**다.
-
-중요:
-
-- `updated_at` / `source_updated_at`는 **판매 시각**이 아니라 **마지막 관측 시각**이다.
-- 현재 파이프라인은 `sold_at`, `removed_at`, `time_to_sale` 같은 라벨을 만들지 않는다.
-- public stash 기반 `inferred_removed_from_public_listing` 같은 약한 신호는 추후 별도 실험 대상으로 둘 수 있지만, 1차 CatBoost 가격 회귀의 핵심 타깃에는 포함하지 않는다.
-
-## 이후 구현 메모
-
-다음 단계에서는 실제 SQL/ETL로:
-
-1. `normalized_priced_items` -> `training_features_raw`
-2. `training_features_raw` -> `training_features_clean`
-
-2단계 파이프라인을 만드는 것이 좋다.
-
-현재 구현 상태:
-
-- `training_features_raw` 생성 스크립트가 추가됨
-- `updated_at + listing_key` 커서 기반 증분 처리
-- 공통 구조/장비/주얼/젬 요약 피처까지 1차 추출
-- `training_features_clean` 생성 스크립트가 추가됨
-- 현재 clean 단계는 `chaos/divine` 가격의 `Rare equipment`, `Jewel`, `Skill Gem`, NeverSink strict allowlist 기반 `Unique equipment`를 선별
-- `Map`, `Timeless Jewel`, allowlist 밖 `Unique equipment`는 현재 제외
-- `training_features_labeled` 생성 스크립트가 추가됨
-- `source_updated_at` 이전 최신 환율 스냅샷을 붙여 `target_price_chaos`, `target_price_log1p` 생성
-- mod key 정규화는 아직 미구현
+즉, 지금 문맥에서 `training_features_*`는 "미래 구상"이 아니라 실제 운영 중인 학습 준비 파이프라인이다.

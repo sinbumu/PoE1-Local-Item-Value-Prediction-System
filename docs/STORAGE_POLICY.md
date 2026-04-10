@@ -2,138 +2,152 @@
 
 ## 문서 목적
 
-이 문서는 로컬 MacBook 환경에서 수집/정규화/학습용 데이터를 **500GB 내에서 관리 가능하게 만들기 위한 저장 정책 초안**입니다.
+이 문서는 현재 프로젝트의 실제 저장/정리/백업 정책을 최신 상태로 정리한다.
 
-실측 결과:
+예전 정책 중 일부는 이미 폐기되었기 때문에, 이 문서를 현재 운영 기준으로 본다.
 
-- 약 13시간 수집에서 `raw_api_responses` 약 `18GB`
-- `normalized_priced_items` 약 `23GB`
+## 현재 기본 원칙
 
-따라서 현재 방식 그대로는 장기 수집이 어렵습니다.
+1. raw는 디버깅/재처리 보조 계층이지 장기 보관 본체가 아니다.
+2. `normalized_priced_items`는 feature extraction용 중간 계층이지 장기 canonical dataset이 아니다.
+3. 장기 보관의 핵심은 `training_features_labeled`와 그 export다.
+4. 저장 정책은 `collector`와 분리된 `maintenance`가 관리한다.
 
-## 기본 원칙
+## 현재 저장 계층
 
-1. raw는 디버깅/재처리 용도이지 장기 보관 본체가 아니다.
-2. normalized도 "무조건 오래 보관"하지 않는다.
-3. 장기 보관의 핵심은 압축된 학습용 산출물과 그에 준하는 compact snapshot이다.
-4. 저장 주기는 collector와 분리해서 배치 정리한다.
-
-## 저장 계층
-
-### Layer 1: Raw responses
+### Layer 1: `raw_api_responses`
 
 용도:
 
 - 디버깅
-- 파서 수정 시 재검증
-- 필드 구조 확인
+- 파서/정규화 재검증
+- 실제 API payload 확인
 
-권장 정책:
+현재 정책:
 
-- 최근 `24시간`만 유지
-- 기간 초과 시 삭제
+- 로컬 DB에 짧게 유지
+- retention cleanup 대상
 
-추가 고려:
+권장 해석:
 
-- 현재는 target league subset raw만 저장하지만, 그래도 빠르게 커짐
-- 필요 시 full raw가 아니라 sample raw만 남기는 방향 검토
+- raw는 "항상 남겨야 하는 자산"이 아니라 "운영 안전장치"에 가깝다
 
-### Layer 2: Normalized priced items
+### Layer 2: `normalized_priced_items`
 
 용도:
 
-- 수집 중간 산출물
+- collector의 직접 중간 산출물
 - SQL 점검
-- feature 추출 원본
+- ETL 입력 원본
 
-권장 정책:
+현재 정책:
 
-- DB에는 최근에 다시 관측된 hot listing만 유지
-- `updated_at` 기준 `7일` 이상 미갱신된 stale listing은 압축 export 후 Google Drive 업로드
-- 업로드 확인 후 DB에서 삭제
+- 로컬 DB에서만 유지
+- `updated_at` 기준 7일 stale row는 cleanup 대상
+- 더 이상 normalized snapshot 자체를 canonical archive로 보지 않음
 
-### Layer 3: Training features
+중요:
+
+- 예전의 "normalized를 Google Drive에 계속 archive" 정책은 현재 기준으로 폐기됨
+
+### Layer 3: `exchange_rate_snapshots`
 
 용도:
 
-- CatBoost 학습 입력
-- 장기 보관 대상
+- `target_price_chaos`
+- `target_price_log1p`
 
-권장 정책:
+생성용 환율 참조 테이블
 
-- 8주 이하 프로젝트 기간 동안 장기 보관 가능
-- raw/normalized보다 훨씬 작은 구조로 유지
-- 최종적으로는 이 계층만 전체 보관 대상이 되도록 수렴
+현재 정책:
 
-## 권장 보관 기간 초안
+- maintenance가 주기적으로 누적
+- labeled 생성에 직접 사용
 
-| 계층 | 권장 기간 | 비고 |
+### Layer 4: `training_features_raw`
+
+용도:
+
+- `normalized_priced_items`에서 추출한 1차 구조화 피처
+
+현재 정책:
+
+- ETL 백필/증분 처리 대상
+- 장기 보관 가능하나 canonical 최종본은 아님
+
+### Layer 5: `training_features_clean`
+
+용도:
+
+- 현재 모델 범위에 맞는 후보만 선별한 중간 계층
+
+현재 정책:
+
+- ETL 중간 결과
+- 장기적으로는 유지 가능하지만 최종 보관 기준은 아님
+
+### Layer 6: `training_features_labeled`
+
+용도:
+
+- 현재 `CatBoost` 학습 직전의 최종 labeled dataset
+- canonical dataset 후보
+
+현재 정책:
+
+- Google Drive backup 대상
+- 장기 보관의 중심 계층
+
+## 현재 보관 기간 / 정리 정책
+
+| 계층 | 현재 정책 | 비고 |
 | --- | --- | --- |
-| `raw_api_responses` | 1일 | 디버깅용 |
-| `normalized_priced_items` | 7일 | `updated_at` 기준 stale listing 정리 |
-| `training_features` | 프로젝트 전체 기간 | 장기 보관 |
+| `raw_api_responses` | 짧게 로컬 보관 후 cleanup | 디버깅용 |
+| `normalized_priced_items` | `updated_at` 기준 7일 stale cleanup | 중간 계층 |
+| `exchange_rate_snapshots` | 누적 유지 | 라벨 생성용 |
+| `training_features_raw` | 로컬 유지 | ETL 중간 계층 |
+| `training_features_clean` | 로컬 유지 | ETL 중간 계층 |
+| `training_features_labeled` | 로컬 유지 + Google Drive backup | canonical dataset 후보 |
 
-## 권장 삭제 정책
+## maintenance가 현재 담당하는 것
 
-### Raw
+현재 `maintenance`는 아래 작업을 담당한다.
 
-- `fetched_at < now() - interval '1 day'` 삭제
+1. raw retention cleanup
+2. normalized stale cleanup
+3. exchange rate snapshot 수집
+4. `training_features_labeled` backup
 
-### Normalized
+즉, 예전처럼 normalized archive 업로드가 아니라:
 
-- 압축 export 후 Google Drive 업로드
-- 업로드 성공 확인 뒤 `updated_at < now() - interval '7 day'` 범위를 우선 정리
-- 장기 보관은 DB가 아니라 외부 스토리지 쪽에 둔다
+- normalized는 로컬 cleanup
+- labeled는 장기 backup
 
-### Candidate routing 기준 삭제
+구조로 바뀌었다.
 
-- `external_price_candidate`: 저장 최소화 또는 짧은 보관
-- `model_candidate`: feature 추출 후 중기 보관
-- `ignore`: 가능하면 저장하지 않음
+## 왜 이렇게 바뀌었는가
 
-## 압축 전략
+이전 방식의 문제:
 
-현재 normalized 테이블이 너무 크므로, 장기적으로는 다음을 권장한다.
+- `normalized_priced_items` 자체가 너무 큼
+- 장기 archive 대상으로 보기엔 비용이 큼
+- 학습 관점에서 그대로 쓰기엔 중간 산출물 성격이 강함
 
-1. `item_json` 전체 장기 보관 지양
-2. feature 추출 뒤 `jsonb` 대신 구조화된 컬럼만 남긴다
-3. 과도기에는 normalized snapshot을 `ndjson.gz`로 압축 업로드
-4. 최종적으로는 `training_features` 계층만 전체 보관
+현재 방식의 장점:
 
-## 운영 전략 초안
+- 로컬 DB 크기 관리가 쉬움
+- 장기 backup의 밀도를 높일 수 있음
+- 학습용 canonical dataset이 더 명확해짐
 
-### 수집 중 실시간
+## 현재 해석
 
-- collector는 `Mirage` 대상만 수집
-- raw subset 저장
-- normalized 저장
+현재 저장 전략의 핵심은 아래 한 줄로 요약할 수 있다.
 
-### 주기 배치
+> `normalized_priced_items`는 지나가는 중간 계층이고, `training_features_labeled`가 장기 보관할 canonical dataset이다.
 
-예시 주기:
+## 관련 문서
 
-- 1시간마다 feature extraction 또는 normalized export 배치
-- 1시간마다 normalized 압축 업로드
-- 하루 1회 raw retention cleanup
-
-## 500GB 내 운영 가능성
-
-다음 조건이면 가능성이 있습니다.
-
-1. raw를 1일 내외로 제한
-2. normalized를 `updated_at` 기준 7일 내외 stale listing만 유지
-3. 외부 시세 추종 대상은 장기 저장 최소화
-4. 장기 보관은 압축된 학습용 산출물 중심
-
-반대로 다음 조건이면 위험합니다.
-
-- raw 장기 무제한 보관
-- normalized 전체를 DB에 몇 주 이상 그대로 유지
-- 학습 제외 대상까지 계속 누적
-
-## 권장 후속 작업
-
-1. retention job 설계
-2. `training_features` 생성 파이프라인 정의
-3. item routing 기준을 SQL/코드로 연결
-4. 실제 하루 증가량 다시 측정 후 기간 조정
+- `docs/TRAINING_ETL_OVERVIEW.md`
+- `docs/TRAINING_FEATURES.md`
+- `docs/MODEL_SCOPE.md`
+- `ml/README.md`

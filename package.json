@@ -22,6 +22,8 @@
     "inspect": "tsx src/scripts/inspect-sample.ts",
     "inspect:summary": "tsx src/scripts/inspect-ingestion-summary.ts",
     "observe:leagues": "tsx src/scripts/observe-leagues.ts",
+    "samples:clipboard:organize": "tsx src/scripts/organize-clipboard-samples.ts",
+    "samples:clipboard:validate": "tsx src/scripts/validate-clipboard-samples.ts",
     "report:charts": "bash reports_docs/render_report_charts.sh",
     "typecheck": "tsc --noEmit"
   },

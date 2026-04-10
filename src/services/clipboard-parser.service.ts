@@ -8,7 +8,8 @@ import type {
 } from "../types/clipboard.types";
 
 type LocaleDictionary = {
-  rarityLabel: string;
+  itemClassLabels: string[];
+  rarityLabels: string[];
   requirementsHeader: string;
   socketsPrefix: string;
   itemLevelPrefix: string;
@@ -19,7 +20,8 @@ const BLOCK_SEPARATOR = "--------";
 
 const LOCALE_DICTIONARIES: Record<Exclude<ClipboardLocale, "unknown">, LocaleDictionary> = {
   en: {
-    rarityLabel: "Rarity:",
+    itemClassLabels: ["Item Class:"],
+    rarityLabels: ["Rarity:"],
     requirementsHeader: "Requirements:",
     socketsPrefix: "Sockets:",
     itemLevelPrefix: "Item Level:",
@@ -35,7 +37,8 @@ const LOCALE_DICTIONARIES: Record<Exclude<ClipboardLocale, "unknown">, LocaleDic
     },
   },
   ko: {
-    rarityLabel: "희귀도:",
+    itemClassLabels: ["아이템 종류:"],
+    rarityLabels: ["아이템 희귀도:", "희귀도:"],
     requirementsHeader: "요구사항:",
     socketsPrefix: "홈:",
     itemLevelPrefix: "아이템 레벨:",
@@ -89,11 +92,23 @@ function detectLocale(
     return localeHint;
   }
 
-  const firstLine = blocks[0]?.[0] ?? "";
-  if (firstLine.startsWith(LOCALE_DICTIONARIES.en.rarityLabel)) {
+  const headerLines = blocks[0] ?? [];
+  if (
+    headerLines.some(
+      (line) =>
+        LOCALE_DICTIONARIES.en.itemClassLabels.some((label) => line.startsWith(label)) ||
+        LOCALE_DICTIONARIES.en.rarityLabels.some((label) => line.startsWith(label)),
+    )
+  ) {
     return "en";
   }
-  if (firstLine.startsWith(LOCALE_DICTIONARIES.ko.rarityLabel)) {
+  if (
+    headerLines.some(
+      (line) =>
+        LOCALE_DICTIONARIES.ko.itemClassLabels.some((label) => line.startsWith(label)) ||
+        LOCALE_DICTIONARIES.ko.rarityLabels.some((label) => line.startsWith(label)),
+    )
+  ) {
     return "ko";
   }
 
@@ -108,19 +123,23 @@ function parseHeaderBlock(
   const dictionary =
     locale === "unknown" ? null : LOCALE_DICTIONARIES[locale];
 
-  const rarityLine = lines[0] ?? "";
-  if (!dictionary || !rarityLine.startsWith(dictionary.rarityLabel)) {
+  const rarityLine = lines.find((line) =>
+    dictionary ? dictionary.rarityLabels.some((label) => line.startsWith(label)) : false,
+  );
+
+  if (!dictionary || !rarityLine) {
     warnings.push("header block does not match a known locale rarity label");
     return {
       rarity: null,
-      itemName: lines[1] ?? null,
-      baseType: lines[2] ?? lines[1] ?? null,
+      itemName: lines[2] ?? null,
+      baseType: lines[3] ?? lines[2] ?? null,
     };
   }
 
-  const rarity = rarityLine.slice(dictionary.rarityLabel.length).trim() || null;
-  const itemName = lines[1] ?? null;
-  const baseType = lines[2] ?? lines[1] ?? null;
+  const rarityLabel = dictionary.rarityLabels.find((label) => rarityLine.startsWith(label));
+  const rarity = rarityLabel ? rarityLine.slice(rarityLabel.length).trim() || null : null;
+  const itemName = lines[2] ?? null;
+  const baseType = lines[3] ?? lines[2] ?? null;
 
   return {
     rarity,
