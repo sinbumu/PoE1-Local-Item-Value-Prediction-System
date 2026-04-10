@@ -32,23 +32,38 @@ function readStringFlag(flag: string): string | undefined {
 async function main(): Promise<void> {
   const maintenanceService = new MaintenanceService();
   const once = process.argv.includes("--once");
-  const olderThanHours = readNumberFlag("--older-than-hours");
-  const limit = readNumberFlag("--limit");
-  const outputDirectory = readStringFlag("--output-dir");
-  const archiveIntervalMs = readNumberFlag("--archive-interval-ms");
+  const normalizedOlderThanHours = readNumberFlag("--older-than-hours");
+  const normalizedCleanupLimit = readNumberFlag("--normalized-cleanup-limit");
+  const normalizedCleanupIntervalMs = readNumberFlag(
+    "--normalized-cleanup-interval-ms",
+  );
+  const normalizedCleanupMaxBatches = readNumberFlag(
+    "--normalized-cleanup-max-batches",
+  );
+  const labeledBackupLimit = readNumberFlag("--labeled-backup-limit");
+  const labeledBackupOutputDirectory = readStringFlag(
+    "--labeled-backup-output-dir",
+  );
+  const labeledBackupIntervalMs = readNumberFlag(
+    "--labeled-backup-interval-ms",
+  );
+  const labeledBackupMaxBatches = readNumberFlag(
+    "--labeled-backup-max-batches",
+  );
   const rawCleanupIntervalMs = readNumberFlag("--raw-cleanup-interval-ms");
   const pollIntervalMs = readNumberFlag("--poll-interval-ms");
-  const archiveMaxBatches = readNumberFlag("--max-batches");
 
   await pool.query("SELECT 1");
   logger.info({ once }, "Database connection verified for maintenance");
 
   if (once) {
     const result = await maintenanceService.runOnce({
-      olderThanHours,
-      limit,
-      outputDirectory,
-      archiveMaxBatches,
+      normalizedOlderThanHours,
+      normalizedCleanupLimit,
+      normalizedCleanupMaxBatches,
+      labeledBackupLimit,
+      labeledBackupOutputDirectory,
+      labeledBackupMaxBatches,
     });
 
     logger.info(result, "Maintenance run completed");
@@ -56,13 +71,16 @@ async function main(): Promise<void> {
   }
 
   await maintenanceService.runForever({
-    olderThanHours,
-    limit,
-    outputDirectory,
-    archiveIntervalMs,
+    normalizedOlderThanHours,
+    normalizedCleanupLimit,
+    normalizedCleanupIntervalMs,
+    normalizedCleanupMaxBatches,
+    labeledBackupLimit,
+    labeledBackupOutputDirectory,
+    labeledBackupIntervalMs,
+    labeledBackupMaxBatches,
     rawCleanupIntervalMs,
     pollIntervalMs,
-    archiveMaxBatches,
   });
 }
 

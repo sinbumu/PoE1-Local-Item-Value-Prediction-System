@@ -116,7 +116,8 @@ raw 전체 장기 보관은 디스크 사용량이 너무 커서 현실적이지
 역할:
 
 - raw retention cleanup
-- normalized archive / purge
+- normalized stale cleanup
+- `training_features_labeled` Google Drive backup
 - exchange rate snapshot 수집
 
 ### 3. ETL / 학습 준비
@@ -135,7 +136,7 @@ raw 전체 장기 보관은 디스크 사용량이 너무 커서 현실적이지
 2026-04-04 기준 요약:
 
 - 수집 파이프라인: 구현 완료
-- retention / archive: 구현 완료
+- retention / backup: 구현 완료
 - 환율 스냅샷 수집: 구현 완료
 - ingestion activity summary: 구현 완료
 - `training_features_raw`: 구현 완료
@@ -166,7 +167,7 @@ raw 전체 장기 보관은 디스크 사용량이 너무 커서 현실적이지
 
 - 수집기 안정화
 - 저장 구조 정리
-- retention / archive 구현
+- retention / backup 구현
 - 환율 스냅샷 누적
 - 일별/시간별 수집 추세 summary 도입
 
@@ -218,8 +219,8 @@ raw 전체 장기 보관은 디스크 사용량이 너무 커서 현실적이지
 ### 5. 데이터 저장 정책 및 운영 구조
 
 - raw retention 정책
-- normalized archive / purge 정책
-- Google Drive 업로드 전략
+- normalized stale cleanup 정책
+- `training_features_labeled` Google Drive backup 전략
 - collector / maintenance 분리 구조
 - 일별/시간별 summary 누적 구조
 

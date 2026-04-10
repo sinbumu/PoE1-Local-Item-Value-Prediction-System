@@ -33,24 +33,34 @@ const resolvedEnv = {
   GOOGLE_REDIRECT_URI: readOptionalString(rawEnv.GOOGLE_REDIRECT_URI),
   GOOGLE_REFRESH_TOKEN: readOptionalString(rawEnv.GOOGLE_REFRESH_TOKEN),
   GOOGLE_DRIVE_FOLDER_ID: readOptionalString(rawEnv.GOOGLE_DRIVE_FOLDER_ID),
-  ARCHIVE_OUTPUT_DIR:
-    readOptionalString(rawEnv.ARCHIVE_OUTPUT_DIR) ?? ".archive/normalized",
   RAW_RETENTION_HOURS: readOptionalString(rawEnv.RAW_RETENTION_HOURS) ?? "24",
   NORMALIZED_RETENTION_HOURS:
     readOptionalString(rawEnv.NORMALIZED_RETENTION_HOURS) ?? "168",
-  NORMALIZED_ARCHIVE_LIMIT:
-    readOptionalString(rawEnv.NORMALIZED_ARCHIVE_LIMIT) ?? "10000",
   MAINTENANCE_POLL_INTERVAL_MS:
     readOptionalString(rawEnv.MAINTENANCE_POLL_INTERVAL_MS) ?? "60000",
-  MAINTENANCE_ARCHIVE_INTERVAL_MS:
-    readOptionalString(rawEnv.MAINTENANCE_ARCHIVE_INTERVAL_MS) ?? "3600000",
   MAINTENANCE_RAW_CLEANUP_INTERVAL_MS:
     readOptionalString(rawEnv.MAINTENANCE_RAW_CLEANUP_INTERVAL_MS) ??
     "86400000",
   MAINTENANCE_EXCHANGE_RATE_INTERVAL_MS:
     readOptionalString(rawEnv.MAINTENANCE_EXCHANGE_RATE_INTERVAL_MS) ?? "900000",
-  MAINTENANCE_ARCHIVE_MAX_BATCHES:
-    readOptionalString(rawEnv.MAINTENANCE_ARCHIVE_MAX_BATCHES) ?? "10",
+  NORMALIZED_CLEANUP_LIMIT:
+    readOptionalString(rawEnv.NORMALIZED_CLEANUP_LIMIT) ?? "100000",
+  MAINTENANCE_NORMALIZED_CLEANUP_INTERVAL_MS:
+    readOptionalString(rawEnv.MAINTENANCE_NORMALIZED_CLEANUP_INTERVAL_MS) ??
+    "3600000",
+  MAINTENANCE_NORMALIZED_CLEANUP_MAX_BATCHES:
+    readOptionalString(rawEnv.MAINTENANCE_NORMALIZED_CLEANUP_MAX_BATCHES) ??
+    "10",
+  LABELED_BACKUP_OUTPUT_DIR:
+    readOptionalString(rawEnv.LABELED_BACKUP_OUTPUT_DIR) ??
+    ".archive/training_features_labeled",
+  LABELED_BACKUP_LIMIT:
+    readOptionalString(rawEnv.LABELED_BACKUP_LIMIT) ?? "100000",
+  MAINTENANCE_LABELED_BACKUP_INTERVAL_MS:
+    readOptionalString(rawEnv.MAINTENANCE_LABELED_BACKUP_INTERVAL_MS) ??
+    "3600000",
+  MAINTENANCE_LABELED_BACKUP_MAX_BATCHES:
+    readOptionalString(rawEnv.MAINTENANCE_LABELED_BACKUP_MAX_BATCHES) ?? "10",
 };
 
 const envSchema = z.object({
@@ -72,20 +82,13 @@ const envSchema = z.object({
   GOOGLE_REDIRECT_URI: z.string().url().optional(),
   GOOGLE_REFRESH_TOKEN: z.string().min(1).optional(),
   GOOGLE_DRIVE_FOLDER_ID: z.string().min(1).optional(),
-  ARCHIVE_OUTPUT_DIR: z.string().min(1).default(".archive/normalized"),
   RAW_RETENTION_HOURS: z.coerce.number().int().positive().default(24),
   NORMALIZED_RETENTION_HOURS: z.coerce.number().int().positive().default(168),
-  NORMALIZED_ARCHIVE_LIMIT: z.coerce.number().int().positive().default(10000),
   MAINTENANCE_POLL_INTERVAL_MS: z.coerce
     .number()
     .int()
     .positive()
     .default(60000),
-  MAINTENANCE_ARCHIVE_INTERVAL_MS: z.coerce
-    .number()
-    .int()
-    .positive()
-    .default(3600000),
   MAINTENANCE_RAW_CLEANUP_INTERVAL_MS: z.coerce
     .number()
     .int()
@@ -96,7 +99,32 @@ const envSchema = z.object({
     .int()
     .positive()
     .default(900000),
-  MAINTENANCE_ARCHIVE_MAX_BATCHES: z.coerce
+  NORMALIZED_CLEANUP_LIMIT: z.coerce
+    .number()
+    .int()
+    .positive()
+    .default(100000),
+  MAINTENANCE_NORMALIZED_CLEANUP_INTERVAL_MS: z.coerce
+    .number()
+    .int()
+    .positive()
+    .default(3600000),
+  MAINTENANCE_NORMALIZED_CLEANUP_MAX_BATCHES: z.coerce
+    .number()
+    .int()
+    .positive()
+    .default(10),
+  LABELED_BACKUP_OUTPUT_DIR: z
+    .string()
+    .min(1)
+    .default(".archive/training_features_labeled"),
+  LABELED_BACKUP_LIMIT: z.coerce.number().int().positive().default(100000),
+  MAINTENANCE_LABELED_BACKUP_INTERVAL_MS: z.coerce
+    .number()
+    .int()
+    .positive()
+    .default(3600000),
+  MAINTENANCE_LABELED_BACKUP_MAX_BATCHES: z.coerce
     .number()
     .int()
     .positive()

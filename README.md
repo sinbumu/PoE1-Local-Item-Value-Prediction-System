@@ -45,15 +45,18 @@ Path of Exile 1 `public-stash-tabs` 데이터를 로컬에서 수집하고, 원�
 - `GOOGLE_CLIENT_SECRET`
 - `GOOGLE_REFRESH_TOKEN`
 - `GOOGLE_DRIVE_FOLDER_ID`
-- `ARCHIVE_OUTPUT_DIR`
 - `RAW_RETENTION_HOURS`
 - `NORMALIZED_RETENTION_HOURS`
-- `NORMALIZED_ARCHIVE_LIMIT`
 - `MAINTENANCE_POLL_INTERVAL_MS`
-- `MAINTENANCE_ARCHIVE_INTERVAL_MS`
 - `MAINTENANCE_RAW_CLEANUP_INTERVAL_MS`
 - `MAINTENANCE_EXCHANGE_RATE_INTERVAL_MS`
-- `MAINTENANCE_ARCHIVE_MAX_BATCHES`
+- `NORMALIZED_CLEANUP_LIMIT`
+- `MAINTENANCE_NORMALIZED_CLEANUP_INTERVAL_MS`
+- `MAINTENANCE_NORMALIZED_CLEANUP_MAX_BATCHES`
+- `LABELED_BACKUP_OUTPUT_DIR`
+- `LABELED_BACKUP_LIMIT`
+- `MAINTENANCE_LABELED_BACKUP_INTERVAL_MS`
+- `MAINTENANCE_LABELED_BACKUP_MAX_BATCHES`
 
 권장 예시는 `.env.example`를 참고하면 됩니다.
 
@@ -84,15 +87,18 @@ Google Drive 업로드를 쓰려면:
 선택적으로:
 
 - `GOOGLE_DRIVE_FOLDER_ID`: 특정 Google Drive 폴더에 업로드
-- `ARCHIVE_OUTPUT_DIR`: 로컬 압축 파일 임시 저장 경로
 - `RAW_RETENTION_HOURS`: raw 보관 시간
 - `NORMALIZED_RETENTION_HOURS`: normalized stale listing 판단 기준 시간 (`updated_at` 기준)
-- `NORMALIZED_ARCHIVE_LIMIT`: 1회 export 최대 행 수
 - `MAINTENANCE_POLL_INTERVAL_MS`: maintenance 루프 체크 주기
-- `MAINTENANCE_ARCHIVE_INTERVAL_MS`: normalized archive sweep 주기
 - `MAINTENANCE_RAW_CLEANUP_INTERVAL_MS`: raw cleanup 주기
 - `MAINTENANCE_EXCHANGE_RATE_INTERVAL_MS`: 환율 스냅샷 수집 주기
-- `MAINTENANCE_ARCHIVE_MAX_BATCHES`: 1회 maintenance sweep 최대 배치 수
+- `NORMALIZED_CLEANUP_LIMIT`: 1회 stale normalized cleanup 최대 row 수
+- `MAINTENANCE_NORMALIZED_CLEANUP_INTERVAL_MS`: stale normalized cleanup 주기
+- `MAINTENANCE_NORMALIZED_CLEANUP_MAX_BATCHES`: 1회 maintenance stale cleanup 최대 배치 수
+- `LABELED_BACKUP_OUTPUT_DIR`: labeled backup 파일 임시 저장 경로
+- `LABELED_BACKUP_LIMIT`: 1회 labeled backup 최대 row 수
+- `MAINTENANCE_LABELED_BACKUP_INTERVAL_MS`: labeled backup 주기
+- `MAINTENANCE_LABELED_BACKUP_MAX_BATCHES`: 1회 maintenance labeled backup 최대 배치 수
 
 주의:
 
@@ -115,7 +121,7 @@ Google Drive 업로드를 쓰려면:
 | `POE_REALM` | 선택 | `pc`, `xbox`, `sony` 중 하나 |
 | `POLL_INTERVAL_MS` | 선택 | collector 반복 간격(ms) |
 
-#### Google Drive / Archive
+#### Google Drive / Backup
 
 | 변수 | 필수 여부 | 설명 |
 | --- | --- | --- |
@@ -123,15 +129,18 @@ Google Drive 업로드를 쓰려면:
 | `GOOGLE_CLIENT_SECRET` | Drive 사용 시 필수 | Google OAuth 클라이언트 시크릿 |
 | `GOOGLE_REFRESH_TOKEN` | Drive 사용 시 필수 | 업로드용 refresh token |
 | `GOOGLE_DRIVE_FOLDER_ID` | 선택 | 업로드 대상 Drive 폴더 ID |
-| `ARCHIVE_OUTPUT_DIR` | 선택 | 로컬 압축 파일 임시 저장 경로 |
 | `RAW_RETENTION_HOURS` | 선택 | `raw_api_responses` 삭제 기준 시간 |
 | `NORMALIZED_RETENTION_HOURS` | 선택 | `normalized_priced_items` stale listing 판단 기준 시간 (`updated_at` 기준, 기본 `168`) |
-| `NORMALIZED_ARCHIVE_LIMIT` | 선택 | 1회 export 최대 행 수 |
 | `MAINTENANCE_POLL_INTERVAL_MS` | 선택 | maintenance 루프 체크 주기(ms) |
-| `MAINTENANCE_ARCHIVE_INTERVAL_MS` | 선택 | normalized archive sweep 주기(ms) |
 | `MAINTENANCE_RAW_CLEANUP_INTERVAL_MS` | 선택 | raw cleanup 주기(ms) |
 | `MAINTENANCE_EXCHANGE_RATE_INTERVAL_MS` | 선택 | 환율 스냅샷 수집 주기(ms) |
-| `MAINTENANCE_ARCHIVE_MAX_BATCHES` | 선택 | 1회 maintenance sweep 최대 배치 수 |
+| `NORMALIZED_CLEANUP_LIMIT` | 선택 | 1회 stale normalized cleanup 최대 row 수 |
+| `MAINTENANCE_NORMALIZED_CLEANUP_INTERVAL_MS` | 선택 | stale normalized cleanup 주기(ms) |
+| `MAINTENANCE_NORMALIZED_CLEANUP_MAX_BATCHES` | 선택 | 1회 maintenance stale cleanup 최대 배치 수 |
+| `LABELED_BACKUP_OUTPUT_DIR` | 선택 | labeled backup 파일 임시 저장 경로 |
+| `LABELED_BACKUP_LIMIT` | 선택 | 1회 labeled backup 최대 row 수 |
+| `MAINTENANCE_LABELED_BACKUP_INTERVAL_MS` | 선택 | labeled backup 주기(ms) |
+| `MAINTENANCE_LABELED_BACKUP_MAX_BATCHES` | 선택 | 1회 maintenance labeled backup 최대 배치 수 |
 
 ## 로컬 PostgreSQL 실행
 
@@ -215,16 +224,16 @@ npm run inspect
 npm run drive:test
 ```
 
-오랫동안 다시 보이지 않은 normalized 행을 압축 후 Google Drive 업로드:
+`training_features_labeled`를 Google Drive로 증분 백업:
 
 ```bash
-npm run archive:normalized
+npm run backup:labeled
 ```
 
-업로드 성공 후 같은 행을 DB에서 제거:
+stale normalized cleanup:
 
 ```bash
-npm run archive:normalized -- --purge
+npm run cleanup:normalized-stale
 ```
 
 raw retention 정리:
@@ -236,7 +245,15 @@ npm run cleanup:retention
 옵션 예시:
 
 ```bash
-npm run archive:normalized -- --older-than-hours=168 --limit=5000 --purge
+npm run backup:labeled -- --limit=100000 --max-batches=5
+```
+
+```bash
+npm run cleanup:normalized-stale -- --older-than-hours=168 --limit=100000 --max-batches=10
+```
+
+```bash
+npm run cleanup:normalized-drive-archives
 ```
 
 ```bash
@@ -258,23 +275,23 @@ npm run maintenance -- --once
 옵션 예시:
 
 ```bash
-npm run maintenance -- --once --older-than-hours=168 --limit=10000 --max-batches=5
+npm run maintenance -- --once --older-than-hours=168 --normalized-cleanup-limit=100000 --normalized-cleanup-max-batches=5
 ```
 
 현재 maintenance 동작:
 
 1. `raw_api_responses`에서 `RAW_RETENTION_HOURS`보다 오래된 row 삭제
-2. `normalized_priced_items`에서 `updated_at` 기준 `NORMALIZED_RETENTION_HOURS`보다 오래된 stale listing을 압축 업로드
-3. 업로드가 성공한 batch만 purge
-4. purge 직전에 다시 stale 조건을 검사해서 collector가 갱신한 row는 삭제하지 않음
-5. advisory lock으로 maintenance 작업끼리의 중복 실행 방지
-6. `poe.ninja` currencyoverview 기준 환율 스냅샷 수집
-7. collector / 환율 수집 시점에 `ingestion_activity_summaries`를 시간/일 단위로 누적 갱신
+2. `normalized_priced_items`에서 `updated_at` 기준 `NORMALIZED_RETENTION_HOURS`보다 오래된 stale listing을 batch delete
+3. `training_features_labeled`를 Google Drive로 증분 백업
+4. advisory lock으로 maintenance 작업끼리의 중복 실행 방지
+5. `poe.ninja` currencyoverview 기준 환율 스냅샷 수집
+6. collector / 환율 수집 시점에 `ingestion_activity_summaries`를 시간/일 단위로 누적 갱신
 
 collector와 동시 실행:
 
 - `raw` cleanup은 동시 실행해도 무방
-- `maintenance` archive/purge도 stale 재검사 후 삭제하므로 collector와 함께 돌릴 수 있음
+- `maintenance`의 stale normalized cleanup도 collector와 함께 돌릴 수 있음
+- `training_features_labeled` backup도 collector와 독립적으로 함께 돌릴 수 있음
 - 환율 스냅샷 수집도 collector와 독립적으로 함께 돌릴 수 있음
 - 단, 아주 큰 batch를 자주 돌리면 DB I/O는 증가하므로 `limit`과 주기를 조절하는 편이 좋음
 
@@ -347,8 +364,8 @@ npm run maintenance
 역할 분리:
 
 - `collector`: public stash 수집, `raw_api_responses`, `normalized_priced_items`, `collector_state` 갱신
-- `maintenance`: raw 정리, stale normalized archive/purge, 환율 스냅샷 수집
-- `maintenance`: raw 정리, stale normalized archive/purge, 환율 스냅샷 수집, 수집량 summary 누적
+- `maintenance`: raw 정리, stale normalized cleanup, labeled backup, 환율 스냅샷 수집
+- `maintenance`: raw 정리, stale normalized cleanup, labeled backup, 환율 스냅샷 수집, 수집량 summary 누적
 
 현재 구현 기준에서는 이 2개만 계속 켜두면 됩니다.
 
@@ -373,7 +390,7 @@ npm run maintenance
 - `collector`는 계속 실행
 - `maintenance`도 계속 실행
 - `collect:exchange-rates`는 `maintenance`가 이미 담당하므로 따로 상시 실행할 필요 없음
-- `archive:normalized`, `cleanup:retention`도 `maintenance`가 이미 담당하므로 수동 실행은 점검/디버깅용일 때만 사용
+- `backup:labeled`, `cleanup:normalized-stale`, `cleanup:retention`도 `maintenance`가 이미 담당하므로 수동 실행은 점검/디버깅용일 때만 사용
 
 ### ETL 실행 시점
 
@@ -436,12 +453,39 @@ npm run inspect:summary
 
 - `collector`와 `maintenance`는 동시에 실행해도 되도록 구현되어 있습니다.
 - `maintenance`의 purge는 삭제 직전에 stale 조건을 다시 확인하므로 collector와 병행 가능하도록 처리되어 있습니다.
-- DB I/O가 부담되면 `NORMALIZED_ARCHIVE_LIMIT`, `MAINTENANCE_ARCHIVE_INTERVAL_MS`, `MAINTENANCE_EXCHANGE_RATE_INTERVAL_MS`를 조절하면 됩니다.
+- DB I/O가 부담되면 `NORMALIZED_CLEANUP_LIMIT`, `MAINTENANCE_NORMALIZED_CLEANUP_INTERVAL_MS`, `LABELED_BACKUP_LIMIT`, `MAINTENANCE_LABELED_BACKUP_INTERVAL_MS`, `MAINTENANCE_EXCHANGE_RATE_INTERVAL_MS`를 조절하면 됩니다.
 - 규칙을 크게 바꾼 뒤에는 `training_features_clean`, `training_features_labeled`를 다시 만드는 편이 깔끔합니다.
 
 ## Training Feature ETL
 
-초기 CatBoost용 중간 계층으로 `training_features_raw`를 생성할 수 있습니다.
+초기 CatBoost용 중간 계층은 `training_features_raw -> training_features_clean -> training_features_labeled` 순으로 생성됩니다.
+
+권장 실행 방식은 통합 러너 `etl:training`입니다.
+
+통합 풀 백필:
+
+```bash
+npm run etl:training -- --reset-cursors --limit=10000
+```
+
+통합 연속 실행(daemon):
+
+```bash
+npm run etl:training -- --daemon --limit=10000 --max-batches-per-stage=10 --poll-interval-ms=60000
+```
+
+설명:
+
+- 기본 `etl:training`은 `raw -> clean -> labeled`를 순서대로 끝까지 따라잡고 종료합니다.
+- `--daemon`을 붙이면 각 단계 cursor를 이어받으며 반복 실행합니다.
+- 중간에 프로세스가 종료되어도 재실행 시 각 단계의 cursor 기준으로 이어서 진행됩니다.
+- `--reset-cursors`는 `raw/clean/labeled` 3개 cursor를 모두 초기화하고 다시 시작합니다.
+- `--limit`은 세 단계 공통 batch 크기입니다.
+- 필요하면 `--raw-limit`, `--clean-limit`, `--labeled-limit`으로 단계별 override도 가능합니다.
+
+개별 단계 스크립트도 여전히 유지되지만, 디버깅이나 특정 단계만 재실행할 때만 쓰는 것을 권장합니다.
+
+`training_features_raw`만 개별 생성:
 
 기본 실행:
 
@@ -573,17 +617,26 @@ npm run export:training-dataset -- --days=7 --segments=rare_equipment,jewel
 
 ### 추천 실행 순서
 
-실제 1차 학습을 준비할 때는 아래처럼 **순차 실행**하는 편이 가장 단순합니다.
+실제 1차 학습을 준비할 때는 아래처럼 **통합 ETL -> export** 순서가 가장 단순합니다.
 
-1. `npm run build:training-features -- --reset-cursor --until-end`
-2. `npm run build:training-features-clean -- --reset-cursor --until-end`
-3. `npm run build:training-features-labeled -- --reset-cursor --until-end`
-4. `npm run export:training-dataset -- --days=7`
+1. `npm run etl:training -- --reset-cursors --limit=10000`
+2. `npm run export:training-dataset -- --days=7`
 
 설명:
 
-- 각 단계는 별도 배치 작업이므로 전용 터미널 하나에서 실행하면 됩니다.
-- 다만 `raw -> clean -> labeled`는 동시에 돌리기보다 **앞 단계가 끝난 뒤 다음 단계 실행**을 권장합니다.
+- 현재는 아래처럼 통합 실행을 기본 권장합니다:
+
+```bash
+npm run etl:training -- --reset-cursors --limit=10000
+```
+
+- 운영 중 ETL을 계속 따라잡고 싶으면 daemon 모드도 사용할 수 있습니다:
+
+```bash
+npm run etl:training -- --daemon --limit=10000 --max-batches-per-stage=10
+```
+
+- 개별 단계 스크립트는 디버깅/부분 재실행용으로 남겨둡니다.
 - `collector`, `maintenance`는 계속 켜둬도 되지만, DB 부하가 크면 ETL 실행 중에는 상태를 보면서 조절하는 것이 좋습니다.
 
 ## ML 디렉토리

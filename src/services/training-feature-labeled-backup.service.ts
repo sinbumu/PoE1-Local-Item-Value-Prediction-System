@@ -6,26 +6,29 @@ import { pipeline } from "stream/promises";
 import { createGzip } from "zlib";
 import { env } from "../config/env";
 import {
-  ArchiveRepository,
-  type ArchivedNormalizedRow,
-} from "../repositories/archive.repository";
+  TrainingFeatureLabeledBackupRepository,
+  type TrainingFeatureLabeledBackupRow,
+} from "../repositories/training-feature-labeled-backup.repository";
+import {
+  TrainingFeatureLabeledBackupStateRepository,
+  type TrainingFeatureLabeledBackupCursor,
+} from "../repositories/training-feature-labeled-backup-state.repository";
 import {
   GoogleDriveService,
   type GoogleDriveFileMetadata,
 } from "./google-drive.service";
 
-type ArchiveNormalizedOptions = {
-  olderThanHours?: number;
+type BackupTrainingFeaturesLabeledOptions = {
   limit?: number;
   outputDirectory?: string;
-  purgeAfterUpload?: boolean;
+  resetCursor?: boolean;
 };
 
-export type NormalizedArchiveResult = {
+export type TrainingFeatureLabeledBackupResult = {
   exportedRowCount: number;
   archivePath: string | null;
   driveFile: GoogleDriveFileMetadata | null;
-  purgedRowCount: number;
+  cursor: TrainingFeatureLabeledBackupCursor | null;
 };
 
 function formatFileTimestamp(date: Date): string {
@@ -35,42 +38,44 @@ function formatFileTimestamp(date: Date): string {
     .replace(/\.\d{3}Z$/, "Z");
 }
 
-export class NormalizedArchiveService {
+export class TrainingFeatureLabeledBackupService {
   constructor(
-    private readonly archiveRepository = new ArchiveRepository(),
+    private readonly repository = new TrainingFeatureLabeledBackupRepository(),
+    private readonly stateRepository = new TrainingFeatureLabeledBackupStateRepository(),
     private readonly googleDriveService = new GoogleDriveService(),
   ) {}
 
-  async archiveAndUpload(
-    options?: ArchiveNormalizedOptions,
-  ): Promise<NormalizedArchiveResult> {
-    const olderThanHours =
-      options?.olderThanHours ?? env.NORMALIZED_RETENTION_HOURS;
-    const limit = options?.limit ?? env.NORMALIZED_ARCHIVE_LIMIT;
-    const outputDirectory = options?.outputDirectory ?? env.ARCHIVE_OUTPUT_DIR;
-    const purgeAfterUpload = options?.purgeAfterUpload ?? false;
-    const rows = await this.archiveRepository.getNormalizedRowsForArchive(
-      olderThanHours,
-      limit,
-    );
+  async backupNextBatch(
+    options?: BackupTrainingFeaturesLabeledOptions,
+  ): Promise<TrainingFeatureLabeledBackupResult> {
+    const limit = options?.limit ?? env.LABELED_BACKUP_LIMIT;
+    const outputDirectory =
+      options?.outputDirectory ?? env.LABELED_BACKUP_OUTPUT_DIR;
+
+    if (options?.resetCursor) {
+      await this.stateRepository.resetCursor();
+    }
+
+    const cursor = await this.stateRepository.getCursor();
+    const rows = await this.repository.getBatch(limit, cursor);
 
     if (rows.length === 0) {
       return {
         exportedRowCount: 0,
         archivePath: null,
         driveFile: null,
-        purgedRowCount: 0,
+        cursor,
       };
     }
 
     await mkdir(outputDirectory, { recursive: true });
 
-    const fileName = `normalized_priced_items_${formatFileTimestamp(
+    const fileName = `training_features_labeled_${formatFileTimestamp(
       new Date(),
     )}_${rows.length}.ndjson.gz`;
     const archivePath = join(outputDirectory, fileName);
 
-    await this.writeArchiveFile(archivePath, rows, olderThanHours);
+    await this.writeArchiveFile(archivePath, rows);
 
     const driveFile = await this.googleDriveService.uploadFile({
       filePath: archivePath,
@@ -78,34 +83,29 @@ export class NormalizedArchiveService {
       mimeType: "application/gzip",
     });
 
-    let purgedRowCount = 0;
-
-    if (purgeAfterUpload) {
-      purgedRowCount = await this.archiveRepository.deleteNormalizedRowsByIds(
-        rows.map((row) => row.id),
-        olderThanHours,
-      );
-    }
+    const lastRow = rows[rows.length - 1];
+    const nextCursor = {
+      labeledAt: lastRow.labeled_at,
+      listingKey: lastRow.listing_key,
+    };
+    await this.stateRepository.saveCursor(nextCursor);
 
     return {
       exportedRowCount: rows.length,
       archivePath,
       driveFile,
-      purgedRowCount,
+      cursor: nextCursor,
     };
   }
 
   private async writeArchiveFile(
     archivePath: string,
-    rows: ArchivedNormalizedRow[],
-    olderThanHours: number,
+    rows: TrainingFeatureLabeledBackupRow[],
   ): Promise<void> {
     const metadataLine = JSON.stringify({
       kind: "archive_metadata",
-      sourceTable: "normalized_priced_items",
+      sourceTable: "training_features_labeled",
       exportedAt: new Date().toISOString(),
-      staleBy: "updated_at",
-      olderThanHours,
       rowCount: rows.length,
     });
 
@@ -113,8 +113,8 @@ export class NormalizedArchiveService {
       metadataLine,
       ...rows.map((row) =>
         JSON.stringify({
-          kind: "normalized_priced_item",
-          row,
+          kind: "training_feature_labeled",
+          row: row.row_json,
         }),
       ),
     ];

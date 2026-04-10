@@ -29,6 +29,12 @@ type UploadFileOptions = {
   parentFolderId?: string;
 };
 
+type ListFilesOptions = {
+  parentFolderId?: string;
+  namePrefix?: string;
+  pageSize?: number;
+};
+
 const GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token";
 const GOOGLE_DRIVE_METADATA_URL = "https://www.googleapis.com/drive/v3/files";
 const GOOGLE_DRIVE_MEDIA_UPLOAD_URL =
@@ -167,5 +173,63 @@ export class GoogleDriveService {
     );
 
     return response.data;
+  }
+
+  async listFiles(options?: ListFilesOptions): Promise<GoogleDriveFileMetadata[]> {
+    const accessToken = await this.getAccessToken();
+    const parentFolderId = options?.parentFolderId ?? env.GOOGLE_DRIVE_FOLDER_ID;
+    const pageSize = options?.pageSize ?? 1000;
+    const queryParts = ["trashed = false"];
+
+    if (parentFolderId) {
+      queryParts.push(`'${parentFolderId}' in parents`);
+    }
+
+    if (options?.namePrefix) {
+      queryParts.push(`name contains '${options.namePrefix.replace(/'/g, "\\'")}'`);
+    }
+
+    const files: GoogleDriveFileMetadata[] = [];
+    let pageToken: string | undefined;
+
+    do {
+      const response = await axios.get<{
+        files?: GoogleDriveFileMetadata[];
+        nextPageToken?: string;
+      }>(GOOGLE_DRIVE_METADATA_URL, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          Accept: "application/json",
+        },
+        params: {
+          q: queryParts.join(" and "),
+          pageSize,
+          pageToken,
+          fields:
+            "files(id,name,mimeType,size,parents,createdTime,webViewLink),nextPageToken",
+          supportsAllDrives: true,
+          includeItemsFromAllDrives: true,
+        },
+        timeout: 30000,
+      });
+
+      files.push(...(response.data.files ?? []));
+      pageToken = response.data.nextPageToken;
+    } while (pageToken);
+
+    return files;
+  }
+
+  async deleteFile(fileId: string): Promise<void> {
+    const accessToken = await this.getAccessToken();
+    await axios.delete(`${GOOGLE_DRIVE_METADATA_URL}/${fileId}`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      params: {
+        supportsAllDrives: true,
+      },
+      timeout: 15000,
+    });
   }
 }

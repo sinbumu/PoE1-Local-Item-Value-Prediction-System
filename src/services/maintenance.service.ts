@@ -3,79 +3,97 @@ import { pool } from "../db/client";
 import { ArchiveRepository } from "../repositories/archive.repository";
 import { logger } from "../utils/logger";
 import { sleep } from "../utils/time";
-import { ExchangeRateService } from "./exchange-rate.service";
 import {
-  NormalizedArchiveService,
-  type NormalizedArchiveResult,
-} from "./normalized-archive.service";
+  TrainingFeatureLabeledBackupService,
+  type TrainingFeatureLabeledBackupResult,
+} from "./training-feature-labeled-backup.service";
+import { ExchangeRateService } from "./exchange-rate.service";
 
 type MaintenanceLoopOptions = {
-  olderThanHours?: number;
-  limit?: number;
-  outputDirectory?: string;
-  archiveIntervalMs?: number;
+  normalizedOlderThanHours?: number;
+  normalizedCleanupLimit?: number;
+  normalizedCleanupIntervalMs?: number;
+  normalizedCleanupMaxBatches?: number;
+  labeledBackupLimit?: number;
+  labeledBackupOutputDirectory?: string;
+  labeledBackupIntervalMs?: number;
+  labeledBackupMaxBatches?: number;
   rawCleanupIntervalMs?: number;
   exchangeRateIntervalMs?: number;
   pollIntervalMs?: number;
-  archiveMaxBatches?: number;
 };
 
 type MaintenanceOnceResult = {
   deletedRawCount: number | null;
   rawCleanupSkipped: boolean;
-  archiveBatches: number;
-  exportedRowCount: number;
-  purgedRowCount: number;
-  archiveSkipped: boolean;
+  normalizedCleanupBatches: number;
+  deletedNormalizedCount: number;
+  normalizedCleanupSkipped: boolean;
+  labeledBackupBatches: number;
+  labeledBackupRowCount: number;
+  labeledBackupSkipped: boolean;
   exchangeRateInsertedCount: number | null;
   exchangeRateSkipped: boolean;
 };
 
-type ArchiveSweepResult = {
+type NormalizedCleanupSweepResult = {
+  batches: number;
+  deletedRowCount: number;
+};
+
+type LabeledBackupSweepResult = {
   batches: number;
   exportedRowCount: number;
-  purgedRowCount: number;
   driveFileIds: string[];
 };
 
-const ARCHIVE_LOCK_KEY = 71001;
+const NORMALIZED_CLEANUP_LOCK_KEY = 71001;
 const RAW_CLEANUP_LOCK_KEY = 71002;
 const EXCHANGE_RATE_LOCK_KEY = 71003;
+const LABELED_BACKUP_LOCK_KEY = 71004;
 
 export class MaintenanceService {
   constructor(
     private readonly archiveRepository = new ArchiveRepository(),
-    private readonly normalizedArchiveService = new NormalizedArchiveService(),
+    private readonly labeledBackupService = new TrainingFeatureLabeledBackupService(),
     private readonly exchangeRateService = new ExchangeRateService(),
   ) {}
 
   async runOnce(options?: MaintenanceLoopOptions): Promise<MaintenanceOnceResult> {
     const rawCleanup = await this.runRawCleanup(env.RAW_RETENTION_HOURS);
-    const archiveSweep = await this.runArchiveSweep(options);
+    const normalizedCleanup = await this.runNormalizedCleanupSweep(options);
+    const labeledBackup = await this.runLabeledBackupSweep(options);
     const exchangeRateCollection = await this.runExchangeRateCollection();
 
     return {
       deletedRawCount: rawCleanup.deletedRawCount,
       rawCleanupSkipped: rawCleanup.skipped,
-      archiveBatches: archiveSweep.batches,
-      exportedRowCount: archiveSweep.exportedRowCount,
-      purgedRowCount: archiveSweep.purgedRowCount,
-      archiveSkipped: archiveSweep.skipped,
+      normalizedCleanupBatches: normalizedCleanup.batches,
+      deletedNormalizedCount: normalizedCleanup.deletedRowCount,
+      normalizedCleanupSkipped: normalizedCleanup.skipped,
+      labeledBackupBatches: labeledBackup.batches,
+      labeledBackupRowCount: labeledBackup.exportedRowCount,
+      labeledBackupSkipped: labeledBackup.skipped,
       exchangeRateInsertedCount: exchangeRateCollection.insertedCount,
       exchangeRateSkipped: exchangeRateCollection.skipped,
     };
   }
 
   async runForever(options?: MaintenanceLoopOptions): Promise<void> {
-    const archiveIntervalMs =
-      options?.archiveIntervalMs ?? env.MAINTENANCE_ARCHIVE_INTERVAL_MS;
+    const normalizedCleanupIntervalMs =
+      options?.normalizedCleanupIntervalMs ??
+      env.MAINTENANCE_NORMALIZED_CLEANUP_INTERVAL_MS;
+    const labeledBackupIntervalMs =
+      options?.labeledBackupIntervalMs ??
+      env.MAINTENANCE_LABELED_BACKUP_INTERVAL_MS;
     const rawCleanupIntervalMs =
       options?.rawCleanupIntervalMs ?? env.MAINTENANCE_RAW_CLEANUP_INTERVAL_MS;
     const exchangeRateIntervalMs =
       options?.exchangeRateIntervalMs ?? env.MAINTENANCE_EXCHANGE_RATE_INTERVAL_MS;
     const pollIntervalMs =
       options?.pollIntervalMs ?? env.MAINTENANCE_POLL_INTERVAL_MS;
-    let lastArchiveRunAt = 0;
+    let lastNormalizedCleanupRunAt = 0;
+    let lastLabeledBackupRunAt = 0;
     let lastRawCleanupRunAt = 0;
     let lastExchangeRateRunAt = 0;
 
@@ -84,22 +102,40 @@ export class MaintenanceService {
 
       try {
         if (
-          lastArchiveRunAt === 0 ||
-          startedAt - lastArchiveRunAt >= archiveIntervalMs
+          lastNormalizedCleanupRunAt === 0 ||
+          startedAt - lastNormalizedCleanupRunAt >= normalizedCleanupIntervalMs
         ) {
-          const archiveSweep = await this.runArchiveSweep(options);
+          const normalizedCleanup =
+            await this.runNormalizedCleanupSweep(options);
 
           logger.info(
             {
-              archiveIntervalMs,
-              archiveBatches: archiveSweep.batches,
-              exportedRowCount: archiveSweep.exportedRowCount,
-              purgedRowCount: archiveSweep.purgedRowCount,
-              archiveSkipped: archiveSweep.skipped,
+              normalizedCleanupIntervalMs,
+              normalizedCleanupBatches: normalizedCleanup.batches,
+              deletedNormalizedCount: normalizedCleanup.deletedRowCount,
+              normalizedCleanupSkipped: normalizedCleanup.skipped,
             },
-            "Maintenance archive tick completed",
+            "Maintenance normalized cleanup tick completed",
           );
-          lastArchiveRunAt = Date.now();
+          lastNormalizedCleanupRunAt = Date.now();
+        }
+
+        if (
+          lastLabeledBackupRunAt === 0 ||
+          startedAt - lastLabeledBackupRunAt >= labeledBackupIntervalMs
+        ) {
+          const labeledBackup = await this.runLabeledBackupSweep(options);
+
+          logger.info(
+            {
+              labeledBackupIntervalMs,
+              labeledBackupBatches: labeledBackup.batches,
+              labeledBackupRowCount: labeledBackup.exportedRowCount,
+              labeledBackupSkipped: labeledBackup.skipped,
+            },
+            "Maintenance labeled backup tick completed",
+          );
+          lastLabeledBackupRunAt = Date.now();
         }
 
         if (
@@ -145,32 +181,91 @@ export class MaintenanceService {
     }
   }
 
-  private async runArchiveSweep(
+  private async runNormalizedCleanupSweep(
     options?: MaintenanceLoopOptions,
-  ): Promise<ArchiveSweepResult & { skipped: boolean }> {
+  ): Promise<NormalizedCleanupSweepResult & { skipped: boolean }> {
     const olderThanHours =
-      options?.olderThanHours ?? env.NORMALIZED_RETENTION_HOURS;
-    const limit = options?.limit ?? env.NORMALIZED_ARCHIVE_LIMIT;
-    const outputDirectory = options?.outputDirectory ?? env.ARCHIVE_OUTPUT_DIR;
-    const archiveMaxBatches =
-      options?.archiveMaxBatches ?? env.MAINTENANCE_ARCHIVE_MAX_BATCHES;
+      options?.normalizedOlderThanHours ?? env.NORMALIZED_RETENTION_HOURS;
+    const limit =
+      options?.normalizedCleanupLimit ?? env.NORMALIZED_CLEANUP_LIMIT;
+    const maxBatches =
+      options?.normalizedCleanupMaxBatches ??
+      env.MAINTENANCE_NORMALIZED_CLEANUP_MAX_BATCHES;
 
     const lockResult = await this.withAdvisoryLock(
-      "normalized_archive",
-      ARCHIVE_LOCK_KEY,
+      "normalized_cleanup",
+      NORMALIZED_CLEANUP_LOCK_KEY,
+      async () => {
+        let batches = 0;
+        let deletedRowCount = 0;
+
+        while (batches < maxBatches) {
+          const deletedCount =
+            await this.archiveRepository.deleteNormalizedRowsOlderThanLimited(
+              olderThanHours,
+              limit,
+            );
+
+          if (deletedCount === 0) {
+            break;
+          }
+
+          batches += 1;
+          deletedRowCount += deletedCount;
+
+          if (deletedCount < limit) {
+            break;
+          }
+        }
+
+        logger.info(
+          {
+            olderThanHours,
+            limit,
+            maxBatches,
+            batches,
+            deletedRowCount,
+          },
+          "Maintenance normalized cleanup sweep completed",
+        );
+
+        return {
+          batches,
+          deletedRowCount,
+        };
+      },
+    );
+
+    return {
+      batches: lockResult.result?.batches ?? 0,
+      deletedRowCount: lockResult.result?.deletedRowCount ?? 0,
+      skipped: lockResult.skipped,
+    };
+  }
+
+  private async runLabeledBackupSweep(
+    options?: MaintenanceLoopOptions,
+  ): Promise<LabeledBackupSweepResult & { skipped: boolean }> {
+    const limit = options?.labeledBackupLimit ?? env.LABELED_BACKUP_LIMIT;
+    const outputDirectory =
+      options?.labeledBackupOutputDirectory ?? env.LABELED_BACKUP_OUTPUT_DIR;
+    const maxBatches =
+      options?.labeledBackupMaxBatches ??
+      env.MAINTENANCE_LABELED_BACKUP_MAX_BATCHES;
+
+    const lockResult = await this.withAdvisoryLock(
+      "labeled_backup",
+      LABELED_BACKUP_LOCK_KEY,
       async () => {
         const driveFileIds: string[] = [];
         let batches = 0;
         let exportedRowCount = 0;
-        let purgedRowCount = 0;
 
-        while (batches < archiveMaxBatches) {
-          const result: NormalizedArchiveResult =
-            await this.normalizedArchiveService.archiveAndUpload({
-              olderThanHours,
+        while (batches < maxBatches) {
+          const result: TrainingFeatureLabeledBackupResult =
+            await this.labeledBackupService.backupNextBatch({
               limit,
               outputDirectory,
-              purgeAfterUpload: true,
             });
 
           if (result.exportedRowCount === 0) {
@@ -179,7 +274,6 @@ export class MaintenanceService {
 
           batches += 1;
           exportedRowCount += result.exportedRowCount;
-          purgedRowCount += result.purgedRowCount;
 
           if (result.driveFile?.id) {
             driveFileIds.push(result.driveFile.id);
@@ -192,21 +286,19 @@ export class MaintenanceService {
 
         logger.info(
           {
-            olderThanHours,
             limit,
-            archiveMaxBatches,
+            outputDirectory,
+            maxBatches,
             batches,
             exportedRowCount,
-            purgedRowCount,
             driveFileIds,
           },
-          "Maintenance normalized archive sweep completed",
+          "Maintenance labeled backup sweep completed",
         );
 
         return {
           batches,
           exportedRowCount,
-          purgedRowCount,
           driveFileIds,
         };
       },
@@ -215,7 +307,6 @@ export class MaintenanceService {
     return {
       batches: lockResult.result?.batches ?? 0,
       exportedRowCount: lockResult.result?.exportedRowCount ?? 0,
-      purgedRowCount: lockResult.result?.purgedRowCount ?? 0,
       driveFileIds: lockResult.result?.driveFileIds ?? [],
       skipped: lockResult.skipped,
     };

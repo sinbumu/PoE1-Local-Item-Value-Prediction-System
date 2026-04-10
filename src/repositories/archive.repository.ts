@@ -25,45 +25,6 @@ export type ArchivedNormalizedRow = {
 };
 
 export class ArchiveRepository {
-  async getNormalizedRowsForArchive(
-    olderThanHours: number,
-    limit: number,
-  ): Promise<ArchivedNormalizedRow[]> {
-    const result = await pool.query<ArchivedNormalizedRow>(
-      `
-        SELECT
-          id::text,
-          listing_key,
-          stash_change_id,
-          item_id,
-          account_name,
-          stash_name,
-          stash_type,
-          league,
-          item_name,
-          type_line,
-          base_type,
-          rarity,
-          frame_type,
-          note_raw,
-          note_source,
-          listing_mode,
-          price_amount::text,
-          price_currency,
-          item_json,
-          inserted_at::text,
-          updated_at::text
-        FROM normalized_priced_items
-        WHERE updated_at < NOW() - ($1 * INTERVAL '1 hour')
-        ORDER BY updated_at ASC
-        LIMIT $2
-      `,
-      [olderThanHours, limit],
-    );
-
-    return result.rows;
-  }
-
   async deleteNormalizedRowsByIds(
     ids: string[],
     olderThanHours?: number,
@@ -99,6 +60,29 @@ export class ArchiveRepository {
         RETURNING id::text
       `,
       [olderThanHours],
+    );
+
+    return result.rowCount ?? result.rows.length;
+  }
+
+  async deleteNormalizedRowsOlderThanLimited(
+    olderThanHours: number,
+    limit: number,
+  ): Promise<number> {
+    const result = await pool.query<{ id: string }>(
+      `
+        WITH stale_rows AS (
+          SELECT id
+          FROM normalized_priced_items
+          WHERE updated_at < NOW() - ($1 * INTERVAL '1 hour')
+          ORDER BY updated_at ASC, id ASC
+          LIMIT $2
+        )
+        DELETE FROM normalized_priced_items
+        WHERE id IN (SELECT id FROM stale_rows)
+        RETURNING id::text
+      `,
+      [olderThanHours, limit],
     );
 
     return result.rowCount ?? result.rows.length;
