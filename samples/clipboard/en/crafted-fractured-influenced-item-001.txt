@@ -1,0 +1,23 @@
+Item Class: Gloves
+Rarity: Rare
+Phoenix Nails
+Sorcerer Gloves
+--------
+Quality: +10% (augmented)
+Energy Shield: 76 (augmented)
+--------
+Requirements:
+Level: 69
+Int: 97
+--------
+Sockets: B-G-G-B 
+--------
+Item Level: 86
+--------
++15 to maximum Energy Shield (fractured)
++19 to maximum Mana (fractured)
+35% increased Energy Shield Recharge Rate
++29% to Chaos Resistance
+Gain 23 Mana per Enemy Killed
+--------
+Fractured Item

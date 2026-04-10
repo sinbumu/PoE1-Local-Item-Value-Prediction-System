@@ -1,0 +1,13 @@
+{
+  "id": "awakened-gem-001",
+  "locale": "en",
+  "category": "awakened_gem",
+  "sourceFile": "EN_Awakened_gem.txt",
+  "sourceItemIndex": 1,
+  "notes": [],
+  "expected": {
+    "rarity": "Gem",
+    "itemName": "Awakened Enhance Support",
+    "baseType": "Awakened Enhance Support"
+  }
+}

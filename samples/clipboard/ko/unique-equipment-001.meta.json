@@ -1,0 +1,13 @@
+{
+  "id": "unique-equipment-001",
+  "locale": "ko",
+  "category": "unique_equipment",
+  "sourceFile": "KOR_unique장비.txt",
+  "sourceItemIndex": 1,
+  "notes": [],
+  "expected": {
+    "rarity": "고유",
+    "itemName": "삿된 조프의 시초",
+    "baseType": "성채 활"
+  }
+}

@@ -1,0 +1,20 @@
+Item Class: Jewels
+Rarity: Rare
+Honour Spark
+Medium Cluster Jewel
+--------
+Requirements:
+Level: 54
+--------
+Item Level: 84
+--------
+Adds 5 Passive Skills (enchant)
+1 Added Passive Skill is a Jewel Socket (enchant)
+Added Small Passive Skills grant: 12% increased Trap Damage (enchant)
+Added Small Passive Skills grant: 12% increased Mine Damage (enchant)
+--------
+Added Small Passive Skills also grant: +2 to All Attributes
+Added Small Passive Skills also grant: +3% to all Elemental Resistances
+1 Added Passive Skill is Set and Forget
+--------
+Place into an allocated Medium or Large Jewel Socket on the Passive Skill Tree. Added passives do not interact with jewel radiuses. Right click to remove from the Socket.

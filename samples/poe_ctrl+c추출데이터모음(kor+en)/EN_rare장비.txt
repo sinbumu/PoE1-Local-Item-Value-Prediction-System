@@ -1,0 +1,123 @@
+Item Class: Gloves
+Rarity: Rare
+Mind Hand
+Precursor Gauntlets
+--------
+Armour: 352
+--------
+Requirements:
+Level: 78
+Str: 125
+--------
+Sockets: R-R-R-B 
+--------
+Item Level: 85
+--------
++41 to Strength
+16% increased Attack Speed
++124 to maximum Life
++45% to Cold Resistance
+---
+Item Class: Shields
+Rarity: Rare
+Bramble Tower
+Archon Kite Shield
+--------
+Chance to Block: 22%
+Armour: 557 (augmented)
+Energy Shield: 136 (augmented)
+--------
+Requirements:
+Level: 68
+Str: 85
+Int: 85
+--------
+Sockets: R-B-B 
+--------
+Item Level: 86
+--------
++12% to all Elemental Resistances (implicit)
+--------
+You take 60% reduced Extra Damage from Critical Strikes
++216 to Armour
+42% increased Armour and Energy Shield
++60 to maximum Energy Shield
++114 to maximum Life
++3% to maximum Cold Resistance
++35% to Cold Resistance
+17% increased Stun and Block Recovery
+---
+Item Class: Boots
+Rarity: Rare
+Glyph Goad
+Phantom Boots
+--------
+Evasion Rating: 381 (augmented)
+Energy Shield: 76 (augmented)
+--------
+Requirements:
+Level: 84
+Dex: 66 (augmented)
+Int: 66 (augmented)
+--------
+Sockets: B-B 
+--------
+Item Level: 84
+--------
+32% reduced Attribute Requirements
+73% increased Evasion and Energy Shield
++104 to maximum Life
++43% to Fire Resistance
++38% to Lightning Resistance
+30% increased Movement Speed
+---
+Item Class: Body Armours
+Rarity: Rare
+Corpse Skin
+Necrotic Armour
+--------
+Evasion Rating: 1056 (augmented)
+Energy Shield: 217 (augmented)
+Memory Strands: 83
+--------
+Requirements:
+Level: 84
+Dex: 173
+Int: 173
+--------
+Sockets: B B 
+--------
+Item Level: 85
+--------
++51 to Dexterity
++54 to Intelligence
++295 to Evasion Rating
++64 to maximum Energy Shield
++70 to maximum Mana
++45% to Fire Resistance
+---
+Item Class: Wands
+Rarity: Rare
+Plague Gnarl
+Prophecy Wand
+--------
+Wand
+Physical Damage: 26-48
+Elemental Damage: 2-4 (augmented)
+Critical Strike Chance: 8.70%
+Attacks per Second: 1.50
+--------
+Requirements:
+Level: 68
+Int: 245
+--------
+Sockets: B-B B 
+--------
+Item Level: 83
+--------
+38% increased Spell Damage (implicit)
+--------
++23% to Damage over Time Multiplier
+Adds 2 to 4 Fire Damage
++107 to maximum Mana
+13% increased Stun Duration on Enemies

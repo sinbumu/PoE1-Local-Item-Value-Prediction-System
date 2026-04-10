@@ -1,0 +1,26 @@
+Item Class: Wands
+Rarity: Rare
+Dusk Branch
+Tornado Wand
+--------
+Wand
+Physical Damage: 22-65
+Critical Strike Chance: 8.00%
+Attacks per Second: 1.45
+--------
+Requirements:
+Level: 65
+Int: 212
+--------
+Sockets: G-B 
+--------
+Item Level: 85
+--------
+Adds 3 to 72 Lightning Damage to Spells and Attacks (implicit)
+--------
+16% increased Projectile Speed (fractured)
+34% increased Fire Damage
+18% increased Stun Duration on Enemies
++499 to Accuracy Rating
+--------
+Fractured Item

@@ -1,0 +1,13 @@
+{
+  "id": "cluster-jewel-005",
+  "locale": "en",
+  "category": "cluster_jewel",
+  "sourceFile": "EN_cluster_jewel.txt",
+  "sourceItemIndex": 5,
+  "notes": [],
+  "expected": {
+    "rarity": "Unique",
+    "itemName": "Megalomaniac",
+    "baseType": "Medium Cluster Jewel"
+  }
+}

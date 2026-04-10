@@ -1,0 +1,26 @@
+Item Class: Helmets
+Rarity: Unique
+Geofri's Crest
+Great Crown
+--------
+Armour: 373 (augmented)
+Energy Shield: 77 (augmented)
+--------
+Requirements:
+Level: 53
+Str: 59
+Int: 59
+--------
+Sockets: B 
+--------
+Item Level: 85
+--------
+147% increased Armour and Energy Shield
++21% to Fire Resistance
++30% to Cold Resistance
++29% to Lightning Resistance
++27% to Chaos Resistance
++1 to maximum number of Summoned Holy Relics
+--------
+In the battle for honour, Geofri won.
+Not so, the battle for survival.

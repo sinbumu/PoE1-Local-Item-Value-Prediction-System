@@ -1,0 +1,13 @@
+{
+  "id": "rare-equipment-005",
+  "locale": "ko",
+  "category": "rare_equipment",
+  "sourceFile": "KOR_rare장비.txt",
+  "sourceItemIndex": 5,
+  "notes": [],
+  "expected": {
+    "rarity": "희귀",
+    "itemName": "역병 마디",
+    "baseType": "예언 마법봉"
+  }
+}

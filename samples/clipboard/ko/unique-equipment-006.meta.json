@@ -1,0 +1,13 @@
+{
+  "id": "unique-equipment-006",
+  "locale": "ko",
+  "category": "unique_equipment",
+  "sourceFile": "KOR_unique장비.txt",
+  "sourceItemIndex": 6,
+  "notes": [],
+  "expected": {
+    "rarity": "고유",
+    "itemName": "살아있는 칼날",
+    "baseType": "에조미어 검"
+  }
+}

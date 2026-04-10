@@ -1,0 +1,29 @@
+Item Class: Shields
+Rarity: Unique
+Dawnbreaker
+Colossal Tower Shield
+--------
+Chance to Block: 48% (augmented)
+Armour: 1554 (augmented)
+--------
+Requirements:
+Level: 67
+Str: 159
+--------
+Sockets: R-R 
+--------
+Item Level: 86
+--------
++17 to maximum Life (implicit)
+--------
+162% increased Armour
++25% Chance to Block
+-1% Chance to Block Attack Damage for every 200 Fire Damage taken from Hits Recently
+19% of Cold Damage taken as Fire Damage
+18% of Lightning Damage taken as Fire Damage
+11% of Physical Damage taken as Fire Damage
+Scorch Enemies in Close Range when you Block
+--------
+"The newcomers warn of doom and death beyond mortal ken.
+I ask, why should we fear the fire when we serve the Lord of Light?"
+- Maxarius, the first High Templar

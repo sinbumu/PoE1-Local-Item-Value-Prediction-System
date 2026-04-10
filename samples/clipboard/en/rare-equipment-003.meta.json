@@ -1,0 +1,13 @@
+{
+  "id": "rare-equipment-003",
+  "locale": "en",
+  "category": "rare_equipment",
+  "sourceFile": "EN_rare장비.txt",
+  "sourceItemIndex": 3,
+  "notes": [],
+  "expected": {
+    "rarity": "Rare",
+    "itemName": "Glyph Goad",
+    "baseType": "Phantom Boots"
+  }
+}

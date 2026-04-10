@@ -1,0 +1,13 @@
+{
+  "id": "normal-jewel-001",
+  "locale": "ko",
+  "category": "normal_jewel",
+  "sourceFile": "KOR_일반jewel.txt",
+  "sourceItemIndex": 1,
+  "notes": [],
+  "expected": {
+    "rarity": "희귀",
+    "itemName": "적의 파편",
+    "baseType": "코발트색 주얼"
+  }
+}

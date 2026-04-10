@@ -1,0 +1,13 @@
+{
+  "id": "vaal-gem-002",
+  "locale": "en",
+  "category": "vaal_gem",
+  "sourceFile": "EN_Vaal_Gem.txt",
+  "sourceItemIndex": 2,
+  "notes": [],
+  "expected": {
+    "rarity": "Gem",
+    "itemName": "Power Siphon",
+    "baseType": "Power Siphon"
+  }
+}

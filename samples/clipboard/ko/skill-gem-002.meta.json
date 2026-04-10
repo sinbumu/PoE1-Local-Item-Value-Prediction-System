@@ -1,0 +1,13 @@
+{
+  "id": "skill-gem-002",
+  "locale": "ko",
+  "category": "skill_gem",
+  "sourceFile": "KOR_Gem.txt",
+  "sourceItemIndex": 2,
+  "notes": [],
+  "expected": {
+    "rarity": "젬",
+    "itemName": "원소의 순수함",
+    "baseType": "원소의 순수함"
+  }
+}

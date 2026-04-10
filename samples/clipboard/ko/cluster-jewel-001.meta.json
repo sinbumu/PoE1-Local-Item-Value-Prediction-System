@@ -1,0 +1,13 @@
+{
+  "id": "cluster-jewel-001",
+  "locale": "ko",
+  "category": "cluster_jewel",
+  "sourceFile": "KOR_cluster_jewel.txt",
+  "sourceItemIndex": 1,
+  "notes": [],
+  "expected": {
+    "rarity": "일반",
+    "itemName": "소형 스킬 군 주얼",
+    "baseType": "소형 스킬 군 주얼"
+  }
+}

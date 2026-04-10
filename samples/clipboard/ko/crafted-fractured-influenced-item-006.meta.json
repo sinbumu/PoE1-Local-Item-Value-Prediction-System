@@ -1,0 +1,13 @@
+{
+  "id": "crafted-fractured-influenced-item-006",
+  "locale": "ko",
+  "category": "crafted_fractured_influenced_item",
+  "sourceFile": "KOR_crafted_fractured_influenced_아이템.txt",
+  "sourceItemIndex": 6,
+  "notes": [],
+  "expected": {
+    "rarity": "희귀",
+    "itemName": "역병 부적",
+    "baseType": "티타늄 영혼 방패"
+  }
+}

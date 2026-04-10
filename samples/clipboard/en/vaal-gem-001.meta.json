@@ -1,0 +1,13 @@
+{
+  "id": "vaal-gem-001",
+  "locale": "en",
+  "category": "vaal_gem",
+  "sourceFile": "EN_Vaal_Gem.txt",
+  "sourceItemIndex": 1,
+  "notes": [],
+  "expected": {
+    "rarity": "Gem",
+    "itemName": "Volcanic Fissure",
+    "baseType": "Volcanic Fissure"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "id": "rare-equipment-004",
+  "locale": "ko",
+  "category": "rare_equipment",
+  "sourceFile": "KOR_rare장비.txt",
+  "sourceItemIndex": 4,
+  "notes": [],
+  "expected": {
+    "rarity": "희귀",
+    "itemName": "시신의 피부",
+    "baseType": "괴사의 방어구"
+  }
+}

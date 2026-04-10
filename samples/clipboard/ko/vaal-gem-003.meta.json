@@ -1,0 +1,13 @@
+{
+  "id": "vaal-gem-003",
+  "locale": "ko",
+  "category": "vaal_gem",
+  "sourceFile": "KOR_Vaal_Gem.txt",
+  "sourceItemIndex": 3,
+  "notes": [],
+  "expected": {
+    "rarity": "젬",
+    "itemName": "약탈",
+    "baseType": "약탈"
+  }
+}

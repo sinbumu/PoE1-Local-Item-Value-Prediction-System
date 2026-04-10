@@ -1,0 +1,13 @@
+{
+  "id": "normal-jewel-005",
+  "locale": "ko",
+  "category": "normal_jewel",
+  "sourceFile": "KOR_일반jewel.txt",
+  "sourceItemIndex": 5,
+  "notes": [],
+  "expected": {
+    "rarity": "희귀",
+    "itemName": "상형 문자의 갈증",
+    "baseType": "코발트색 주얼"
+  }
+}

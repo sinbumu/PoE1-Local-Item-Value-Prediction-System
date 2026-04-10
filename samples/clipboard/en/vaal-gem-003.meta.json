@@ -1,0 +1,13 @@
+{
+  "id": "vaal-gem-003",
+  "locale": "en",
+  "category": "vaal_gem",
+  "sourceFile": "EN_Vaal_Gem.txt",
+  "sourceItemIndex": 3,
+  "notes": [],
+  "expected": {
+    "rarity": "Gem",
+    "itemName": "Reave",
+    "baseType": "Reave"
+  }
+}

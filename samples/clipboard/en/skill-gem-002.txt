@@ -1,0 +1,27 @@
+Item Class: Skill Gems
+Rarity: Gem
+Purity of Elements
+--------
+Aura, Spell, AoE
+Level: 19
+Reservation: 50% Mana
+Cooldown Time: 1.20 sec
+Cast Time: Instant
+Quality: +20% (augmented)
+--------
+Requirements:
+Level: 68
+Str: 66
+Int: 95
+--------
+Casts an aura that grants elemental resistances and elemental ailment immunity to you and your allies.
+--------
++1.8 metres to radius
+You and nearby allies gain +38% to all Elemental Resistances
+You and nearby allies are Immune to all Elemental Ailments
+--------
+Experience: 1/211,877,683
+--------
+Place into an item socket of the right colour to gain this skill. Right click to remove from a socket.
+--------
+Corrupted

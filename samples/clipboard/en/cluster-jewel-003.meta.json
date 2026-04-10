@@ -1,0 +1,13 @@
+{
+  "id": "cluster-jewel-003",
+  "locale": "en",
+  "category": "cluster_jewel",
+  "sourceFile": "EN_cluster_jewel.txt",
+  "sourceItemIndex": 3,
+  "notes": [],
+  "expected": {
+    "rarity": "Rare",
+    "itemName": "Honour Spark",
+    "baseType": "Medium Cluster Jewel"
+  }
+}

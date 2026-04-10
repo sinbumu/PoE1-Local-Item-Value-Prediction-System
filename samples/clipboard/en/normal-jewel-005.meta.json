@@ -1,0 +1,13 @@
+{
+  "id": "normal-jewel-005",
+  "locale": "en",
+  "category": "normal_jewel",
+  "sourceFile": "EN_일반jewel.txt",
+  "sourceItemIndex": 5,
+  "notes": [],
+  "expected": {
+    "rarity": "Rare",
+    "itemName": "Glyph Thirst",
+    "baseType": "Cobalt Jewel"
+  }
+}

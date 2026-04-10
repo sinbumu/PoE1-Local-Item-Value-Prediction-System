@@ -1,0 +1,13 @@
+{
+  "id": "cluster-jewel-004",
+  "locale": "en",
+  "category": "cluster_jewel",
+  "sourceFile": "EN_cluster_jewel.txt",
+  "sourceItemIndex": 4,
+  "notes": [],
+  "expected": {
+    "rarity": "Normal",
+    "itemName": "Medium Cluster Jewel",
+    "baseType": "Medium Cluster Jewel"
+  }
+}

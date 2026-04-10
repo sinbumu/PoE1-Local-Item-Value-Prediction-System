@@ -1,0 +1,13 @@
+{
+  "id": "unique-equipment-003",
+  "locale": "en",
+  "category": "unique_equipment",
+  "sourceFile": "EN_unique장비.txt",
+  "sourceItemIndex": 3,
+  "notes": [],
+  "expected": {
+    "rarity": "Unique",
+    "itemName": "Algor Mortis",
+    "baseType": "Carnal Mitts"
+  }
+}

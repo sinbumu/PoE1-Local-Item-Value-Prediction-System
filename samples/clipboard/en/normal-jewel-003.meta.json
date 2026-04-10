@@ -1,0 +1,13 @@
+{
+  "id": "normal-jewel-003",
+  "locale": "en",
+  "category": "normal_jewel",
+  "sourceFile": "EN_일반jewel.txt",
+  "sourceItemIndex": 3,
+  "notes": [],
+  "expected": {
+    "rarity": "Rare",
+    "itemName": "Entropy Eye",
+    "baseType": "Cobalt Jewel"
+  }
+}

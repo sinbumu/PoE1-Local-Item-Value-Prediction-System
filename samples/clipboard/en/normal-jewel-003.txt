@@ -1,0 +1,14 @@
+Item Class: Jewels
+Rarity: Rare
+Entropy Eye
+Cobalt Jewel
+--------
+Item Level: 83
+--------
+13% increased Totem Damage
+31% reduced Effect of Chill on you
+2% increased Attack and Cast Speed
+--------
+Place into an allocated Jewel Socket on the Passive Skill Tree. Right click to remove from the Socket.
+--------
+Corrupted

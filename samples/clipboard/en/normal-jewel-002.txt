@@ -1,0 +1,15 @@
+Item Class: Jewels
+Rarity: Rare
+Oblivion Wisdom
+Cobalt Jewel
+--------
+Item Level: 84
+--------
+15% increased Spell Damage while holding a Shield
+11% increased Chaos Damage
++13% to Lightning Resistance
++12% to Fire and Lightning Resistances
+--------
+Place into an allocated Jewel Socket on the Passive Skill Tree. Right click to remove from the Socket.
+--------
+Corrupted

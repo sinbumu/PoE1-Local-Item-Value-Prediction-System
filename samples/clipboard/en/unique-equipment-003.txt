@@ -1,0 +1,24 @@
+Item Class: Gloves
+Rarity: Unique
+Algor Mortis
+Carnal Mitts
+--------
+Evasion Rating: 91
+Energy Shield: 89 (augmented)
+--------
+Requirements:
+Level: 50
+Dex: 39
+Int: 39
+--------
+Sockets: G-B 
+--------
+Item Level: 85
+--------
++70 to maximum Energy Shield
++20% to Cold and Lightning Resistances
+29% chance to Sap Enemies in Chilling Areas
+Enemies in your Chilling Areas take 29% increased Lightning Damage
+17% increased Effect of Non-Damaging Ailments
+--------
+Winter's white blanket swaddles all.

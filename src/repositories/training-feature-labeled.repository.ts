@@ -72,6 +72,8 @@ const TRAINING_FEATURE_LABELED_COLUMNS = [
   "labeled_at",
 ] as const;
 
+const MAX_BIND_PARAMETERS = 60000;
+
 function buildRowValues(feature: TrainingFeatureLabeled): Array<unknown> {
   return [
     feature.listingKey,
@@ -237,95 +239,103 @@ export class TrainingFeatureLabeledRepository {
       return 0;
     }
 
-    const values = features.flatMap((feature) => buildRowValues(feature));
-    const placeholders = features
-      .map((_feature, rowIndex) => {
-        const start = rowIndex * TRAINING_FEATURE_LABELED_COLUMNS.length;
-        const rowPlaceholders = TRAINING_FEATURE_LABELED_COLUMNS.map(
-          (_column, columnIndex) => `$${start + columnIndex + 1}`,
-        );
-        return `(${rowPlaceholders.join(", ")})`;
-      })
-      .join(", ");
-
-    await pool.query(
-      `
-        INSERT INTO training_features_labeled (
-          ${TRAINING_FEATURE_LABELED_COLUMNS.join(", ")}
-        )
-        VALUES ${placeholders}
-        ON CONFLICT (listing_key)
-        DO UPDATE SET
-          source_updated_at = EXCLUDED.source_updated_at,
-          league = EXCLUDED.league,
-          model_segment = EXCLUDED.model_segment,
-          clean_reason = EXCLUDED.clean_reason,
-          target_price_amount = EXCLUDED.target_price_amount,
-          target_price_currency = EXCLUDED.target_price_currency,
-          item_class = EXCLUDED.item_class,
-          base_type = EXCLUDED.base_type,
-          rarity = EXCLUDED.rarity,
-          frame_type = EXCLUDED.frame_type,
-          ilvl = EXCLUDED.ilvl,
-          identified = EXCLUDED.identified,
-          corrupted = EXCLUDED.corrupted,
-          fractured = EXCLUDED.fractured,
-          synthesised = EXCLUDED.synthesised,
-          duplicated = EXCLUDED.duplicated,
-          influence_shaper = EXCLUDED.influence_shaper,
-          influence_elder = EXCLUDED.influence_elder,
-          influence_crusader = EXCLUDED.influence_crusader,
-          influence_redeemer = EXCLUDED.influence_redeemer,
-          influence_hunter = EXCLUDED.influence_hunter,
-          influence_warlord = EXCLUDED.influence_warlord,
-          influence_searing = EXCLUDED.influence_searing,
-          influence_tangled = EXCLUDED.influence_tangled,
-          socket_count = EXCLUDED.socket_count,
-          link_count = EXCLUDED.link_count,
-          white_socket_count = EXCLUDED.white_socket_count,
-          prefix_count = EXCLUDED.prefix_count,
-          suffix_count = EXCLUDED.suffix_count,
-          explicit_mod_count = EXCLUDED.explicit_mod_count,
-          implicit_mod_count = EXCLUDED.implicit_mod_count,
-          crafted_mod_count = EXCLUDED.crafted_mod_count,
-          fractured_mod_count = EXCLUDED.fractured_mod_count,
-          enchant_mod_count = EXCLUDED.enchant_mod_count,
-          quality = EXCLUDED.quality,
-          armour = EXCLUDED.armour,
-          evasion = EXCLUDED.evasion,
-          energy_shield = EXCLUDED.energy_shield,
-          ward = EXCLUDED.ward,
-          physical_dps = EXCLUDED.physical_dps,
-          elemental_dps = EXCLUDED.elemental_dps,
-          attack_speed = EXCLUDED.attack_speed,
-          crit_chance = EXCLUDED.crit_chance,
-          move_speed = EXCLUDED.move_speed,
-          life_roll_sum = EXCLUDED.life_roll_sum,
-          resistance_roll_sum = EXCLUDED.resistance_roll_sum,
-          attribute_roll_sum = EXCLUDED.attribute_roll_sum,
-          jewel_type = EXCLUDED.jewel_type,
-          cluster_size = EXCLUDED.cluster_size,
-          cluster_passive_count = EXCLUDED.cluster_passive_count,
-          notable_count = EXCLUDED.notable_count,
-          damage_mod_count = EXCLUDED.damage_mod_count,
-          defence_mod_count = EXCLUDED.defence_mod_count,
-          utility_mod_count = EXCLUDED.utility_mod_count,
-          gem_level = EXCLUDED.gem_level,
-          gem_quality = EXCLUDED.gem_quality,
-          is_awakened = EXCLUDED.is_awakened,
-          is_vaal = EXCLUDED.is_vaal,
-          is_support_gem = EXCLUDED.is_support_gem,
-          gem_tags = EXCLUDED.gem_tags,
-          exchange_rate_source = EXCLUDED.exchange_rate_source,
-          exchange_rate_sample_time_utc = EXCLUDED.exchange_rate_sample_time_utc,
-          exchange_rate_chaos_equivalent = EXCLUDED.exchange_rate_chaos_equivalent,
-          target_price_chaos = EXCLUDED.target_price_chaos,
-          target_price_log1p = EXCLUDED.target_price_log1p,
-          label_reason = EXCLUDED.label_reason,
-          labeled_at = EXCLUDED.labeled_at
-      `,
-      values,
+    const chunkSize = Math.max(
+      1,
+      Math.floor(MAX_BIND_PARAMETERS / TRAINING_FEATURE_LABELED_COLUMNS.length),
     );
+
+    for (let offset = 0; offset < features.length; offset += chunkSize) {
+      const chunk = features.slice(offset, offset + chunkSize);
+      const values = chunk.flatMap((feature) => buildRowValues(feature));
+      const placeholders = chunk
+        .map((_feature, rowIndex) => {
+          const start = rowIndex * TRAINING_FEATURE_LABELED_COLUMNS.length;
+          const rowPlaceholders = TRAINING_FEATURE_LABELED_COLUMNS.map(
+            (_column, columnIndex) => `$${start + columnIndex + 1}`,
+          );
+          return `(${rowPlaceholders.join(", ")})`;
+        })
+        .join(", ");
+
+      await pool.query(
+        `
+          INSERT INTO training_features_labeled (
+            ${TRAINING_FEATURE_LABELED_COLUMNS.join(", ")}
+          )
+          VALUES ${placeholders}
+          ON CONFLICT (listing_key)
+          DO UPDATE SET
+            source_updated_at = EXCLUDED.source_updated_at,
+            league = EXCLUDED.league,
+            model_segment = EXCLUDED.model_segment,
+            clean_reason = EXCLUDED.clean_reason,
+            target_price_amount = EXCLUDED.target_price_amount,
+            target_price_currency = EXCLUDED.target_price_currency,
+            item_class = EXCLUDED.item_class,
+            base_type = EXCLUDED.base_type,
+            rarity = EXCLUDED.rarity,
+            frame_type = EXCLUDED.frame_type,
+            ilvl = EXCLUDED.ilvl,
+            identified = EXCLUDED.identified,
+            corrupted = EXCLUDED.corrupted,
+            fractured = EXCLUDED.fractured,
+            synthesised = EXCLUDED.synthesised,
+            duplicated = EXCLUDED.duplicated,
+            influence_shaper = EXCLUDED.influence_shaper,
+            influence_elder = EXCLUDED.influence_elder,
+            influence_crusader = EXCLUDED.influence_crusader,
+            influence_redeemer = EXCLUDED.influence_redeemer,
+            influence_hunter = EXCLUDED.influence_hunter,
+            influence_warlord = EXCLUDED.influence_warlord,
+            influence_searing = EXCLUDED.influence_searing,
+            influence_tangled = EXCLUDED.influence_tangled,
+            socket_count = EXCLUDED.socket_count,
+            link_count = EXCLUDED.link_count,
+            white_socket_count = EXCLUDED.white_socket_count,
+            prefix_count = EXCLUDED.prefix_count,
+            suffix_count = EXCLUDED.suffix_count,
+            explicit_mod_count = EXCLUDED.explicit_mod_count,
+            implicit_mod_count = EXCLUDED.implicit_mod_count,
+            crafted_mod_count = EXCLUDED.crafted_mod_count,
+            fractured_mod_count = EXCLUDED.fractured_mod_count,
+            enchant_mod_count = EXCLUDED.enchant_mod_count,
+            quality = EXCLUDED.quality,
+            armour = EXCLUDED.armour,
+            evasion = EXCLUDED.evasion,
+            energy_shield = EXCLUDED.energy_shield,
+            ward = EXCLUDED.ward,
+            physical_dps = EXCLUDED.physical_dps,
+            elemental_dps = EXCLUDED.elemental_dps,
+            attack_speed = EXCLUDED.attack_speed,
+            crit_chance = EXCLUDED.crit_chance,
+            move_speed = EXCLUDED.move_speed,
+            life_roll_sum = EXCLUDED.life_roll_sum,
+            resistance_roll_sum = EXCLUDED.resistance_roll_sum,
+            attribute_roll_sum = EXCLUDED.attribute_roll_sum,
+            jewel_type = EXCLUDED.jewel_type,
+            cluster_size = EXCLUDED.cluster_size,
+            cluster_passive_count = EXCLUDED.cluster_passive_count,
+            notable_count = EXCLUDED.notable_count,
+            damage_mod_count = EXCLUDED.damage_mod_count,
+            defence_mod_count = EXCLUDED.defence_mod_count,
+            utility_mod_count = EXCLUDED.utility_mod_count,
+            gem_level = EXCLUDED.gem_level,
+            gem_quality = EXCLUDED.gem_quality,
+            is_awakened = EXCLUDED.is_awakened,
+            is_vaal = EXCLUDED.is_vaal,
+            is_support_gem = EXCLUDED.is_support_gem,
+            gem_tags = EXCLUDED.gem_tags,
+            exchange_rate_source = EXCLUDED.exchange_rate_source,
+            exchange_rate_sample_time_utc = EXCLUDED.exchange_rate_sample_time_utc,
+            exchange_rate_chaos_equivalent = EXCLUDED.exchange_rate_chaos_equivalent,
+            target_price_chaos = EXCLUDED.target_price_chaos,
+            target_price_log1p = EXCLUDED.target_price_log1p,
+            label_reason = EXCLUDED.label_reason,
+            labeled_at = EXCLUDED.labeled_at
+        `,
+        values,
+      );
+    }
 
     return features.length;
   }

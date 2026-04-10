@@ -1,0 +1,13 @@
+{
+  "id": "normal-jewel-002",
+  "locale": "ko",
+  "category": "normal_jewel",
+  "sourceFile": "KOR_일반jewel.txt",
+  "sourceItemIndex": 2,
+  "notes": [],
+  "expected": {
+    "rarity": "희귀",
+    "itemName": "망각 지혜",
+    "baseType": "코발트색 주얼"
+  }
+}

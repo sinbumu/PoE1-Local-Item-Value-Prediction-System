@@ -1,0 +1,25 @@
+Item Class: Wands
+Rarity: Rare
+Plague Gnarl
+Prophecy Wand
+--------
+Wand
+Physical Damage: 26-48
+Elemental Damage: 2-4 (augmented)
+Critical Strike Chance: 8.70%
+Attacks per Second: 1.50
+--------
+Requirements:
+Level: 68
+Int: 245
+--------
+Sockets: B-B B 
+--------
+Item Level: 83
+--------
+38% increased Spell Damage (implicit)
+--------
++23% to Damage over Time Multiplier
+Adds 2 to 4 Fire Damage
++107 to maximum Mana
+13% increased Stun Duration on Enemies

@@ -1,0 +1,13 @@
+{
+  "id": "crafted-fractured-influenced-item-005",
+  "locale": "ko",
+  "category": "crafted_fractured_influenced_item",
+  "sourceFile": "KOR_crafted_fractured_influenced_아이템.txt",
+  "sourceItemIndex": 5,
+  "notes": [],
+  "expected": {
+    "rarity": "희귀",
+    "itemName": "격노 복장",
+    "baseType": "성스러운 사슬 갑옷"
+  }
+}

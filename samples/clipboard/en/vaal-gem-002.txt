@@ -1,0 +1,49 @@
+Item Class: Skill Gems
+Rarity: Gem
+Power Siphon
+--------
+Critical, Attack, Projectile, Vaal
+Level: 1
+Cost: 5 Mana
+Attack Speed: 150% of base
+Attack Damage: 90% of base
+Effectiveness of Added Damage: 90%
+--------
+Requirements:
+Level: 12
+Int: 33
+--------
+Fires your wand to fire a single projectile each at a number of nearby enemies, granting you a power charge if an enemy is killed by, or soon after, the hit.
+--------
+Increases and Reductions to Spell Damage also apply to Attack Damage from this Skill at 150% of their value
+Fires a Projectile at up to 4 targets
+Modifiers to number of Projectiles instead apply to number of targets fired at
+Culling Strike
+20% chance to gain a Power Charge when Projectile Hits a Rare or Unique Enemy
+10% more Critical Strike Chance per Power Charge
++20% to Critical Strike Multiplier per Power Charge
+--------
+Vaal Power Siphon
+--------
+Souls Per Use: 15
+Can Store 3 Uses
+Soul Gain Prevention: 2 sec
+Attack Speed: 115% of base
+Attack Damage: 150% of base
+Effectiveness of Added Damage: 150%
+--------
+Fires your wand simultaneously at all nearby enemies, culling those close to death and granting you a power charge for each. Cannot be supported by Volley.
+--------
+Increases and Reductions to Spell Damage also apply to Attack Damage from this Skill at 150% of their value
+Fires Projectiles at each nearby Enemy
+Culling Strike
+Can't be Evaded
+Gain a Power Charge when Projectile Hits a Rare or Unique Enemy
+20% more Critical Strike Chance per Power Charge
++25% to Critical Strike Multiplier per Power Charge
+--------
+Experience: 1/15,249
+--------
+Place into an item socket of the right colour to gain this skill. Right click to remove from a socket.
+--------
+Corrupted

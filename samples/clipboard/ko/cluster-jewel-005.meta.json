@@ -1,0 +1,13 @@
+{
+  "id": "cluster-jewel-005",
+  "locale": "ko",
+  "category": "cluster_jewel",
+  "sourceFile": "KOR_cluster_jewel.txt",
+  "sourceItemIndex": 5,
+  "notes": [],
+  "expected": {
+    "rarity": "고유",
+    "itemName": "과대망상",
+    "baseType": "중형 스킬 군 주얼"
+  }
+}

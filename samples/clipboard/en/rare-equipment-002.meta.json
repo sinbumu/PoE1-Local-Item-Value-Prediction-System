@@ -1,0 +1,13 @@
+{
+  "id": "rare-equipment-002",
+  "locale": "en",
+  "category": "rare_equipment",
+  "sourceFile": "EN_rare장비.txt",
+  "sourceItemIndex": 2,
+  "notes": [],
+  "expected": {
+    "rarity": "Rare",
+    "itemName": "Bramble Tower",
+    "baseType": "Archon Kite Shield"
+  }
+}

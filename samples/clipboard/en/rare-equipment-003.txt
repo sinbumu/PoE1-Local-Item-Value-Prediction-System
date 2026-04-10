@@ -1,0 +1,23 @@
+Item Class: Boots
+Rarity: Rare
+Glyph Goad
+Phantom Boots
+--------
+Evasion Rating: 381 (augmented)
+Energy Shield: 76 (augmented)
+--------
+Requirements:
+Level: 84
+Dex: 66 (augmented)
+Int: 66 (augmented)
+--------
+Sockets: B-B 
+--------
+Item Level: 84
+--------
+32% reduced Attribute Requirements
+73% increased Evasion and Energy Shield
++104 to maximum Life
++43% to Fire Resistance
++38% to Lightning Resistance
+30% increased Movement Speed

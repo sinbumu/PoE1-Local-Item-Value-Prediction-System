@@ -1,0 +1,13 @@
+{
+  "id": "crafted-fractured-influenced-item-002",
+  "locale": "en",
+  "category": "crafted_fractured_influenced_item",
+  "sourceFile": "EN_crafted_fractured_influenced_아이템.txt",
+  "sourceItemIndex": 2,
+  "notes": [],
+  "expected": {
+    "rarity": "Rare",
+    "itemName": "Dusk Branch",
+    "baseType": "Tornado Wand"
+  }
+}

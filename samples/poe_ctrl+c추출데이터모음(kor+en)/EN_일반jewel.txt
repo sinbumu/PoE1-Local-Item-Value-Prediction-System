@@ -1,0 +1,81 @@
+Item Class: Jewels
+Rarity: Rare
+Foe Shard
+Cobalt Jewel
+--------
+Item Level: 85
+--------
+Hits have 12% chance to ignore Enemy Physical Damage Reduction (implicit)
+--------
+3% increased Cast Speed with Cold Skills
+10% increased Chaos Damage
+10% increased Global Critical Strike Chance
++13% to Critical Strike Multiplier for Spell Damage
+--------
+Place into an allocated Jewel Socket on the Passive Skill Tree. Right click to remove from the Socket.
+--------
+Corrupted
+---
+Item Class: Jewels
+Rarity: Rare
+Oblivion Wisdom
+Cobalt Jewel
+--------
+Item Level: 84
+--------
+15% increased Spell Damage while holding a Shield
+11% increased Chaos Damage
++13% to Lightning Resistance
++12% to Fire and Lightning Resistances
+--------
+Place into an allocated Jewel Socket on the Passive Skill Tree. Right click to remove from the Socket.
+--------
+Corrupted
+---
+Item Class: Jewels
+Rarity: Rare
+Entropy Eye
+Cobalt Jewel
+--------
+Item Level: 83
+--------
+13% increased Totem Damage
+31% reduced Effect of Chill on you
+2% increased Attack and Cast Speed
+--------
+Place into an allocated Jewel Socket on the Passive Skill Tree. Right click to remove from the Socket.
+--------
+Corrupted
+---
+Item Class: Jewels
+Rarity: Rare
+Maelström Butcher
+Crimson Jewel
+--------
+Item Level: 83
+--------
++3% Chance to Block Spell Damage while holding a Shield
+3% increased Attack Speed
+6% increased Attack Speed with Axes
+27% increased Stun and Block Recovery
+--------
+Place into an allocated Jewel Socket on the Passive Skill Tree. Right click to remove from the Socket.
+--------
+Corrupted
+---
+Item Class: Jewels
+Rarity: Rare
+Glyph Thirst
+Cobalt Jewel
+--------
+Item Level: 83
+--------
+You cannot be Hindered (implicit)
+--------
++3% Chance to Block Spell Damage while Dual Wielding
+4% increased Attack and Cast Speed
+15% increased Damage with Wands
+--------
+Place into an allocated Jewel Socket on the Passive Skill Tree. Right click to remove from the Socket.
+--------
+Corrupted

@@ -1,0 +1,13 @@
+{
+  "id": "unique-equipment-007",
+  "locale": "ko",
+  "category": "unique_equipment",
+  "sourceFile": "KOR_unique장비.txt",
+  "sourceItemIndex": 7,
+  "notes": [],
+  "expected": {
+    "rarity": "고유",
+    "itemName": "북쪽의 아그네로드",
+    "baseType": "제국 지팡이"
+  }
+}

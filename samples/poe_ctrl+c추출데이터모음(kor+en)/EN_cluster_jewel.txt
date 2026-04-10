@@ -1,0 +1,78 @@
+Item Class: Jewels
+Rarity: Normal
+Small Cluster Jewel
+--------
+Item Level: 73
+--------
+Adds 2 Passive Skills (enchant)
+Added Small Passive Skills grant: +15% to Fire Resistance (enchant)
+--------
+Place into an allocated Small, Medium or Large Jewel Socket on the Passive Skill Tree. Added passives do not interact with jewel radiuses. Right click to remove from the Socket.
+---
+Item Class: Jewels
+Rarity: Normal
+Medium Cluster Jewel
+--------
+Item Level: 83
+--------
+Adds 5 Passive Skills (enchant)
+1 Added Passive Skill is a Jewel Socket (enchant)
+Added Small Passive Skills grant: 10% increased Life Recovery from Flasks (enchant)
+Added Small Passive Skills grant: 10% increased Mana Recovery from Flasks (enchant)
+--------
+Place into an allocated Medium or Large Jewel Socket on the Passive Skill Tree. Added passives do not interact with jewel radiuses. Right click to remove from the Socket.
+---
+Item Class: Jewels
+Rarity: Rare
+Honour Spark
+Medium Cluster Jewel
+--------
+Requirements:
+Level: 54
+--------
+Item Level: 84
+--------
+Adds 5 Passive Skills (enchant)
+1 Added Passive Skill is a Jewel Socket (enchant)
+Added Small Passive Skills grant: 12% increased Trap Damage (enchant)
+Added Small Passive Skills grant: 12% increased Mine Damage (enchant)
+--------
+Added Small Passive Skills also grant: +2 to All Attributes
+Added Small Passive Skills also grant: +3% to all Elemental Resistances
+1 Added Passive Skill is Set and Forget
+--------
+Place into an allocated Medium or Large Jewel Socket on the Passive Skill Tree. Added passives do not interact with jewel radiuses. Right click to remove from the Socket.
+---
+Item Class: Jewels
+Rarity: Normal
+Medium Cluster Jewel
+--------
+Item Level: 83
+--------
+Adds 5 Passive Skills (enchant)
+1 Added Passive Skill is a Jewel Socket (enchant)
+Added Small Passive Skills grant: 12% increased Brand Damage (enchant)
+--------
+Place into an allocated Medium or Large Jewel Socket on the Passive Skill Tree. Added passives do not interact with jewel radiuses. Right click to remove from the Socket.
+---
+Item Class: Jewels
+Rarity: Unique
+Megalomaniac
+Medium Cluster Jewel
+--------
+Requirements:
+Level: 60
+--------
+Item Level: 84
+--------
+Adds 4 Passive Skills
+Added Small Passive Skills grant Nothing
+1 Added Passive Skill is Distilled Perfection
+1 Added Passive Skill is Enduring Focus
+1 Added Passive Skill is Unrestrained Focus
+--------
+If you're going to act like you're better than everyone else, make sure you are.
+--------
+Place into an allocated Medium or Large Jewel Socket on the Passive Skill Tree. Added passives do not interact with jewel radiuses. Right click to remove from the Socket.
+--------
+Corrupted

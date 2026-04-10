@@ -1,0 +1,13 @@
+{
+  "id": "unique-equipment-007",
+  "locale": "en",
+  "category": "unique_equipment",
+  "sourceFile": "EN_unique장비.txt",
+  "sourceItemIndex": 7,
+  "notes": [],
+  "expected": {
+    "rarity": "Unique",
+    "itemName": "Agnerod North",
+    "baseType": "Imperial Staff"
+  }
+}

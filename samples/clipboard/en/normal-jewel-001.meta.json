@@ -1,0 +1,13 @@
+{
+  "id": "normal-jewel-001",
+  "locale": "en",
+  "category": "normal_jewel",
+  "sourceFile": "EN_일반jewel.txt",
+  "sourceItemIndex": 1,
+  "notes": [],
+  "expected": {
+    "rarity": "Rare",
+    "itemName": "Foe Shard",
+    "baseType": "Cobalt Jewel"
+  }
+}

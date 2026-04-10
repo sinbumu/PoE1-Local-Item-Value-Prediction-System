@@ -1,0 +1,13 @@
+{
+  "id": "skill-gem-003",
+  "locale": "ko",
+  "category": "skill_gem",
+  "sourceFile": "KOR_Gem.txt",
+  "sourceItemIndex": 3,
+  "notes": [],
+  "expected": {
+    "rarity": "젬",
+    "itemName": "망령 소환",
+    "baseType": "망령 소환"
+  }
+}

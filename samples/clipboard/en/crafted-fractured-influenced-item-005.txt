@@ -1,0 +1,33 @@
+Item Class: Body Armours
+Rarity: Rare
+Rage Suit
+Sacred Chainmail
+--------
+Quality: +20% (augmented)
+Armour: 3634 (augmented)
+Energy Shield: 753 (augmented)
+--------
+Requirements:
+Level: 84
+Str: 173
+Dex: 111
+Int: 173
+--------
+Sockets: B-B-R-G-R-B 
+--------
+Item Level: 86
+--------
+8% increased Explicit Defence Modifier magnitudes (enchant)
+--------
+8% Chance to Block Attack Damage (implicit)
+Flasks applied to you have 11% increased Effect (implicit)
+--------
++390 to Armour
+148% increased Armour and Energy Shield
++86 to maximum Energy Shield
++36% to Lightning Resistance
+17% increased Stun and Block Recovery
+7% additional Physical Damage Reduction
++15% to Cold and Chaos Resistances (crafted)
+Searing Exarch Item
+Eater of Worlds Item

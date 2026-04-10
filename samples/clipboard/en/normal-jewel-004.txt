@@ -1,0 +1,15 @@
+Item Class: Jewels
+Rarity: Rare
+Maelström Butcher
+Crimson Jewel
+--------
+Item Level: 83
+--------
++3% Chance to Block Spell Damage while holding a Shield
+3% increased Attack Speed
+6% increased Attack Speed with Axes
+27% increased Stun and Block Recovery
+--------
+Place into an allocated Jewel Socket on the Passive Skill Tree. Right click to remove from the Socket.
+--------
+Corrupted

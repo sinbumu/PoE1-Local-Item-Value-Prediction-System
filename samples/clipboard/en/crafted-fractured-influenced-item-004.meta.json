@@ -1,0 +1,13 @@
+{
+  "id": "crafted-fractured-influenced-item-004",
+  "locale": "en",
+  "category": "crafted_fractured_influenced_item",
+  "sourceFile": "EN_crafted_fractured_influenced_아이템.txt",
+  "sourceItemIndex": 4,
+  "notes": [],
+  "expected": {
+    "rarity": "Rare",
+    "itemName": "Sorrow Shelter",
+    "baseType": "Divine Crown"
+  }
+}

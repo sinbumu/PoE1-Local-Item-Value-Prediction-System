@@ -1,0 +1,20 @@
+Item Class: Rings
+Rarity: Unique
+Stormfire
+Opal Ring
+--------
+Requirements:
+Level: 80
+--------
+Item Level: 84
+--------
+20% increased Elemental Damage (implicit)
+--------
+45% increased Mana Regeneration Rate
++22% to Fire and Lightning Resistances
+8% increased Burning Damage for each time you have Shocked a Non-Shocked Enemy Recently, up to a maximum of 120%
+Adds 1 to 62 Lightning Damage to Hits against Ignited Enemies
+Your Lightning Damage can Ignite
+--------
+When your skin sloughs, and your blood cooks,
+you'll wish the lightning strike had killed you.

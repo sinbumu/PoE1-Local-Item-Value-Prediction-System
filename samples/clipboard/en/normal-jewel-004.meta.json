@@ -1,0 +1,13 @@
+{
+  "id": "normal-jewel-004",
+  "locale": "en",
+  "category": "normal_jewel",
+  "sourceFile": "EN_일반jewel.txt",
+  "sourceItemIndex": 4,
+  "notes": [],
+  "expected": {
+    "rarity": "Rare",
+    "itemName": "Maelström Butcher",
+    "baseType": "Crimson Jewel"
+  }
+}

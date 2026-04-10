@@ -1,0 +1,13 @@
+{
+  "id": "rare-equipment-004",
+  "locale": "en",
+  "category": "rare_equipment",
+  "sourceFile": "EN_rare장비.txt",
+  "sourceItemIndex": 4,
+  "notes": [],
+  "expected": {
+    "rarity": "Rare",
+    "itemName": "Corpse Skin",
+    "baseType": "Necrotic Armour"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "id": "unique-equipment-002",
+  "locale": "en",
+  "category": "unique_equipment",
+  "sourceFile": "EN_unique장비.txt",
+  "sourceItemIndex": 2,
+  "notes": [],
+  "expected": {
+    "rarity": "Unique",
+    "itemName": "Dawnbreaker",
+    "baseType": "Colossal Tower Shield"
+  }
+}

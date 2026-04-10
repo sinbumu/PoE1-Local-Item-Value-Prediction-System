@@ -1,0 +1,23 @@
+Item Class: Support Gems
+Rarity: Gem
+Awakened Enhance Support
+--------
+Exceptional, Support
+Level: 3
+Cost & Reservation Multiplier: 120%
+Quality: +20% (augmented)
+--------
+Requirements:
+Level: 76
+Dex: 120
+--------
+Supports any skill gem. Once this gem reaches level 2 or above, will raise the quality of supported gems. Cannot support skills that don't come from gems.
+--------
+This Gem gains 100% increased Experience
++16% to Quality of Supported Skill Gems
+--------
+Experience: 1/420,882,786
+--------
+This is a Support Gem. It does not grant a bonus to your character, but to skills in sockets connected to it. Place into an item socket connected to a socket containing the Skill Gem you wish to augment. Right click to remove from a socket.
+--------
+Corrupted

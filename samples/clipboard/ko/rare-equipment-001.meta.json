@@ -1,0 +1,13 @@
+{
+  "id": "rare-equipment-001",
+  "locale": "ko",
+  "category": "rare_equipment",
+  "sourceFile": "KOR_rare장비.txt",
+  "sourceItemIndex": 1,
+  "notes": [],
+  "expected": {
+    "rarity": "희귀",
+    "itemName": "마음의 손",
+    "baseType": "선도자 건틀릿"
+  }
+}

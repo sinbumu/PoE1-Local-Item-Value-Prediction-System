@@ -1,0 +1,13 @@
+{
+  "id": "unique-equipment-006",
+  "locale": "en",
+  "category": "unique_equipment",
+  "sourceFile": "EN_unique장비.txt",
+  "sourceItemIndex": 6,
+  "notes": [],
+  "expected": {
+    "rarity": "Unique",
+    "itemName": "The Living Blade",
+    "baseType": "Ezomyte Blade"
+  }
+}

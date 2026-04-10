@@ -1,0 +1,13 @@
+{
+  "id": "unique-equipment-004",
+  "locale": "en",
+  "category": "unique_equipment",
+  "sourceFile": "EN_unique장비.txt",
+  "sourceItemIndex": 4,
+  "notes": [],
+  "expected": {
+    "rarity": "Unique",
+    "itemName": "Geofri's Crest",
+    "baseType": "Great Crown"
+  }
+}

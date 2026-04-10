@@ -1,0 +1,13 @@
+{
+  "id": "unique-equipment-003",
+  "locale": "ko",
+  "category": "unique_equipment",
+  "sourceFile": "KOR_unique장비.txt",
+  "sourceItemIndex": 3,
+  "notes": [],
+  "expected": {
+    "rarity": "고유",
+    "itemName": "사후 냉각",
+    "baseType": "육욕의 미트"
+  }
+}

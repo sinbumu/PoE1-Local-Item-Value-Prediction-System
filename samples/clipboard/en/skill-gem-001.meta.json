@@ -1,0 +1,13 @@
+{
+  "id": "skill-gem-001",
+  "locale": "en",
+  "category": "skill_gem",
+  "sourceFile": "EN_Gem.txt",
+  "sourceItemIndex": 1,
+  "notes": [],
+  "expected": {
+    "rarity": "Gem",
+    "itemName": "Raise Spectre",
+    "baseType": "Raise Spectre"
+  }
+}

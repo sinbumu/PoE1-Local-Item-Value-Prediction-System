@@ -1,0 +1,13 @@
+{
+  "id": "unique-equipment-005",
+  "locale": "en",
+  "category": "unique_equipment",
+  "sourceFile": "EN_unique장비.txt",
+  "sourceItemIndex": 5,
+  "notes": [],
+  "expected": {
+    "rarity": "Unique",
+    "itemName": "Stormfire",
+    "baseType": "Opal Ring"
+  }
+}

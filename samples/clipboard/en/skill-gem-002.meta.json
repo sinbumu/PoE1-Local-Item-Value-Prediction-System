@@ -1,0 +1,13 @@
+{
+  "id": "skill-gem-002",
+  "locale": "en",
+  "category": "skill_gem",
+  "sourceFile": "EN_Gem.txt",
+  "sourceItemIndex": 2,
+  "notes": [],
+  "expected": {
+    "rarity": "Gem",
+    "itemName": "Purity of Elements",
+    "baseType": "Purity of Elements"
+  }
+}

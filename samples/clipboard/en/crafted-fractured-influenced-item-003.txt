@@ -1,0 +1,25 @@
+Item Class: Boots
+Rarity: Rare
+Plague Road
+Phantom Boots
+--------
+Quality: +10% (augmented)
+Evasion Rating: 293 (augmented)
+Energy Shield: 52 (augmented)
+--------
+Requirements:
+Level: 84
+Dex: 98
+Int: 98
+--------
+Sockets: G-B-G-G 
+--------
+Item Level: 85
+--------
++31 to Evasion Rating (fractured)
++27 to maximum Life (fractured)
++10% chance to Suppress Spell Damage
+Regenerate 86.5 Life per second
++48% to Cold Resistance
+--------
+Fractured Item

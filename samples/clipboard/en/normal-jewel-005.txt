@@ -1,0 +1,16 @@
+Item Class: Jewels
+Rarity: Rare
+Glyph Thirst
+Cobalt Jewel
+--------
+Item Level: 83
+--------
+You cannot be Hindered (implicit)
+--------
++3% Chance to Block Spell Damage while Dual Wielding
+4% increased Attack and Cast Speed
+15% increased Damage with Wands
+--------
+Place into an allocated Jewel Socket on the Passive Skill Tree. Right click to remove from the Socket.
+--------
+Corrupted

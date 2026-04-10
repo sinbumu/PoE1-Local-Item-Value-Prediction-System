@@ -1,0 +1,12 @@
+Item Class: Jewels
+Rarity: Normal
+Medium Cluster Jewel
+--------
+Item Level: 83
+--------
+Adds 5 Passive Skills (enchant)
+1 Added Passive Skill is a Jewel Socket (enchant)
+Added Small Passive Skills grant: 10% increased Life Recovery from Flasks (enchant)
+Added Small Passive Skills grant: 10% increased Mana Recovery from Flasks (enchant)
+--------
+Place into an allocated Medium or Large Jewel Socket on the Passive Skill Tree. Added passives do not interact with jewel radiuses. Right click to remove from the Socket.

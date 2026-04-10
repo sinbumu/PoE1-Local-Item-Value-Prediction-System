@@ -1,0 +1,26 @@
+Item Class: Bows
+Rarity: Unique
+Foulborn Xoph's Inception
+Citadel Bow
+--------
+Bow
+Physical Damage: 95-380 (augmented)
+Critical Strike Chance: 6.00%
+Attacks per Second: 1.25
+--------
+Requirements:
+Level: 58
+Dex: 185
+--------
+Sockets: G 
+--------
+Item Level: 85
+--------
+164% increased Physical Damage
+Gain 300 Life per Ignited Enemy Killed
+Gain 20% of Physical Damage as Extra Fire Damage
+10% chance to Ignite
+Arrows deal 30 to 50 Added Fire Damage for each time they've Pierced
+Socketed Gems are Supported by Level 20 Returning Projectiles (mutated)
+--------
+Upon the red pyre we are born.

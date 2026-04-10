@@ -1,0 +1,13 @@
+{
+  "id": "rare-equipment-001",
+  "locale": "en",
+  "category": "rare_equipment",
+  "sourceFile": "EN_rare장비.txt",
+  "sourceItemIndex": 1,
+  "notes": [],
+  "expected": {
+    "rarity": "Rare",
+    "itemName": "Mind Hand",
+    "baseType": "Precursor Gauntlets"
+  }
+}

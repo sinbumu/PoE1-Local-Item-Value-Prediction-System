@@ -1,0 +1,13 @@
+{
+  "id": "unique-equipment-001",
+  "locale": "en",
+  "category": "unique_equipment",
+  "sourceFile": "EN_unique장비.txt",
+  "sourceItemIndex": 1,
+  "notes": [],
+  "expected": {
+    "rarity": "Unique",
+    "itemName": "Foulborn Xoph's Inception",
+    "baseType": "Citadel Bow"
+  }
+}

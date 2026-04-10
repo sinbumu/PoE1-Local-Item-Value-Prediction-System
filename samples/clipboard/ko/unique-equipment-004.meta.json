@@ -1,0 +1,13 @@
+{
+  "id": "unique-equipment-004",
+  "locale": "ko",
+  "category": "unique_equipment",
+  "sourceFile": "KOR_unique장비.txt",
+  "sourceItemIndex": 4,
+  "notes": [],
+  "expected": {
+    "rarity": "고유",
+    "itemName": "조프리의 문양",
+    "baseType": "대형 왕관"
+  }
+}

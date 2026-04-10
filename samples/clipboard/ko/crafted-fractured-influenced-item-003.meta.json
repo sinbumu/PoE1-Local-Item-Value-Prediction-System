@@ -1,0 +1,13 @@
+{
+  "id": "crafted-fractured-influenced-item-003",
+  "locale": "ko",
+  "category": "crafted_fractured_influenced_item",
+  "sourceFile": "KOR_crafted_fractured_influenced_아이템.txt",
+  "sourceItemIndex": 3,
+  "notes": [],
+  "expected": {
+    "rarity": "희귀",
+    "itemName": "역병 길",
+    "baseType": "혼령 장화"
+  }
+}

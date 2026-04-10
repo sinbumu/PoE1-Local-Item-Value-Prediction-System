@@ -1,0 +1,19 @@
+Item Class: Gloves
+Rarity: Rare
+Mind Hand
+Precursor Gauntlets
+--------
+Armour: 352
+--------
+Requirements:
+Level: 78
+Str: 125
+--------
+Sockets: R-R-R-B 
+--------
+Item Level: 85
+--------
++41 to Strength
+16% increased Attack Speed
++124 to maximum Life
++45% to Cold Resistance

@@ -1,0 +1,42 @@
+Item Class: Skill Gems
+Rarity: Gem
+Volcanic Fissure
+--------
+Melee, Attack, Projectile, AoE, Slam, Fire, Vaal
+Level: 1
+Cost: 8 Mana
+Attack Speed: 80% of base
+Attack Damage: 177.9% of base
+Effectiveness of Added Damage: 177%
+--------
+Requirements:
+Level: 12
+Str: 33
+--------
+Slam the ground, creating a winding fissure that deals area damage while travelling outwards. When it reaches the target location it erupts, releasing a burst of molten projectiles. Requires an Axe, Mace, Sceptre, Staff or Unarmed.
+--------
+Fires 5 Projectiles
+60% of Physical Damage Converted to Fire Damage
+Projectiles deal 50% less Damage with Hits and Ailments
+--------
+Vaal Volcanic Fissure
+--------
+Souls Per Use: 25
+Can Store 1 Use
+Soul Gain Prevention: 6 sec
+Attack Speed: 80% of base
+Attack Damage: 201.2% of base
+Effectiveness of Added Damage: 201%
+--------
+Slam the ground, creating a winding fissure that deals area damage while travelling outwards. When it reaches the target location it erupts, releasing a burst of molten projectiles. After erupting, the fissure continues moving towards enemies to cause further eruptions. Requires an Axe, Mace, Sceptre, Staff or Unarmed.
+--------
+Fires 9 Projectiles
+60% of Physical Damage Converted to Fire Damage
+50% more Area of Effect
+Fissure erupts 5 additional times
+--------
+Experience: 1/15,249
+--------
+Place into an item socket of the right colour to gain this skill. Right click to remove from a socket.
+--------
+Corrupted

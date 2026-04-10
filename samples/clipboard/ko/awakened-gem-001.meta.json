@@ -1,0 +1,13 @@
+{
+  "id": "awakened-gem-001",
+  "locale": "ko",
+  "category": "awakened_gem",
+  "sourceFile": "KOR_Awakened_gem.txt",
+  "sourceItemIndex": 1,
+  "notes": [],
+  "expected": {
+    "rarity": "젬",
+    "itemName": "각성한 향상 보조",
+    "baseType": "각성한 향상 보조"
+  }
+}

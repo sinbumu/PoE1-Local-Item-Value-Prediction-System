@@ -1,0 +1,13 @@
+{
+  "id": "cluster-jewel-003",
+  "locale": "ko",
+  "category": "cluster_jewel",
+  "sourceFile": "KOR_cluster_jewel.txt",
+  "sourceItemIndex": 3,
+  "notes": [],
+  "expected": {
+    "rarity": "희귀",
+    "itemName": "명예의불꽃",
+    "baseType": "중형 스킬 군 주얼"
+  }
+}

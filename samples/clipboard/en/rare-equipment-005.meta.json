@@ -1,0 +1,13 @@
+{
+  "id": "rare-equipment-005",
+  "locale": "en",
+  "category": "rare_equipment",
+  "sourceFile": "EN_rare장비.txt",
+  "sourceItemIndex": 5,
+  "notes": [],
+  "expected": {
+    "rarity": "Rare",
+    "itemName": "Plague Gnarl",
+    "baseType": "Prophecy Wand"
+  }
+}

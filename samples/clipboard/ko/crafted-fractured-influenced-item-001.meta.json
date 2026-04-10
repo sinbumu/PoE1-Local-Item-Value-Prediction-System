@@ -1,0 +1,13 @@
+{
+  "id": "crafted-fractured-influenced-item-001",
+  "locale": "ko",
+  "category": "crafted_fractured_influenced_item",
+  "sourceFile": "KOR_crafted_fractured_influenced_아이템.txt",
+  "sourceItemIndex": 1,
+  "notes": [],
+  "expected": {
+    "rarity": "희귀",
+    "itemName": "불사조 손톱",
+    "baseType": "악령술사 장갑"
+  }
+}

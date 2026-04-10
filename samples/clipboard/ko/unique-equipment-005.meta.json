@@ -1,0 +1,13 @@
+{
+  "id": "unique-equipment-005",
+  "locale": "ko",
+  "category": "unique_equipment",
+  "sourceFile": "KOR_unique장비.txt",
+  "sourceItemIndex": 5,
+  "notes": [],
+  "expected": {
+    "rarity": "고유",
+    "itemName": "태풍불길",
+    "baseType": "오팔 반지"
+  }
+}

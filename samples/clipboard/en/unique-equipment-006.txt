@@ -1,0 +1,30 @@
+Item Class: Two Hand Swords
+Rarity: Unique
+The Living Blade
+Ezomyte Blade
+--------
+Two Handed Sword
+Physical Damage: 147-273 (augmented)
+Critical Strike Chance: 6.50%
+Attacks per Second: 1.80 (augmented)
+Weapon Range: 1.3 metres
+--------
+Requirements:
+Level: 61
+Str: 113
+Dex: 113
+--------
+Sockets: B 
+--------
+Item Level: 86
+--------
++25% to Global Critical Strike Multiplier (implicit)
+--------
+137% increased Physical Damage
+28% increased Attack Speed
+Cannot be Poisoned
+You can have an additional Tincture active
+10% chance to remove 1 Mana Burn on Kill
+--------
+Green-cloaked travelers emerged from the mists, planted a tree,
+and named it Lorrata. Its strongest root became a weapon...

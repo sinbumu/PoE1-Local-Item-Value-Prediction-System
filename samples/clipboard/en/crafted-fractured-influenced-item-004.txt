@@ -1,0 +1,32 @@
+Item Class: Helmets
+Rarity: Rare
+Sorrow Shelter
+Divine Crown
+--------
+Quality: +20% (augmented)
+Armour: 850 (augmented)
+Energy Shield: 198 (augmented)
+--------
+Requirements:
+Level: 84
+Str: 132
+Dex: 119
+Int: 132
+--------
+Sockets: R-G R-B 
+--------
+Item Level: 85
+--------
+7% of Physical Damage from Hits taken as Lightning Damage (implicit)
+20% reduced Mana Cost of Attacks (implicit)
+--------
++565 to Accuracy Rating
+20% increased Global Accuracy Rating
++13 to maximum Energy Shield
++106 to maximum Life
++19 to maximum Mana
++29% to Chaos Resistance
+15% increased Light Radius
+74% increased Armour and Energy Shield (crafted)
+Searing Exarch Item
+Eater of Worlds Item

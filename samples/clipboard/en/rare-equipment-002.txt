@@ -1,0 +1,28 @@
+Item Class: Shields
+Rarity: Rare
+Bramble Tower
+Archon Kite Shield
+--------
+Chance to Block: 22%
+Armour: 557 (augmented)
+Energy Shield: 136 (augmented)
+--------
+Requirements:
+Level: 68
+Str: 85
+Int: 85
+--------
+Sockets: R-B-B 
+--------
+Item Level: 86
+--------
++12% to all Elemental Resistances (implicit)
+--------
+You take 60% reduced Extra Damage from Critical Strikes
++216 to Armour
+42% increased Armour and Energy Shield
++60 to maximum Energy Shield
++114 to maximum Life
++3% to maximum Cold Resistance
++35% to Cold Resistance
+17% increased Stun and Block Recovery

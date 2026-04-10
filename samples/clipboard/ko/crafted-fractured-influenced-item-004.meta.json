@@ -1,0 +1,13 @@
+{
+  "id": "crafted-fractured-influenced-item-004",
+  "locale": "ko",
+  "category": "crafted_fractured_influenced_item",
+  "sourceFile": "KOR_crafted_fractured_influenced_아이템.txt",
+  "sourceItemIndex": 4,
+  "notes": [],
+  "expected": {
+    "rarity": "희귀",
+    "itemName": "슬픔의 대피소",
+    "baseType": "신성한 왕관"
+  }
+}

@@ -1,0 +1,24 @@
+Item Class: Body Armours
+Rarity: Rare
+Corpse Skin
+Necrotic Armour
+--------
+Evasion Rating: 1056 (augmented)
+Energy Shield: 217 (augmented)
+Memory Strands: 83
+--------
+Requirements:
+Level: 84
+Dex: 173
+Int: 173
+--------
+Sockets: B B 
+--------
+Item Level: 85
+--------
++51 to Dexterity
++54 to Intelligence
++295 to Evasion Rating
++64 to maximum Energy Shield
++70 to maximum Mana
++45% to Fire Resistance

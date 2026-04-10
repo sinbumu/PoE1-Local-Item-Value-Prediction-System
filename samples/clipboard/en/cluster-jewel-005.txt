@@ -1,0 +1,21 @@
+Item Class: Jewels
+Rarity: Unique
+Megalomaniac
+Medium Cluster Jewel
+--------
+Requirements:
+Level: 60
+--------
+Item Level: 84
+--------
+Adds 4 Passive Skills
+Added Small Passive Skills grant Nothing
+1 Added Passive Skill is Distilled Perfection
+1 Added Passive Skill is Enduring Focus
+1 Added Passive Skill is Unrestrained Focus
+--------
+If you're going to act like you're better than everyone else, make sure you are.
+--------
+Place into an allocated Medium or Large Jewel Socket on the Passive Skill Tree. Added passives do not interact with jewel radiuses. Right click to remove from the Socket.
+--------
+Corrupted

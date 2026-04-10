@@ -1,0 +1,10 @@
+Item Class: Jewels
+Rarity: Normal
+Small Cluster Jewel
+--------
+Item Level: 73
+--------
+Adds 2 Passive Skills (enchant)
+Added Small Passive Skills grant: +15% to Fire Resistance (enchant)
+--------
+Place into an allocated Small, Medium or Large Jewel Socket on the Passive Skill Tree. Added passives do not interact with jewel radiuses. Right click to remove from the Socket.

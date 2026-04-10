@@ -1,0 +1,13 @@
+{
+  "id": "crafted-fractured-influenced-item-002",
+  "locale": "ko",
+  "category": "crafted_fractured_influenced_item",
+  "sourceFile": "KOR_crafted_fractured_influenced_아이템.txt",
+  "sourceItemIndex": 2,
+  "notes": [],
+  "expected": {
+    "rarity": "희귀",
+    "itemName": "황혼 나뭇가지",
+    "baseType": "회오리 마법봉"
+  }
+}

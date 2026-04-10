@@ -1,0 +1,13 @@
+{
+  "id": "normal-jewel-003",
+  "locale": "ko",
+  "category": "normal_jewel",
+  "sourceFile": "KOR_일반jewel.txt",
+  "sourceItemIndex": 3,
+  "notes": [],
+  "expected": {
+    "rarity": "희귀",
+    "itemName": "엔트로피 눈",
+    "baseType": "코발트색 주얼"
+  }
+}

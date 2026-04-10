@@ -1,0 +1,40 @@
+Item Class: Skill Gems
+Rarity: Gem
+Reave
+--------
+Attack, AoE, Melee, Vaal
+Level: 1
+Cost: 6 Mana
+Attack Damage: 232.7% of base
+Effectiveness of Added Damage: 232%
+--------
+Requirements:
+Level: 12
+Dex: 21
+Int: 14
+--------
+Attacks an area in front of you. Each Reave that hits an enemy grants stages, which you will begin to lose after a short period without hitting anything. Only works with Daggers, Claws, and One-Handed Swords.
+--------
+4 Maximum Stages
+50% more Area of Effect for each stage
+--------
+Vaal Reave
+--------
+Souls Per Use: 25
+Can Store 3 Uses
+Soul Gain Prevention: 2 sec
+Attack Speed: 250% of base
+Attack Damage: 295.1% of base
+Effectiveness of Added Damage: 295%
+--------
+Repeatedly attacks a large area in different directions. Each Vaal Reave that hits an enemy grants stages, which you will begin to lose after a short period without hitting anything. Only works with Daggers, Claws, and One-Handed Swords.
+--------
+50% more Area of Effect for each stage
+Can't be Evaded
++4 to maximum Stages
+--------
+Experience: 1/15,249
+--------
+Place into an item socket of the right colour to gain this skill. Right click to remove from a socket.
+--------
+Corrupted

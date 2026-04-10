@@ -1,0 +1,17 @@
+Item Class: Jewels
+Rarity: Rare
+Foe Shard
+Cobalt Jewel
+--------
+Item Level: 85
+--------
+Hits have 12% chance to ignore Enemy Physical Damage Reduction (implicit)
+--------
+3% increased Cast Speed with Cold Skills
+10% increased Chaos Damage
+10% increased Global Critical Strike Chance
++13% to Critical Strike Multiplier for Spell Damage
+--------
+Place into an allocated Jewel Socket on the Passive Skill Tree. Right click to remove from the Socket.
+--------
+Corrupted

@@ -1,0 +1,27 @@
+Item Class: Shields
+Rarity: Rare
+Plague Charm
+Titanium Spirit Shield
+--------
+Quality: +20% (augmented)
+Chance to Block: 44% (augmented)
+Energy Shield: 82 (augmented)
+--------
+Requirements:
+Level: 70
+Str: 155
+Dex: 111
+Int: 159
+--------
+Sockets: G-R B 
+--------
+Item Level: 87
+--------
+79% increased Chance to Block
+106% increased Spell Damage
+19% chance to Avoid Elemental Ailments
++1 to maximum number of Summoned Totems
+Recover 5% of Energy Shield when you Block
+5% chance to deal Double Damage (crafted)
+--------
+Shaper Item
