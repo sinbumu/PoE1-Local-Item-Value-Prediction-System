@@ -449,6 +449,12 @@ npm run inspect:summary
 npm run build:training-features
 ```
 
+처음부터 끝까지 풀 백필:
+
+```bash
+npm run build:training-features -- --reset-cursor --until-end
+```
+
 커서를 리셋하고 처음부터 다시 스캔:
 
 ```bash
@@ -486,6 +492,12 @@ npm run build:training-features -- --limit=500 --max-batches=20
 npm run build:training-features-clean
 ```
 
+처음부터 끝까지 풀 백필:
+
+```bash
+npm run build:training-features-clean -- --reset-cursor --until-end
+```
+
 처음부터 다시 스캔:
 
 ```bash
@@ -508,6 +520,12 @@ npm run build:training-features-clean -- --reset-cursor
 npm run build:training-features-labeled
 ```
 
+처음부터 끝까지 풀 백필:
+
+```bash
+npm run build:training-features-labeled -- --reset-cursor --until-end
+```
+
 처음부터 다시 스캔:
 
 ```bash
@@ -526,6 +544,73 @@ npm run build:training-features-labeled -- --reset-cursor
 - 환율 스냅샷을 최근에 모으기 시작했다면, 그 이전 시점의 `training_features_clean` row는 일단 `missing_historical_exchange_rate`로 라벨링에서 제외될 수 있습니다.
 - 즉 과거 이미 수집된 매물에 대해서는 시점 이전 환율 스냅샷이 없으면 `training_features_labeled`에 아직 안 들어갈 수 있습니다.
 - 현재 `training_features_labeled`의 타깃은 `target_price_chaos`, `target_price_log1p`뿐이며, public listing에서의 disappearance 추정은 추후 별도 실험 과제입니다.
+
+### 실제 학습용 export
+
+`training_features_labeled`가 쌓인 뒤에는 최근 N일 구간을 학습용 CSV로 export할 수 있습니다.
+
+기본 예시:
+
+```bash
+npm run export:training-dataset -- --days=7
+```
+
+세그먼트 제한 예시:
+
+```bash
+npm run export:training-dataset -- --days=7 --segments=rare_equipment,jewel
+```
+
+출력:
+
+- 기본 경로: `artifacts/datasets/`
+- CSV와 동일 이름의 `.manifest.json`
+
+주의:
+
+- export는 `training_features_labeled`만 대상으로 합니다.
+- 즉 실제 CatBoost 학습 직전 단계의 canonical dataset export 용도입니다.
+
+### 추천 실행 순서
+
+실제 1차 학습을 준비할 때는 아래처럼 **순차 실행**하는 편이 가장 단순합니다.
+
+1. `npm run build:training-features -- --reset-cursor --until-end`
+2. `npm run build:training-features-clean -- --reset-cursor --until-end`
+3. `npm run build:training-features-labeled -- --reset-cursor --until-end`
+4. `npm run export:training-dataset -- --days=7`
+
+설명:
+
+- 각 단계는 별도 배치 작업이므로 전용 터미널 하나에서 실행하면 됩니다.
+- 다만 `raw -> clean -> labeled`는 동시에 돌리기보다 **앞 단계가 끝난 뒤 다음 단계 실행**을 권장합니다.
+- `collector`, `maintenance`는 계속 켜둬도 되지만, DB 부하가 크면 ETL 실행 중에는 상태를 보면서 조절하는 것이 좋습니다.
+
+## ML 디렉토리
+
+학습 코드는 저장소 내부 `ml/` 경로로 분리했습니다.
+
+구성:
+
+- `ml/train_catboost.py`: 첫 `CatBoost` 회귀 학습 골격
+- `ml/requirements.txt`: Python 학습 의존성
+- `ml/README.md`: 학습 실행 가이드
+
+기본 실행 예시:
+
+```bash
+python3 -m venv ml/.venv
+source ml/.venv/bin/activate
+pip install -r ml/requirements.txt
+python ml/train_catboost.py --dataset artifacts/datasets/YOUR_FILE.csv
+```
+
+현재 학습 스크립트 특징:
+
+1. 시간 순서 기준 `train / valid / test` 분할
+2. 기본 타깃은 `target_price_log1p`
+3. leakage 방지를 위해 `target_price_amount`, `target_price_currency`, `exchange_rate_*`, `target_price_*` 등 직접 라벨 관련 컬럼은 feature에서 자동 제외
+4. 결과물로 `model.cbm`, `metrics.json`, `feature_importance.csv`, `run_info.json` 저장
 
 ## league 관측 스크립트
 

@@ -23,14 +23,24 @@ async function main(): Promise<void> {
   const pipelineService = new TrainingFeaturePipelineService();
   const limit = readNumberFlag("--limit");
   const maxBatches = readNumberFlag("--max-batches");
+  const untilEnd = process.argv.includes("--until-end");
   const resetCursor = process.argv.includes("--reset-cursor");
+  const effectiveMaxBatches = untilEnd ? Number.MAX_SAFE_INTEGER : maxBatches;
 
   await pool.query("SELECT 1");
-  logger.info({ limit, maxBatches, resetCursor }, "Database connection verified");
+  logger.info(
+    {
+      limit,
+      maxBatches: effectiveMaxBatches,
+      untilEnd,
+      resetCursor,
+    },
+    "Database connection verified",
+  );
 
   const result = await pipelineService.buildRawFeatures({
     limit,
-    maxBatches,
+    maxBatches: effectiveMaxBatches,
     resetCursor,
   });
 
