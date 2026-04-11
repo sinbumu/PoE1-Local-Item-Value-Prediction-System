@@ -734,11 +734,11 @@ gunzip -c backup.sql.gz | psql "postgres://postgres:postgres@localhost:5432/poe_
 
 - 실제 운영 단계에서는 raw subset만 저장하더라도 장기 보관 정책은 따로 정하는 편이 좋음
 - MVP 학습용 데이터는 결국 `Mirage` 소프트코어 중심으로 더 좁혀야 할 가능성이 높음
-- 현재 권장 운영은 `raw_api_responses` 24시간 보관, `normalized_priced_items`는 `updated_at` 기준 7일 이상 미갱신된 stale listing만 압축 업로드 후 정리
+- 현재 권장 운영은 `raw_api_responses` 24시간 보관, `normalized_priced_items`는 `updated_at` 기준 7일 stale cleanup, 장기 canonical backup은 `training_features_labeled` 중심으로 가져가는 구조
 
 ## 현재 범위 밖
 
-- 최종 ML 학습 파이프라인
+- 최종 운영형 ML 학습 파이프라인
 - overlay/UI
 - AWS 배포
 - 모든 가격 메모 edge case 대응
@@ -746,12 +746,17 @@ gunzip -c backup.sql.gz | psql "postgres://postgres:postgres@localhost:5432/poe_
 
 ## 관련 문서
 
-- 계획 원문: `docs/PLAN.md`
-- 변경사항 및 운영 메모: `docs/IMPLEMENTATION_NOTES.md`
+- 문서 인덱스 / 현재 기준선: `docs/README.md`
+- 현재 학습/ETL 기준 문서: `docs/TRAINING_ETL_OVERVIEW.md`
+- 최신 handoff 요약: `docs/REPORT_HANDOFF.md`
 - 모델 스코프: `docs/MODEL_SCOPE.md`
 - 아이템 라우팅 분류표: `docs/ITEM_ROUTING.md`
-- 학습 피처 초안: `docs/TRAINING_FEATURES.md`
-- 저장 정책 초안: `docs/STORAGE_POLICY.md`
+- 현재 학습 피처 문서: `docs/TRAINING_FEATURES.md`
+- 현재 저장 정책 문서: `docs/STORAGE_POLICY.md`
+- 클립보드 호환 감사: `docs/CLIPBOARD_COMPATIBILITY_AUDIT.md`
+- affix dictionary 준비사항: `docs/AFFIX_DICTIONARY_REQUIREMENTS.md`
+- legacy 구현 메모: `docs/IMPLEMENTATION_NOTES.md`
+- legacy 초기 계획: `docs/PLAN.md`
 
 ## Third-party notice
 

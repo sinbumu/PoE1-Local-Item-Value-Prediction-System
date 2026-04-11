@@ -2,12 +2,13 @@
 
 ## 문서 상태
 
-이 문서는 프로젝트 초기에 작성된 **초기 collector 계획 문서**다.
+이 문서는 프로젝트 초기에 작성된 **초기 collector 계획 문서**이며, 현재는 `legacy` 문서로 취급한다.
 
 즉, 현재 구현 상태의 기준 문서가 아니라 역사적 기록에 가깝다.
 
 현재 상태를 보려면 아래 문서를 우선 참고한다.
 
+- `docs/README.md`
 - `docs/TRAINING_ETL_OVERVIEW.md`
 - `docs/TRAINING_FEATURES.md`
 - `docs/STORAGE_POLICY.md`

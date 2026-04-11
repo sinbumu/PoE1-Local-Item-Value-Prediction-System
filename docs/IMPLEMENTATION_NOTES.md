@@ -1,5 +1,17 @@
 # IMPLEMENTATION_NOTES.md
 
+## 문서 상태
+
+이 문서는 현재 구조의 기준 문서가 아니라, 프로젝트 진행 중 확인된 변경사항과 실측 결과를 쌓아둔 **legacy 성격의 구현 메모**다.
+
+즉, 현재 시스템 구조를 빠르게 이해하려면 이 문서보다 아래 문서를 먼저 보는 편이 좋다.
+
+- `docs/README.md`
+- `docs/TRAINING_ETL_OVERVIEW.md`
+- `docs/TRAINING_FEATURES.md`
+- `docs/STORAGE_POLICY.md`
+- `docs/REPORT_HANDOFF.md`
+
 ## 문서 목적
 
 이 문서는 초기 `docs/PLAN.md` 작성 이후 실제 구현 및 실측 과정에서 확인된 변경사항, 현재 의사결정, 운영 이슈를 정리하기 위한 메모입니다.
