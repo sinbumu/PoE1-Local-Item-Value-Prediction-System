@@ -476,12 +476,39 @@ npm run etl:training -- --daemon --limit=10000 --max-batches-per-stage=10 --poll
 
 설명:
 
-- 기본 `etl:training`은 `raw -> clean -> labeled`를 순서대로 끝까지 따라잡고 종료합니다.
+- 기본 `etl:training`은 `raw -> clean -> labeled`를 stage 단위로 순환하면서 따라잡고 종료합니다.
 - `--daemon`을 붙이면 각 단계 cursor를 이어받으며 반복 실행합니다.
 - 중간에 프로세스가 종료되어도 재실행 시 각 단계의 cursor 기준으로 이어서 진행됩니다.
 - `--reset-cursors`는 `raw/clean/labeled` 3개 cursor를 모두 초기화하고 다시 시작합니다.
 - `--limit`은 세 단계 공통 batch 크기입니다.
 - 필요하면 `--raw-limit`, `--clean-limit`, `--labeled-limit`으로 단계별 override도 가능합니다.
+- one-off 실행에도 `--max-batches-per-stage`, `--raw-max-batches`, `--clean-max-batches`, `--labeled-max-batches`를 줄 수 있습니다.
+
+운영 가이드:
+
+- `etl:training`은 항상 **단일 프로세스만** 유지하는 것을 권장합니다.
+- 특히 `--daemon` 모드 재시작 전에는 잔류 ETL 프로세스가 없는지 먼저 확인합니다.
+- 과거 daemon이 남아 있으면 advisory lock 때문에 cycle이 skip되거나, 어떤 프로세스가 실제로 진행 중인지 판단이 흐려질 수 있습니다.
+
+실행 전 잔류 확인 예:
+
+```bash
+ps -axo pid=,ppid=,etime=,state=,command= | rg "run-training-etl.ts|etl:training"
+```
+
+잔류 프로세스가 있으면 먼저 종료:
+
+```bash
+kill <PID>
+```
+
+여러 개가 남아 있으면 모두 정리한 뒤 다시 확인:
+
+```bash
+ps -axo pid=,ppid=,etime=,state=,command= | rg "run-training-etl.ts|etl:training"
+```
+
+그 다음에만 새 ETL을 시작하는 것을 권장합니다.
 
 개별 단계 스크립트도 여전히 유지되지만, 디버깅이나 특정 단계만 재실행할 때만 쓰는 것을 권장합니다.
 

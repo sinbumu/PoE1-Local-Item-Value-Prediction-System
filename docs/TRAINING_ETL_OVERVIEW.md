@@ -108,6 +108,7 @@
 핵심 구조:
 
 - `training_features_raw -> clean -> labeled`
+- one-off 실행도 stage 단위 round-robin 진행
 - cursor 기반 재개
 - advisory lock 기반 동시 실행 방지
 - one-off 백필 가능
@@ -126,6 +127,45 @@ npm run etl:training -- --daemon --limit=10000
 ```
 
 즉, 현재는 3단계를 사람이 수동으로 이어서 돌리는 구조가 아니라, 하나의 실행 흐름으로 관리되는 상태다.
+
+### 실행 전 점검 규칙
+
+운영 시 중요한 규칙:
+
+- `etl:training`은 항상 **단일 프로세스만** 유지하는 것을 권장한다
+- 새 ETL 시작 전에는 잔류 daemon / one-off 프로세스가 없는지 먼저 확인한다
+- 잔류 프로세스가 있으면 먼저 종료한 뒤 재시작한다
+
+이유:
+
+- 잔류 ETL이 있으면 advisory lock 때문에 새 cycle이 계속 skip될 수 있다
+- 또는 로그상으로는 여러 ETL이 섞여 보여 실제 진행 상태를 잘못 해석할 수 있다
+- backlog가 큰 상황에서는 어떤 단계가 실제로 전진하는지 혼동하기 쉽다
+
+확인 예:
+
+```bash
+ps -axo pid=,ppid=,etime=,state=,command= | rg "run-training-etl.ts|etl:training"
+```
+
+종료 예:
+
+```bash
+kill <PID>
+```
+
+권장 순서:
+
+1. 잔류 ETL 프로세스 확인
+2. 남아 있으면 모두 종료
+3. 프로세스 목록이 비었는지 다시 확인
+4. 그 다음 새 `etl:training` 실행
+
+### 현재 runner 동작 메모
+
+현재 one-off `etl:training`은 `raw`를 끝까지 먼저 다 밀고 나서 다음 단계로 넘어가는 구조가 아니라, 각 cycle마다 `raw -> clean -> labeled`를 순환하며 진행한다.
+
+즉 backlog가 커도 `clean`, `labeled`가 장시간 굶지 않도록 설계되어 있다.
 
 ## 현재 학습 입력 정책
 

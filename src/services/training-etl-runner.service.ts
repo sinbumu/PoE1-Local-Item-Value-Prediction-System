@@ -37,6 +37,10 @@ type RunUntilStableOptions = {
   rawLimit?: number;
   cleanLimit?: number;
   labeledLimit?: number;
+  maxBatchesPerStage?: number;
+  rawMaxBatches?: number;
+  cleanMaxBatches?: number;
+  labeledMaxBatches?: number;
   resetCursors?: boolean;
 };
 
@@ -49,6 +53,7 @@ type RunForeverOptions = RunUntilStableOptions & {
 };
 
 const DEFAULT_LIMIT = 10000;
+const DEFAULT_RUN_UNTIL_STABLE_MAX_BATCHES_PER_STAGE = 1;
 const DEFAULT_MAX_BATCHES_PER_STAGE = 10;
 const DEFAULT_POLL_INTERVAL_MS = 60000;
 const TRAINING_ETL_LOCK_KEY = 71005;
@@ -61,21 +66,76 @@ export class TrainingEtlRunnerService {
   ) {}
 
   async runUntilStable(options?: RunUntilStableOptions): Promise<TrainingEtlCycleResult> {
-    const runOptions = this.resolveRunUntilStableOptions(options);
     const result = await this.withAdvisoryLock("training_etl_runner", async () => {
-      const cycleResult = await this.runCycle(runOptions);
+      let shouldResetCursors = options?.resetCursors ?? false;
+      let cycleCount = 0;
+      let rawResult = this.createEmptyRawResult();
+      let cleanResult = this.createEmptyCleanResult();
+      let labeledResult = this.createEmptyLabeledResult();
+
+      while (true) {
+        cycleCount += 1;
+        const cycleOptions = this.resolveRunUntilStableCycleOptions({
+          ...options,
+          resetCursors: shouldResetCursors,
+        });
+        const cycleResult = await this.runCycle(cycleOptions);
+        rawResult = this.mergeRawResults(rawResult, cycleResult.raw);
+        cleanResult = this.mergeCleanResults(cleanResult, cycleResult.clean);
+        labeledResult = this.mergeLabeledResults(labeledResult, cycleResult.labeled);
+        shouldResetCursors = false;
+
+        logger.info(
+          {
+            cycle: cycleCount,
+            rawProcessedRows: cycleResult.raw.processedRows,
+            cleanProcessedRows: cycleResult.clean.processedRows,
+            labeledProcessedRows: cycleResult.labeled.processedRows,
+            rawReachedEnd: cycleResult.raw.reachedEnd,
+            cleanReachedEnd: cycleResult.clean.reachedEnd,
+            labeledReachedEnd: cycleResult.labeled.reachedEnd,
+          },
+          "Training ETL run-until-stable cycle checkpoint",
+        );
+
+        if (
+          cycleResult.raw.reachedEnd &&
+          cycleResult.clean.reachedEnd &&
+          cycleResult.labeled.reachedEnd
+        ) {
+          break;
+        }
+
+        if (
+          cycleResult.raw.processedRows === 0 &&
+          cycleResult.clean.processedRows === 0 &&
+          cycleResult.labeled.processedRows === 0
+        ) {
+          logger.warn(
+            { cycle: cycleCount },
+            "Training ETL run-until-stable made no progress; stopping early",
+          );
+          break;
+        }
+      }
+
       logger.info(
         {
-          rawProcessedRows: cycleResult.raw.processedRows,
-          cleanProcessedRows: cycleResult.clean.processedRows,
-          labeledProcessedRows: cycleResult.labeled.processedRows,
-          rawReachedEnd: cycleResult.raw.reachedEnd,
-          cleanReachedEnd: cycleResult.clean.reachedEnd,
-          labeledReachedEnd: cycleResult.labeled.reachedEnd,
+          cycles: cycleCount,
+          rawProcessedRows: rawResult.processedRows,
+          cleanProcessedRows: cleanResult.processedRows,
+          labeledProcessedRows: labeledResult.processedRows,
+          rawReachedEnd: rawResult.reachedEnd,
+          cleanReachedEnd: cleanResult.reachedEnd,
+          labeledReachedEnd: labeledResult.reachedEnd,
         },
         "Training ETL run-until-stable cycle completed",
       );
-      return cycleResult;
+      return {
+        raw: rawResult,
+        clean: cleanResult,
+        labeled: labeledResult,
+      };
     });
 
     if (result === null) {
@@ -177,28 +237,101 @@ export class TrainingEtlRunnerService {
     };
   }
 
-  private resolveRunUntilStableOptions(
+  private resolveRunUntilStableCycleOptions(
     options?: RunUntilStableOptions,
   ): TrainingEtlRunOptions {
     const sharedLimit = options?.limit ?? DEFAULT_LIMIT;
     const resetCursors = options?.resetCursors ?? false;
+    const maxBatchesPerStage =
+      options?.maxBatchesPerStage ?? DEFAULT_RUN_UNTIL_STABLE_MAX_BATCHES_PER_STAGE;
 
     return {
       raw: {
         limit: options?.rawLimit ?? sharedLimit,
-        maxBatches: Number.MAX_SAFE_INTEGER,
+        maxBatches: options?.rawMaxBatches ?? maxBatchesPerStage,
         resetCursor: resetCursors,
       },
       clean: {
         limit: options?.cleanLimit ?? sharedLimit,
-        maxBatches: Number.MAX_SAFE_INTEGER,
+        maxBatches: options?.cleanMaxBatches ?? maxBatchesPerStage,
         resetCursor: resetCursors,
       },
       labeled: {
         limit: options?.labeledLimit ?? sharedLimit,
-        maxBatches: Number.MAX_SAFE_INTEGER,
+        maxBatches: options?.labeledMaxBatches ?? maxBatchesPerStage,
         resetCursor: resetCursors,
       },
+    };
+  }
+
+  private createEmptyRawResult(): BuildTrainingFeaturesResult {
+    return {
+      processedRows: 0,
+      batches: 0,
+      finalCursor: null,
+      reachedEnd: false,
+    };
+  }
+
+  private createEmptyCleanResult(): BuildTrainingFeatureCleanResult {
+    return {
+      processedRows: 0,
+      keptRows: 0,
+      droppedRows: 0,
+      batches: 0,
+      finalCursor: null,
+      reachedEnd: false,
+    };
+  }
+
+  private createEmptyLabeledResult(): BuildTrainingFeatureLabeledResult {
+    return {
+      processedRows: 0,
+      keptRows: 0,
+      droppedRows: 0,
+      batches: 0,
+      finalCursor: null,
+      reachedEnd: false,
+    };
+  }
+
+  private mergeRawResults(
+    aggregate: BuildTrainingFeaturesResult,
+    cycle: BuildTrainingFeaturesResult,
+  ): BuildTrainingFeaturesResult {
+    return {
+      processedRows: aggregate.processedRows + cycle.processedRows,
+      batches: aggregate.batches + cycle.batches,
+      finalCursor: cycle.finalCursor ?? aggregate.finalCursor,
+      reachedEnd: cycle.reachedEnd,
+    };
+  }
+
+  private mergeCleanResults(
+    aggregate: BuildTrainingFeatureCleanResult,
+    cycle: BuildTrainingFeatureCleanResult,
+  ): BuildTrainingFeatureCleanResult {
+    return {
+      processedRows: aggregate.processedRows + cycle.processedRows,
+      keptRows: aggregate.keptRows + cycle.keptRows,
+      droppedRows: aggregate.droppedRows + cycle.droppedRows,
+      batches: aggregate.batches + cycle.batches,
+      finalCursor: cycle.finalCursor ?? aggregate.finalCursor,
+      reachedEnd: cycle.reachedEnd,
+    };
+  }
+
+  private mergeLabeledResults(
+    aggregate: BuildTrainingFeatureLabeledResult,
+    cycle: BuildTrainingFeatureLabeledResult,
+  ): BuildTrainingFeatureLabeledResult {
+    return {
+      processedRows: aggregate.processedRows + cycle.processedRows,
+      keptRows: aggregate.keptRows + cycle.keptRows,
+      droppedRows: aggregate.droppedRows + cycle.droppedRows,
+      batches: aggregate.batches + cycle.batches,
+      finalCursor: cycle.finalCursor ?? aggregate.finalCursor,
+      reachedEnd: cycle.reachedEnd,
     };
   }
 

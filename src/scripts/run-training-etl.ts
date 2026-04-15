@@ -70,6 +70,10 @@ async function main(): Promise<void> {
     rawLimit,
     cleanLimit,
     labeledLimit,
+    maxBatchesPerStage,
+    rawMaxBatches,
+    cleanMaxBatches,
+    labeledMaxBatches,
     resetCursors,
   });
 
