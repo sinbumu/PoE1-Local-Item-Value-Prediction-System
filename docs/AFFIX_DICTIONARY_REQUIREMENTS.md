@@ -16,6 +16,12 @@
 
 현재 학습/ETL에는 `prefix_count`, `suffix_count`가 존재한다.
 
+현재 프로젝트 범위 결정:
+
+- 이번 캡스톤 과제 기간에는 **영문 PoE 클라이언트 대응만 V1 구현 범위로 본다.**
+- 한국어 지원은 유용하지만, 현재 학기 목표의 필수 완료 조건에는 포함하지 않는다.
+- 따라서 affix dictionary 관련 의사결정도 **영문 dictionary를 먼저 안정화하는 방향**으로 내려야 한다.
+
 하지만 게임 클라이언트의 `Ctrl+C` 원문에는:
 
 - 이 줄이 prefix인지 suffix인지
@@ -76,6 +82,11 @@
 ### 3. Locale Mapping
 
 영문/한글 클라이언트 모두 지원하려면 locale별 문자열이 같은 canonical mod로 연결되어야 한다.
+
+다만 현재 범위에서는 아래처럼 우선순위를 둔다.
+
+- **V1 필수:** 영문 locale mapping
+- **V2 선택:** 한국어 overlay mapping
 
 필수 대응 범위:
 
@@ -163,12 +174,12 @@ affix dictionary는 "explicit affix로 세야 하는 줄"만 정확히 대상으
 
 목표:
 
-- 영문/한글 `Ctrl+C` 원문을 안정적으로 block / section / header 단위로 파싱
+- 영문 `Ctrl+C` 원문을 안정적으로 block / section / header 단위로 파싱
 - 기본 헤더 정보, 상태 정보, mod lines 추출
 
 완료 조건:
 
-- 현재 샘플셋에서 locale / rarity / itemName / baseType 추출이 안정적
+- 현재 영문 샘플셋에서 locale / rarity / itemName / baseType 추출이 안정적
 
 ### 단계 2. Clipboard-safe Feature V1
 
@@ -213,7 +224,7 @@ affix dictionary는 "explicit affix로 세야 하는 줄"만 정확히 대상으
 
 완료 조건:
 
-- 샘플 fixture 기준 parity report 생성 가능
+- 영문 샘플 fixture 기준 parity report 생성 가능
 
 ## 결정이 필요한 정책 질문
 
