@@ -28,6 +28,8 @@ const resolvedEnv = {
   TARGET_LEAGUE: readOptionalString(rawEnv.TARGET_LEAGUE) ?? "Mirage",
   POE_REALM: readOptionalString(rawEnv.POE_REALM) ?? "pc",
   POLL_INTERVAL_MS: readOptionalString(rawEnv.POLL_INTERVAL_MS) ?? "10000",
+  COLLECTOR_EXCHANGE_RATE_INTERVAL_MS:
+    readOptionalString(rawEnv.COLLECTOR_EXCHANGE_RATE_INTERVAL_MS) ?? "900000",
   GOOGLE_CLIENT_ID: readOptionalString(rawEnv.GOOGLE_CLIENT_ID),
   GOOGLE_CLIENT_SECRET: readOptionalString(rawEnv.GOOGLE_CLIENT_SECRET),
   GOOGLE_REDIRECT_URI: readOptionalString(rawEnv.GOOGLE_REDIRECT_URI),
@@ -77,6 +79,11 @@ const envSchema = z.object({
   TARGET_LEAGUE: z.string().min(1).default("Mirage"),
   POE_REALM: z.enum(["pc", "xbox", "sony"]).default("pc"),
   POLL_INTERVAL_MS: z.coerce.number().int().positive().default(10000),
+  COLLECTOR_EXCHANGE_RATE_INTERVAL_MS: z.coerce
+    .number()
+    .int()
+    .positive()
+    .default(900000),
   GOOGLE_CLIENT_ID: z.string().min(1).optional(),
   GOOGLE_CLIENT_SECRET: z.string().min(1).optional(),
   GOOGLE_REDIRECT_URI: z.string().url().optional(),

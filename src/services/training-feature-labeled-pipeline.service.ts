@@ -11,6 +11,8 @@ type BuildTrainingFeatureLabeledOptions = {
   limit?: number;
   maxBatches?: number;
   resetCursor?: boolean;
+  sinceUpdatedAt?: string;
+  pruneBeforeRun?: boolean;
 };
 
 export type BuildTrainingFeatureLabeledResult = {
@@ -40,6 +42,7 @@ export class TrainingFeatureLabeledPipelineService {
   ): Promise<BuildTrainingFeatureLabeledResult> {
     const limit = options?.limit ?? DEFAULT_BATCH_LIMIT;
     const maxBatches = options?.maxBatches ?? DEFAULT_MAX_BATCHES;
+    const sinceUpdatedAt = options?.sinceUpdatedAt;
 
     await this.labeledRepository.ensureSchema();
     await this.cleanRepository.ensureSchema();
@@ -47,6 +50,14 @@ export class TrainingFeatureLabeledPipelineService {
 
     if (options?.resetCursor) {
       await this.stateRepository.resetCursor();
+    }
+
+    if (options?.pruneBeforeRun && sinceUpdatedAt) {
+      const deletedRowCount = await this.labeledRepository.deleteOlderThan(sinceUpdatedAt);
+      logger.info(
+        { sinceUpdatedAt, deletedRowCount },
+        "Training feature labeled prune-before-run completed",
+      );
     }
 
     let cursor = await this.stateRepository.getCursor();
@@ -57,7 +68,7 @@ export class TrainingFeatureLabeledPipelineService {
     let reachedEnd = false;
 
     while (batches < maxBatches) {
-      const sourceRows = await this.sourceRepository.getBatch(limit, cursor);
+      const sourceRows = await this.sourceRepository.getBatch(limit, cursor, sinceUpdatedAt);
       if (sourceRows.length === 0) {
         reachedEnd = true;
         break;
@@ -99,6 +110,7 @@ export class TrainingFeatureLabeledPipelineService {
           batchKeptRows: kept.length,
           batchDroppedRows: sourceRows.length - kept.length,
           dropReasons: Object.fromEntries(dropReasons),
+          sinceUpdatedAt,
           cursorUpdatedAt: cursor.updatedAt,
           cursorListingKey: cursor.listingKey,
         },

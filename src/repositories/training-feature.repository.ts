@@ -325,4 +325,21 @@ export class TrainingFeatureRepository {
 
     return features.length;
   }
+
+  async deleteOlderThan(sourceUpdatedAt: string): Promise<number> {
+    const result = await pool.query<{ deleted_count: string }>(
+      `
+        WITH deleted AS (
+          DELETE FROM training_features_raw
+          WHERE source_updated_at < $1::timestamptz
+          RETURNING 1
+        )
+        SELECT COUNT(*)::text AS deleted_count
+        FROM deleted
+      `,
+      [sourceUpdatedAt],
+    );
+
+    return Number(result.rows[0]?.deleted_count ?? 0);
+  }
 }

@@ -10,6 +10,8 @@ type BuildTrainingFeatureCleanOptions = {
   limit?: number;
   maxBatches?: number;
   resetCursor?: boolean;
+  sinceUpdatedAt?: string;
+  pruneBeforeRun?: boolean;
 };
 
 export type BuildTrainingFeatureCleanResult = {
@@ -38,12 +40,21 @@ export class TrainingFeatureCleanPipelineService {
   ): Promise<BuildTrainingFeatureCleanResult> {
     const limit = options?.limit ?? DEFAULT_BATCH_LIMIT;
     const maxBatches = options?.maxBatches ?? DEFAULT_MAX_BATCHES;
+    const sinceUpdatedAt = options?.sinceUpdatedAt;
 
     await this.cleanRepository.ensureSchema();
     await this.rawRepository.ensureSchema();
 
     if (options?.resetCursor) {
       await this.stateRepository.resetCursor();
+    }
+
+    if (options?.pruneBeforeRun && sinceUpdatedAt) {
+      const deletedRowCount = await this.cleanRepository.deleteOlderThan(sinceUpdatedAt);
+      logger.info(
+        { sinceUpdatedAt, deletedRowCount },
+        "Training feature clean prune-before-run completed",
+      );
     }
 
     let cursor = await this.stateRepository.getCursor();
@@ -54,7 +65,7 @@ export class TrainingFeatureCleanPipelineService {
     let reachedEnd = false;
 
     while (batches < maxBatches) {
-      const sourceRows = await this.sourceRepository.getBatch(limit, cursor);
+      const sourceRows = await this.sourceRepository.getBatch(limit, cursor, sinceUpdatedAt);
       if (sourceRows.length === 0) {
         reachedEnd = true;
         break;
@@ -96,6 +107,7 @@ export class TrainingFeatureCleanPipelineService {
           batchKeptRows: kept.length,
           batchDroppedRows: sourceRows.length - kept.length,
           dropReasons: Object.fromEntries(dropReasons),
+          sinceUpdatedAt,
           cursorUpdatedAt: cursor.updatedAt,
           cursorListingKey: cursor.listingKey,
         },

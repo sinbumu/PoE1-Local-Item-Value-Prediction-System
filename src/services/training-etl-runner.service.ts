@@ -18,6 +18,8 @@ type TrainingEtlStageOptions = {
   limit: number;
   maxBatches: number;
   resetCursor: boolean;
+  sinceUpdatedAt?: string;
+  pruneBeforeRun: boolean;
 };
 
 type TrainingEtlRunOptions = {
@@ -42,6 +44,8 @@ type RunUntilStableOptions = {
   cleanMaxBatches?: number;
   labeledMaxBatches?: number;
   resetCursors?: boolean;
+  sinceUpdatedAt?: string;
+  pruneBeforeRun?: boolean;
 };
 
 type RunForeverOptions = RunUntilStableOptions & {
@@ -78,6 +82,7 @@ export class TrainingEtlRunnerService {
         const cycleOptions = this.resolveRunUntilStableCycleOptions({
           ...options,
           resetCursors: shouldResetCursors,
+          pruneBeforeRun: shouldResetCursors && (options?.pruneBeforeRun ?? false),
         });
         const cycleResult = await this.runCycle(cycleOptions);
         rawResult = this.mergeRawResults(rawResult, cycleResult.raw);
@@ -162,6 +167,8 @@ export class TrainingEtlRunnerService {
         cleanMaxBatches: options?.cleanMaxBatches,
         labeledMaxBatches: options?.labeledMaxBatches,
         resetCursors: shouldResetCursors,
+        sinceUpdatedAt: options?.sinceUpdatedAt,
+        pruneBeforeRun: shouldResetCursors && (options?.pruneBeforeRun ?? false),
       });
 
       const cycleResult = await this.withAdvisoryLock(
@@ -176,6 +183,7 @@ export class TrainingEtlRunnerService {
               rawReachedEnd: result.raw.reachedEnd,
               cleanReachedEnd: result.clean.reachedEnd,
               labeledReachedEnd: result.labeled.reachedEnd,
+              sinceUpdatedAt: cycleOptions.raw.sinceUpdatedAt,
               pollIntervalMs,
             },
             "Training ETL daemon cycle completed",
@@ -208,6 +216,8 @@ export class TrainingEtlRunnerService {
         resetRawCursor: options.raw.resetCursor,
         resetCleanCursor: options.clean.resetCursor,
         resetLabeledCursor: options.labeled.resetCursor,
+        sinceUpdatedAt: options.raw.sinceUpdatedAt,
+        pruneBeforeRun: options.raw.pruneBeforeRun,
       },
       "Training ETL cycle started",
     );
@@ -216,18 +226,24 @@ export class TrainingEtlRunnerService {
       limit: options.raw.limit,
       maxBatches: options.raw.maxBatches,
       resetCursor: options.raw.resetCursor,
+      sinceUpdatedAt: options.raw.sinceUpdatedAt,
+      pruneBeforeRun: options.raw.pruneBeforeRun,
     });
 
     const clean = await this.cleanPipeline.buildCleanFeatures({
       limit: options.clean.limit,
       maxBatches: options.clean.maxBatches,
       resetCursor: options.clean.resetCursor,
+      sinceUpdatedAt: options.clean.sinceUpdatedAt,
+      pruneBeforeRun: options.clean.pruneBeforeRun,
     });
 
     const labeled = await this.labeledPipeline.buildLabeledFeatures({
       limit: options.labeled.limit,
       maxBatches: options.labeled.maxBatches,
       resetCursor: options.labeled.resetCursor,
+      sinceUpdatedAt: options.labeled.sinceUpdatedAt,
+      pruneBeforeRun: options.labeled.pruneBeforeRun,
     });
 
     return {
@@ -244,22 +260,30 @@ export class TrainingEtlRunnerService {
     const resetCursors = options?.resetCursors ?? false;
     const maxBatchesPerStage =
       options?.maxBatchesPerStage ?? DEFAULT_RUN_UNTIL_STABLE_MAX_BATCHES_PER_STAGE;
+    const sinceUpdatedAt = options?.sinceUpdatedAt;
+    const pruneBeforeRun = options?.pruneBeforeRun ?? false;
 
     return {
       raw: {
         limit: options?.rawLimit ?? sharedLimit,
         maxBatches: options?.rawMaxBatches ?? maxBatchesPerStage,
         resetCursor: resetCursors,
+        sinceUpdatedAt,
+        pruneBeforeRun,
       },
       clean: {
         limit: options?.cleanLimit ?? sharedLimit,
         maxBatches: options?.cleanMaxBatches ?? maxBatchesPerStage,
         resetCursor: resetCursors,
+        sinceUpdatedAt,
+        pruneBeforeRun,
       },
       labeled: {
         limit: options?.labeledLimit ?? sharedLimit,
         maxBatches: options?.labeledMaxBatches ?? maxBatchesPerStage,
         resetCursor: resetCursors,
+        sinceUpdatedAt,
+        pruneBeforeRun,
       },
     };
   }
@@ -348,6 +372,8 @@ export class TrainingEtlRunnerService {
         | "rawMaxBatches"
         | "cleanMaxBatches"
         | "labeledMaxBatches"
+        | "sinceUpdatedAt"
+        | "pruneBeforeRun"
       >,
   ): TrainingEtlRunOptions {
     const sharedLimit = options.limit ?? DEFAULT_LIMIT;
@@ -357,16 +383,22 @@ export class TrainingEtlRunnerService {
         limit: options.rawLimit ?? sharedLimit,
         maxBatches: options.rawMaxBatches ?? options.maxBatchesPerStage,
         resetCursor: options.resetCursors,
+        sinceUpdatedAt: options.sinceUpdatedAt,
+        pruneBeforeRun: options.pruneBeforeRun ?? false,
       },
       clean: {
         limit: options.cleanLimit ?? sharedLimit,
         maxBatches: options.cleanMaxBatches ?? options.maxBatchesPerStage,
         resetCursor: options.resetCursors,
+        sinceUpdatedAt: options.sinceUpdatedAt,
+        pruneBeforeRun: options.pruneBeforeRun ?? false,
       },
       labeled: {
         limit: options.labeledLimit ?? sharedLimit,
         maxBatches: options.labeledMaxBatches ?? options.maxBatchesPerStage,
         resetCursor: options.resetCursors,
+        sinceUpdatedAt: options.sinceUpdatedAt,
+        pruneBeforeRun: options.pruneBeforeRun ?? false,
       },
     };
   }

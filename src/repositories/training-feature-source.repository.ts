@@ -8,6 +8,7 @@ export class TrainingFeatureSourceRepository {
   async getBatch(
     limit: number,
     cursor?: TrainingFeatureCursor | null,
+    sinceUpdatedAt?: string,
   ): Promise<NormalizedPricedItemSourceRow[]> {
     const result = await pool.query<NormalizedPricedItemSourceRow>(
       `
@@ -26,13 +27,16 @@ export class TrainingFeatureSourceRepository {
           updated_at::text
         FROM normalized_priced_items
         WHERE
-          $1::timestamptz IS NULL
-          OR updated_at > $1::timestamptz
-          OR (updated_at = $1::timestamptz AND listing_key > $2)
+          ($4::timestamptz IS NULL OR updated_at >= $4::timestamptz)
+          AND (
+            $1::timestamptz IS NULL
+            OR updated_at > $1::timestamptz
+            OR (updated_at = $1::timestamptz AND listing_key > $2)
+          )
         ORDER BY updated_at ASC, listing_key ASC
         LIMIT $3
       `,
-      [cursor?.updatedAt ?? null, cursor?.listingKey ?? "", limit],
+      [cursor?.updatedAt ?? null, cursor?.listingKey ?? "", limit, sinceUpdatedAt ?? null],
     );
 
     return result.rows;

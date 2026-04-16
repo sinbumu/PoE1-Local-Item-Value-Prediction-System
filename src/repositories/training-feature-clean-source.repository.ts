@@ -8,6 +8,7 @@ export class TrainingFeatureCleanSourceRepository {
   async getBatch(
     limit: number,
     cursor?: TrainingFeatureCursor | null,
+    sinceUpdatedAt?: string,
   ): Promise<TrainingFeatureRaw[]> {
     const result = await pool.query<{
       listing_key: string;
@@ -139,13 +140,16 @@ export class TrainingFeatureCleanSourceRepository {
           gem_tags
         FROM training_features_raw
         WHERE
-          $1::timestamptz IS NULL
-          OR source_updated_at > $1::timestamptz
-          OR (source_updated_at = $1::timestamptz AND listing_key > $2)
+          ($4::timestamptz IS NULL OR source_updated_at >= $4::timestamptz)
+          AND (
+            $1::timestamptz IS NULL
+            OR source_updated_at > $1::timestamptz
+            OR (source_updated_at = $1::timestamptz AND listing_key > $2)
+          )
         ORDER BY source_updated_at ASC, listing_key ASC
         LIMIT $3
       `,
-      [cursor?.updatedAt ?? null, cursor?.listingKey ?? "", limit],
+      [cursor?.updatedAt ?? null, cursor?.listingKey ?? "", limit, sinceUpdatedAt ?? null],
     );
 
     return result.rows.map((row) => ({

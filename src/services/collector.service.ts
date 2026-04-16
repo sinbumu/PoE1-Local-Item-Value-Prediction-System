@@ -10,6 +10,7 @@ import { LeagueFilterService } from "./league-filter.service";
 import { NormalizeService } from "./normalize.service";
 import { IngestionActivitySummaryService } from "./ingestion-activity-summary.service";
 import { formatAxiosError, PoeApiService } from "./poe-api.service";
+import { ExchangeRateService } from "./exchange-rate.service";
 
 type CollectorCycleResult = {
   nextChangeId: string;
@@ -31,7 +32,40 @@ export class CollectorService {
     private readonly normalizeService = new NormalizeService(),
     private readonly leagueFilterService = new LeagueFilterService(),
     private readonly ingestionActivitySummaryService = new IngestionActivitySummaryService(),
+    private readonly exchangeRateService = new ExchangeRateService(),
   ) {}
+
+  private async maybeCollectExchangeRates(
+    lastCollectedAt: number,
+  ): Promise<number> {
+    const now = Date.now();
+    if (now - lastCollectedAt < env.COLLECTOR_EXCHANGE_RATE_INTERVAL_MS) {
+      return lastCollectedAt;
+    }
+
+    try {
+      const result = await this.exchangeRateService.collectSnapshots();
+      logger.info(
+        {
+          intervalMs: env.COLLECTOR_EXCHANGE_RATE_INTERVAL_MS,
+          insertedCount: result.insertedCount,
+          sampleTimeUtc: result.sampleTimeUtc,
+          divineChaosEquivalent: result.divineChaosEquivalent,
+        },
+        "Collector exchange rate tick completed",
+      );
+      return Date.now();
+    } catch (error) {
+      logger.warn(
+        {
+          error: formatAxiosError(error),
+          intervalMs: env.COLLECTOR_EXCHANGE_RATE_INTERVAL_MS,
+        },
+        "Collector exchange rate tick failed",
+      );
+      return lastCollectedAt;
+    }
+  }
 
   private async fetchPublicStashesWithAuthRetry(
     requestedChangeId?: string,
@@ -140,9 +174,14 @@ export class CollectorService {
   }
 
   async runForever(options?: CollectorRunOptions): Promise<void> {
+    let lastExchangeRateCollectedAt = 0;
+
     while (true) {
       try {
         const result = await this.runOnce(options);
+        lastExchangeRateCollectedAt = await this.maybeCollectExchangeRates(
+          lastExchangeRateCollectedAt,
+        );
         const delayMs = result.stashCount === 0 ? env.POLL_INTERVAL_MS : 1000;
 
         logger.info(

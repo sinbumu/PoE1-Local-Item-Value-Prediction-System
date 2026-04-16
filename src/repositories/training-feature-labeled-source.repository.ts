@@ -10,6 +10,7 @@ export class TrainingFeatureLabeledSourceRepository {
   async getBatch(
     limit: number,
     cursor?: TrainingFeatureCursor | null,
+    sinceUpdatedAt?: string,
   ): Promise<TrainingFeatureLabelSourceRow[]> {
     const result = await pool.query<{
       listing_key: string;
@@ -152,13 +153,16 @@ export class TrainingFeatureLabeledSourceRepository {
           LIMIT 1
         ) r ON TRUE
         WHERE
-          ($1::timestamptz IS NULL
+          ($4::timestamptz IS NULL OR c.source_updated_at >= $4::timestamptz)
+          AND (
+            $1::timestamptz IS NULL
             OR c.source_updated_at > $1::timestamptz
-            OR (c.source_updated_at = $1::timestamptz AND c.listing_key > $2))
+            OR (c.source_updated_at = $1::timestamptz AND c.listing_key > $2)
+          )
         ORDER BY c.source_updated_at ASC, c.listing_key ASC
         LIMIT $3
       `,
-      [cursor?.updatedAt ?? null, cursor?.listingKey ?? "", limit],
+      [cursor?.updatedAt ?? null, cursor?.listingKey ?? "", limit, sinceUpdatedAt ?? null],
     );
 
     return result.rows.map((row) => ({
