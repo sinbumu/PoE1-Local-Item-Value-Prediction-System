@@ -52,8 +52,8 @@ CREATE INDEX IF NOT EXISTS idx_normalized_priced_items_price_currency
 CREATE INDEX IF NOT EXISTS idx_normalized_priced_items_type_line
   ON normalized_priced_items (type_line);
 
-CREATE INDEX IF NOT EXISTS idx_normalized_priced_items_updated_at
-  ON normalized_priced_items (updated_at DESC);
+CREATE INDEX IF NOT EXISTS idx_normalized_priced_items_updated_at_listing_key
+  ON normalized_priced_items (updated_at ASC, listing_key ASC);
 
 CREATE TABLE IF NOT EXISTS ingestion_activity_summaries (
   id BIGSERIAL PRIMARY KEY,
@@ -140,8 +140,8 @@ CREATE TABLE IF NOT EXISTS training_features_raw (
   extracted_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS idx_training_features_raw_source_updated_at
-  ON training_features_raw (source_updated_at DESC);
+CREATE INDEX IF NOT EXISTS idx_training_features_raw_source_updated_at_listing_key
+  ON training_features_raw (source_updated_at ASC, listing_key ASC);
 
 CREATE INDEX IF NOT EXISTS idx_training_features_raw_item_class
   ON training_features_raw (item_class);
@@ -215,8 +215,8 @@ CREATE TABLE IF NOT EXISTS training_features_clean (
   cleaned_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS idx_training_features_clean_source_updated_at
-  ON training_features_clean (source_updated_at DESC);
+CREATE INDEX IF NOT EXISTS idx_training_features_clean_source_updated_at_listing_key
+  ON training_features_clean (source_updated_at ASC, listing_key ASC);
 
 CREATE INDEX IF NOT EXISTS idx_training_features_clean_model_segment
   ON training_features_clean (model_segment);
@@ -322,8 +322,8 @@ CREATE TABLE IF NOT EXISTS training_features_labeled (
   labeled_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS idx_training_features_labeled_source_updated_at
-  ON training_features_labeled (source_updated_at DESC);
+CREATE INDEX IF NOT EXISTS idx_training_features_labeled_source_updated_at_listing_key
+  ON training_features_labeled (source_updated_at ASC, listing_key ASC);
 
 CREATE INDEX IF NOT EXISTS idx_training_features_labeled_model_segment
   ON training_features_labeled (model_segment);

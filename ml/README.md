@@ -32,7 +32,7 @@ npm run build:training-features-labeled -- --reset-cursor --until-end
 주의:
 
 - 세 단계는 보통 **동시에 돌리기보다 순차 실행**이 안전합니다.
-- `collector`와 `maintenance`는 계속 켜둬도 되지만, DB 부하가 크면 ETL 중에는 잠시 관찰이 필요합니다.
+- `collector`는 계속 켜두고, ETL 중 DB 부하가 크면 `maintenance`는 잠시 내려두는 편이 안전합니다.
 
 ## 학습용 CSV export
 

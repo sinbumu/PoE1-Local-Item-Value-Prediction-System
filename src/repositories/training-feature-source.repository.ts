@@ -13,27 +13,26 @@ export class TrainingFeatureSourceRepository {
     const result = await pool.query<NormalizedPricedItemSourceRow>(
       `
         SELECT
-          listing_key,
-          item_id,
-          league,
-          base_type,
-          rarity,
-          frame_type,
-          listing_mode,
-          price_amount::text,
-          price_currency,
-          item_json,
-          inserted_at::text,
-          updated_at::text
-        FROM normalized_priced_items
+          n.listing_key,
+          n.item_id,
+          n.league,
+          n.base_type,
+          n.rarity,
+          n.frame_type,
+          n.listing_mode,
+          n.price_amount::text,
+          n.price_currency,
+          n.item_json,
+          n.inserted_at::text,
+          n.updated_at::text
+        FROM normalized_priced_items n
         WHERE
-          ($4::timestamptz IS NULL OR updated_at >= $4::timestamptz)
+          ($4::timestamptz IS NULL OR n.updated_at >= $4::timestamptz)
           AND (
             $1::timestamptz IS NULL
-            OR updated_at > $1::timestamptz
-            OR (updated_at = $1::timestamptz AND listing_key > $2)
+            OR (n.updated_at, n.listing_key) > ($1::timestamptz, $2::text)
           )
-        ORDER BY updated_at ASC, listing_key ASC
+        ORDER BY n.updated_at ASC, n.listing_key ASC
         LIMIT $3
       `,
       [cursor?.updatedAt ?? null, cursor?.listingKey ?? "", limit, sinceUpdatedAt ?? null],

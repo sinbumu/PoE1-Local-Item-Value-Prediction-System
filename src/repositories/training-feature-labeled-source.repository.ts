@@ -156,8 +156,7 @@ export class TrainingFeatureLabeledSourceRepository {
           ($4::timestamptz IS NULL OR c.source_updated_at >= $4::timestamptz)
           AND (
             $1::timestamptz IS NULL
-            OR c.source_updated_at > $1::timestamptz
-            OR (c.source_updated_at = $1::timestamptz AND c.listing_key > $2)
+            OR (c.source_updated_at, c.listing_key) > ($1::timestamptz, $2::text)
           )
         ORDER BY c.source_updated_at ASC, c.listing_key ASC
         LIMIT $3

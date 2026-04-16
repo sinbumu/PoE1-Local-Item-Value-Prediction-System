@@ -43,8 +43,6 @@ const resolvedEnv = {
   MAINTENANCE_RAW_CLEANUP_INTERVAL_MS:
     readOptionalString(rawEnv.MAINTENANCE_RAW_CLEANUP_INTERVAL_MS) ??
     "86400000",
-  MAINTENANCE_EXCHANGE_RATE_INTERVAL_MS:
-    readOptionalString(rawEnv.MAINTENANCE_EXCHANGE_RATE_INTERVAL_MS) ?? "900000",
   NORMALIZED_CLEANUP_LIMIT:
     readOptionalString(rawEnv.NORMALIZED_CLEANUP_LIMIT) ?? "100000",
   MAINTENANCE_NORMALIZED_CLEANUP_INTERVAL_MS:
@@ -101,11 +99,6 @@ const envSchema = z.object({
     .int()
     .positive()
     .default(86400000),
-  MAINTENANCE_EXCHANGE_RATE_INTERVAL_MS: z.coerce
-    .number()
-    .int()
-    .positive()
-    .default(900000),
   NORMALIZED_CLEANUP_LIMIT: z.coerce
     .number()
     .int()

@@ -11,7 +11,7 @@
 1. raw는 디버깅/재처리 보조 계층이지 장기 보관 본체가 아니다.
 2. `normalized_priced_items`는 feature extraction용 중간 계층이지 장기 canonical dataset이 아니다.
 3. 장기 보관의 핵심은 `training_features_labeled`와 그 export다.
-4. 저장 정책은 `collector`와 분리된 `maintenance`가 관리한다.
+4. 환율 스냅샷은 `collector`가 함께 수집하고, 정리/백업은 `maintenance`가 담당한다.
 
 ## 현재 저장 계층
 
@@ -61,7 +61,7 @@
 
 현재 정책:
 
-- maintenance가 주기적으로 누적
+- `collector`가 주기적으로 누적
 - labeled 생성에 직접 사용
 
 ### Layer 4: `training_features_raw`
@@ -115,8 +115,13 @@
 
 1. raw retention cleanup
 2. normalized stale cleanup
-3. exchange rate snapshot 수집
-4. `training_features_labeled` backup
+3. `training_features_labeled` backup
+
+## collector가 현재 함께 담당하는 것
+
+현재 `collector`는 public stash 수집 외에도 아래 작업을 함께 담당한다.
+
+1. exchange rate snapshot 수집
 
 즉, 예전처럼 normalized archive 업로드가 아니라:
 

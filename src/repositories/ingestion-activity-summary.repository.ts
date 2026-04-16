@@ -26,8 +26,8 @@ export class IngestionActivitySummaryRepository {
   async ensureSchema(): Promise<void> {
     const schemaStatements = [
       `
-        CREATE INDEX IF NOT EXISTS idx_normalized_priced_items_updated_at
-          ON normalized_priced_items (updated_at DESC);
+        CREATE INDEX IF NOT EXISTS idx_normalized_priced_items_updated_at_listing_key
+          ON normalized_priced_items (updated_at ASC, listing_key ASC);
       `,
       `
         CREATE TABLE IF NOT EXISTS ingestion_activity_summaries (

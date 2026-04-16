@@ -209,8 +209,8 @@ export class TrainingFeatureRepository {
     `);
 
     await pool.query(`
-      CREATE INDEX IF NOT EXISTS idx_training_features_raw_source_updated_at
-        ON training_features_raw (source_updated_at DESC);
+      CREATE INDEX IF NOT EXISTS idx_training_features_raw_source_updated_at_listing_key
+        ON training_features_raw (source_updated_at ASC, listing_key ASC);
     `);
 
     await pool.query(`

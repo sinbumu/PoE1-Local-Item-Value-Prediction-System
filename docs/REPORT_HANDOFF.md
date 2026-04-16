@@ -38,6 +38,7 @@ Path of Exile 1의 `public-stash-tabs` 데이터를 로컬에서 지속 수집�
 - `Mirage` softcore 기준 exact match 필터링
 - filtered raw 저장
 - priced item normalized 저장
+- `poe.ninja` 환율 스냅샷 주기 수집
 - `next_change_id` 기반 재시작/이어받기
 
 ### 2. Maintenance
@@ -46,7 +47,6 @@ Path of Exile 1의 `public-stash-tabs` 데이터를 로컬에서 지속 수집�
 
 - raw retention cleanup
 - normalized stale cleanup
-- exchange rate snapshot 수집
 - `training_features_labeled` Google Drive backup
 
 중요:

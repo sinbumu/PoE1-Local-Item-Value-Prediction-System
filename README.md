@@ -41,6 +41,7 @@ Path of Exile 1 `public-stash-tabs` 데이터를 로컬에서 수집하고, 원�
 - `TARGET_LEAGUE`
 - `POE_REALM` (`pc`, `xbox`, `sony`)
 - `POLL_INTERVAL_MS`
+- `COLLECTOR_EXCHANGE_RATE_INTERVAL_MS`
 - `GOOGLE_CLIENT_ID`
 - `GOOGLE_CLIENT_SECRET`
 - `GOOGLE_REFRESH_TOKEN`
@@ -49,7 +50,6 @@ Path of Exile 1 `public-stash-tabs` 데이터를 로컬에서 수집하고, 원�
 - `NORMALIZED_RETENTION_HOURS`
 - `MAINTENANCE_POLL_INTERVAL_MS`
 - `MAINTENANCE_RAW_CLEANUP_INTERVAL_MS`
-- `MAINTENANCE_EXCHANGE_RATE_INTERVAL_MS`
 - `NORMALIZED_CLEANUP_LIMIT`
 - `MAINTENANCE_NORMALIZED_CLEANUP_INTERVAL_MS`
 - `MAINTENANCE_NORMALIZED_CLEANUP_MAX_BATCHES`
@@ -89,9 +89,9 @@ Google Drive 업로드를 쓰려면:
 - `GOOGLE_DRIVE_FOLDER_ID`: 특정 Google Drive 폴더에 업로드
 - `RAW_RETENTION_HOURS`: raw 보관 시간
 - `NORMALIZED_RETENTION_HOURS`: normalized stale listing 판단 기준 시간 (`updated_at` 기준)
+- `COLLECTOR_EXCHANGE_RATE_INTERVAL_MS`: collector가 `poe.ninja` 환율 스냅샷을 추가 수집하는 주기
 - `MAINTENANCE_POLL_INTERVAL_MS`: maintenance 루프 체크 주기
 - `MAINTENANCE_RAW_CLEANUP_INTERVAL_MS`: raw cleanup 주기
-- `MAINTENANCE_EXCHANGE_RATE_INTERVAL_MS`: 환율 스냅샷 수집 주기
 - `NORMALIZED_CLEANUP_LIMIT`: 1회 stale normalized cleanup 최대 row 수
 - `MAINTENANCE_NORMALIZED_CLEANUP_INTERVAL_MS`: stale normalized cleanup 주기
 - `MAINTENANCE_NORMALIZED_CLEANUP_MAX_BATCHES`: 1회 maintenance stale cleanup 최대 배치 수
@@ -120,6 +120,7 @@ Google Drive 업로드를 쓰려면:
 | `TARGET_LEAGUE` | 선택 | 기본값 `Mirage` |
 | `POE_REALM` | 선택 | `pc`, `xbox`, `sony` 중 하나 |
 | `POLL_INTERVAL_MS` | 선택 | collector 반복 간격(ms) |
+| `COLLECTOR_EXCHANGE_RATE_INTERVAL_MS` | 선택 | collector의 환율 스냅샷 수집 주기(ms) |
 
 #### Google Drive / Backup
 
@@ -133,7 +134,6 @@ Google Drive 업로드를 쓰려면:
 | `NORMALIZED_RETENTION_HOURS` | 선택 | `normalized_priced_items` stale listing 판단 기준 시간 (`updated_at` 기준, 기본 `168`) |
 | `MAINTENANCE_POLL_INTERVAL_MS` | 선택 | maintenance 루프 체크 주기(ms) |
 | `MAINTENANCE_RAW_CLEANUP_INTERVAL_MS` | 선택 | raw cleanup 주기(ms) |
-| `MAINTENANCE_EXCHANGE_RATE_INTERVAL_MS` | 선택 | 환율 스냅샷 수집 주기(ms) |
 | `NORMALIZED_CLEANUP_LIMIT` | 선택 | 1회 stale normalized cleanup 최대 row 수 |
 | `MAINTENANCE_NORMALIZED_CLEANUP_INTERVAL_MS` | 선택 | stale normalized cleanup 주기(ms) |
 | `MAINTENANCE_NORMALIZED_CLEANUP_MAX_BATCHES` | 선택 | 1회 maintenance stale cleanup 최대 배치 수 |
@@ -192,7 +192,8 @@ npm run collector:once -- --start-latest
 4. 필터링된 raw subset 저장
 5. priced item 일부 정규화
 6. 최신 `next_change_id` 저장
-7. 재시작 시 이전 state부터 재개
+7. 주기적으로 `poe.ninja` 환율 스냅샷도 함께 수집
+8. 재시작 시 이전 state부터 재개
 
 중요:
 
@@ -284,15 +285,13 @@ npm run maintenance -- --once --older-than-hours=168 --normalized-cleanup-limit=
 2. `normalized_priced_items`에서 `updated_at` 기준 `NORMALIZED_RETENTION_HOURS`보다 오래된 stale listing을 batch delete
 3. `training_features_labeled`를 Google Drive로 증분 백업
 4. advisory lock으로 maintenance 작업끼리의 중복 실행 방지
-5. `poe.ninja` currencyoverview 기준 환율 스냅샷 수집
-6. collector / 환율 수집 시점에 `ingestion_activity_summaries`를 시간/일 단위로 누적 갱신
+5. cleanup / backup 시점에 `ingestion_activity_summaries`를 시간/일 단위로 누적 갱신
 
 collector와 동시 실행:
 
 - `raw` cleanup은 동시 실행해도 무방
 - `maintenance`의 stale normalized cleanup도 collector와 함께 돌릴 수 있음
 - `training_features_labeled` backup도 collector와 독립적으로 함께 돌릴 수 있음
-- 환율 스냅샷 수집도 collector와 독립적으로 함께 돌릴 수 있음
 - 단, 아주 큰 batch를 자주 돌리면 DB I/O는 증가하므로 `limit`과 주기를 조절하는 편이 좋음
 
 ### Exchange Rate Snapshots
@@ -345,7 +344,7 @@ npm run collect:exchange-rates -- --league=Mirage
 
 ## 실제 운영 가이드
 
-로컬에서 지금 기준으로 가장 단순한 운영 방식은 `collector`와 `maintenance`를 각각 별도 터미널에서 계속 실행하는 것입니다.
+로컬에서 지금 기준으로 가장 단순한 운영 방식은 `collector`를 계속 실행하고, `maintenance`는 필요에 따라 함께 돌리거나 잠시 내려두는 것입니다.
 
 ### 권장 구성
 
@@ -355,19 +354,13 @@ npm run collect:exchange-rates -- --league=Mirage
 npm run collector
 ```
 
-터미널 2:
-
-```bash
-npm run maintenance
-```
-
 역할 분리:
 
-- `collector`: public stash 수집, `raw_api_responses`, `normalized_priced_items`, `collector_state` 갱신
-- `maintenance`: raw 정리, stale normalized cleanup, labeled backup, 환율 스냅샷 수집
-- `maintenance`: raw 정리, stale normalized cleanup, labeled backup, 환율 스냅샷 수집, 수집량 summary 누적
+- `collector`: public stash 수집, `raw_api_responses`, `normalized_priced_items`, `collector_state` 갱신, 환율 스냅샷 수집
+- `maintenance`: raw 정리, stale normalized cleanup, labeled backup
 
-현재 구현 기준에서는 이 2개만 계속 켜두면 됩니다.
+현재 구현 기준에서는 `collector`만 계속 켜둬도 환율 스냅샷은 유지됩니다.
+ETL 속도를 우선할 때는 `maintenance`를 잠시 내려서 cleanup / backup 부하를 줄일 수 있습니다.
 
 ### 처음 시작할 때
 
@@ -381,16 +374,12 @@ npm run maintenance
 npm run collector -- --start-latest
 ```
 
-```bash
-npm run maintenance
-```
-
 ### 평소 운영 중
 
 - `collector`는 계속 실행
-- `maintenance`도 계속 실행
-- `collect:exchange-rates`는 `maintenance`가 이미 담당하므로 따로 상시 실행할 필요 없음
-- `backup:labeled`, `cleanup:normalized-stale`, `cleanup:retention`도 `maintenance`가 이미 담당하므로 수동 실행은 점검/디버깅용일 때만 사용
+- `maintenance`는 cleanup / backup이 필요할 때만 실행하거나, ETL 여유가 생겼을 때 재개
+- `collect:exchange-rates`는 `collector`가 이미 담당하므로 따로 상시 실행할 필요 없음
+- `backup:labeled`, `cleanup:normalized-stale`, `cleanup:retention`은 `maintenance`가 담당하므로 수동 실행은 점검/디버깅용일 때만 사용
 
 ### ETL 실행 시점
 
@@ -447,13 +436,13 @@ npm run inspect:summary
 
 1. `training_features_labeled`는 `source_updated_at` 이전 최신 환율 스냅샷이 있어야 생성됩니다.
 2. 환율 스냅샷을 모으기 시작하기 전의 과거 매물은 당장은 `missing_historical_exchange_rate`로 제외될 수 있습니다.
-3. 따라서 앞으로 `collector + maintenance`를 함께 계속 돌릴수록 labeled 데이터가 점점 정상적으로 쌓이게 됩니다.
+3. 따라서 앞으로는 `collector`가 계속 환율 스냅샷을 쌓고, ETL이 그 시점 데이터를 사용해 labeled를 생성합니다.
 
 ### 운영 팁
 
 - `collector`와 `maintenance`는 동시에 실행해도 되도록 구현되어 있습니다.
 - `maintenance`의 purge는 삭제 직전에 stale 조건을 다시 확인하므로 collector와 병행 가능하도록 처리되어 있습니다.
-- DB I/O가 부담되면 `NORMALIZED_CLEANUP_LIMIT`, `MAINTENANCE_NORMALIZED_CLEANUP_INTERVAL_MS`, `LABELED_BACKUP_LIMIT`, `MAINTENANCE_LABELED_BACKUP_INTERVAL_MS`, `MAINTENANCE_EXCHANGE_RATE_INTERVAL_MS`를 조절하면 됩니다.
+- DB I/O가 부담되면 `maintenance`를 잠시 멈추고, `NORMALIZED_CLEANUP_LIMIT`, `MAINTENANCE_NORMALIZED_CLEANUP_INTERVAL_MS`, `LABELED_BACKUP_LIMIT`, `MAINTENANCE_LABELED_BACKUP_INTERVAL_MS`, `COLLECTOR_EXCHANGE_RATE_INTERVAL_MS`를 조절하면 됩니다.
 - 규칙을 크게 바꾼 뒤에는 `training_features_clean`, `training_features_labeled`를 다시 만드는 편이 깔끔합니다.
 
 ## Training Feature ETL

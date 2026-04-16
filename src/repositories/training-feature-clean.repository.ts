@@ -206,8 +206,8 @@ export class TrainingFeatureCleanRepository {
     `);
 
     await pool.query(`
-      CREATE INDEX IF NOT EXISTS idx_training_features_clean_source_updated_at
-        ON training_features_clean (source_updated_at DESC);
+      CREATE INDEX IF NOT EXISTS idx_training_features_clean_source_updated_at_listing_key
+        ON training_features_clean (source_updated_at ASC, listing_key ASC);
     `);
 
     await pool.query(`
