@@ -5,6 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc -p tsconfig.json",
+    "vendor:repoe-snapshot": "tsx src/scripts/vendor-repoe-snapshot.ts",
     "cleanup:retention": "tsx src/scripts/cleanup-retention.ts",
     "cleanup:normalized-stale": "tsx src/scripts/cleanup-normalized-stale.ts",
     "cleanup:normalized-drive-archives": "tsx src/scripts/cleanup-normalized-drive-archives.ts",
@@ -24,6 +25,8 @@
     "observe:leagues": "tsx src/scripts/observe-leagues.ts",
     "samples:clipboard:organize": "tsx src/scripts/organize-clipboard-samples.ts",
     "samples:clipboard:validate": "tsx src/scripts/validate-clipboard-samples.ts",
+    "build:affix-dictionary": "tsx src/scripts/build-affix-dictionary.ts",
+    "validate:affix-dictionary": "tsx src/scripts/validate-affix-dictionary.ts",
     "report:charts": "bash reports_docs/render_report_charts.sh",
     "typecheck": "tsc --noEmit"
   },

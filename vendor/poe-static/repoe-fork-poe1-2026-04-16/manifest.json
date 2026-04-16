@@ -1,0 +1,52 @@
+{
+  "source": "repoe-fork",
+  "game": "poe1",
+  "snapshotLabel": "repoe-fork-poe1-2026-04-16",
+  "sourceRepoUrl": "https://github.com/repoe-fork/repoe",
+  "exportBaseUrl": "https://repoe-fork.github.io",
+  "fetchedAt": "2026-04-16T14:25:02.959Z",
+  "files": [
+    {
+      "name": "mods.json",
+      "url": "https://repoe-fork.github.io/mods.json",
+      "sha256": "f0dd3e57677566851fa7561560dde0488e07e6d2251072a84d5862ff30fcd309",
+      "size": 33453815
+    },
+    {
+      "name": "stats.json",
+      "url": "https://repoe-fork.github.io/stats.json",
+      "sha256": "eee4866c7c4e2d0ccfe048fa77729f2dc9d56c29744ee0faf0fde32931ad0c96",
+      "size": 4261451
+    },
+    {
+      "name": "stat_translations.json",
+      "url": "https://repoe-fork.github.io/stat_translations.json",
+      "sha256": "7b6b2423d7fb009f19e8acebc2e2ac7f8764744fe3c5f194403c6d4dd4e6de66",
+      "size": 12337284
+    },
+    {
+      "name": "mod_types.json",
+      "url": "https://repoe-fork.github.io/mod_types.json",
+      "sha256": "4b7cfda0c1210c591eeeee3427f660dd74f8d9a4829ef046a792ceb9bd76510a",
+      "size": 1177915
+    },
+    {
+      "name": "tags.json",
+      "url": "https://repoe-fork.github.io/tags.json",
+      "sha256": "955fe6dfc6b30a690fd40a917d7a55285a5d7f701ad187798e260a8960eec743",
+      "size": 31056
+    },
+    {
+      "name": "item_classes.json",
+      "url": "https://repoe-fork.github.io/item_classes.json",
+      "sha256": "b53d019f9a9997d75b4305485127f1863225a9cdedb89bbc4b39d519f0153a9f",
+      "size": 17102
+    },
+    {
+      "name": "base_items.json",
+      "url": "https://repoe-fork.github.io/base_items.json",
+      "sha256": "8f92de8d758216b1b557d84758972af449b39490a7696c4e6bee4ab3c0d4c548",
+      "size": 7343894
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "countHybridAsSingleAffix": true,
+  "includeCraftedInPrefixSuffixCount": false,
+  "includeFracturedInPrefixSuffixCount": false,
+  "excludeSections": [
+    "implicit_mods",
+    "enchant_mods",
+    "fractured_mods",
+    "crafted_mods"
+  ],
+  "nullOnUnmatchedExplicit": true,
+  "scope": "en_v1",
+  "sourceVersion": "repoe-fork-poe1-2026-04-16"
+}

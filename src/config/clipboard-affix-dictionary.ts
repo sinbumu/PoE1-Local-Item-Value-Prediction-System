@@ -1,50 +1,67 @@
+import generatedEnglishAffixDictionary from "../generated/affix-dictionary/affix_dictionary_en.generated.json";
 import type { ClipboardLocale } from "../types/clipboard.types";
-
-export type ClipboardAffixKind = "prefix" | "suffix";
-
-export type ClipboardAffixDictionaryEntry = {
-  id: string;
-  affixKind: ClipboardAffixKind;
-  englishPatterns: string[];
-  koreanPatterns: string[];
-  notes?: string;
-};
+import type {
+  ClipboardAffixKind,
+  EnglishAffixDictionaryEntry,
+} from "../types/affix-dictionary.types";
 
 export type ClipboardAffixMatch = {
   entry: ClipboardAffixDictionaryEntry;
   matchedPattern: string;
+  matchingMethod: "normalized_exact";
 };
 
-// This starts intentionally small. The first implementation goal is to
-// stabilize the schema and matching flow so real rules can be filled from
-// clipboard samples and later from external game data.
-export const CLIPBOARD_AFFIX_DICTIONARY: ClipboardAffixDictionaryEntry[] = [];
+export type ClipboardAffixDictionaryEntry = EnglishAffixDictionaryEntry;
 
-function normalizeClipboardModLine(line: string): string {
+export const CLIPBOARD_AFFIX_DICTIONARY =
+  generatedEnglishAffixDictionary as ClipboardAffixDictionaryEntry[];
+
+export function normalizeClipboardModLine(line: string): string {
   return line
-    .toLowerCase()
+    .replace(/\{[^}]*\}/g, " ")
+    .replace(/\([^)]*\)/g, " ")
+    .replace(/[+-]?\d+(?:\.\d+)?(?:\s*-\s*[+-]?\d+(?:\.\d+)?)?/g, "#")
+    .replace(/\{[0-9]+\}/g, "#")
     .replace(/\([^)]*\)/g, "")
+    .replace(/\s*\/\s*/g, "/")
     .replace(/\s+/g, " ")
-    .trim();
+    .trim()
+    .toLowerCase();
 }
 
-export function matchClipboardAffixDictionary(
-  line: string,
-  locale: Exclude<ClipboardLocale, "unknown">,
-): ClipboardAffixMatch | null {
+function matchEnglishDictionary(line: string): ClipboardAffixMatch | null {
   const normalizedLine = normalizeClipboardModLine(line);
 
   for (const entry of CLIPBOARD_AFFIX_DICTIONARY) {
-    const patterns = locale === "en" ? entry.englishPatterns : entry.koreanPatterns;
-    for (const pattern of patterns) {
-      if (normalizedLine.includes(normalizeClipboardModLine(pattern))) {
+    for (const pattern of entry.normalizedTextTemplatesEn) {
+      if (normalizedLine === pattern) {
         return {
           entry,
           matchedPattern: pattern,
+          matchingMethod: "normalized_exact",
         };
       }
     }
   }
 
   return null;
+}
+
+export function isEnglishAffixDictionaryAvailable(): boolean {
+  return CLIPBOARD_AFFIX_DICTIONARY.length > 0;
+}
+
+export function getClipboardAffixKinds(): ClipboardAffixKind[] {
+  return ["prefix", "suffix"];
+}
+
+export function matchClipboardAffixDictionary(
+  line: string,
+  locale: Exclude<ClipboardLocale, "unknown">,
+): ClipboardAffixMatch | null {
+  if (locale !== "en") {
+    return null;
+  }
+
+  return matchEnglishDictionary(line);
 }
