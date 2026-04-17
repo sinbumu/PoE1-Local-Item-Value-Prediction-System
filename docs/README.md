@@ -31,6 +31,8 @@
   - 어떤 아이템을 모델 후보 / 외부 시세 후보로 볼지
 - `CLIPBOARD_COMPATIBILITY_AUDIT.md`
   - 클립보드 기반 추론과 ETL 피처의 호환성 감사
+- `AFFIX_SOURCE_STRATEGY.md`
+  - RePoE 기반 affix dictionary source / build / validation 기준선
 - `AFFIX_DICTIONARY_REQUIREMENTS.md`
   - affix dictionary 이슈와 준비사항 정리
 
@@ -69,7 +71,8 @@
 클립보드/추론 이슈를 볼 경우:
 
 1. `CLIPBOARD_COMPATIBILITY_AUDIT.md`
-2. `AFFIX_DICTIONARY_REQUIREMENTS.md`
+2. `AFFIX_SOURCE_STRATEGY.md`
+3. `AFFIX_DICTIONARY_REQUIREMENTS.md`
 
 과거 맥락이 필요할 경우:
 

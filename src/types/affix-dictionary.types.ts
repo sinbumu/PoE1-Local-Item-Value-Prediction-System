@@ -1,22 +1,36 @@
 export type ClipboardAffixKind = "prefix" | "suffix";
 
+export type AffixValueBounds = {
+  min: number | null;
+  max: number | null;
+};
+
 export type CanonicalModRecord = {
   canonicalModId: string;
   sourceModId: string;
   domain: string;
+  modType: string | null;
   generationType: string;
   groups: string[];
   statIds: string[];
   sourceVersion: string;
   isHybrid: boolean;
+  addsTags: string[];
   allowedTags: string[];
+  statValueBounds: AffixValueBounds[];
   englishTemplates: string[];
 };
 
 export type EnglishAffixDictionaryEntry = {
   canonicalModId: string;
   sourceModId: string;
+  domain: string;
+  modType: string | null;
   affixKind: ClipboardAffixKind;
+  groups: string[];
+  addsTags: string[];
+  allowedTags: string[];
+  statValueBounds: AffixValueBounds[];
   textTemplatesEn: string[];
   normalizedTextTemplatesEn: string[];
   matchTokensEn: string[];
@@ -61,8 +75,14 @@ export type ClipboardAffixAnalysisLine = {
   line: string;
   normalizedLine: string;
   sectionKind: string;
+  candidateCanonicalModIds: string[];
+  candidateSourceModIds: string[];
+  isAmbiguous: boolean;
   matchedCanonicalModId: string | null;
+  matchedSourceModId: string | null;
   matchedAffixKind: ClipboardAffixKind | null;
+  matchingConfidence: "high" | "medium" | null;
+  matchingMethod: "normalized_exact" | null;
 };
 
 export type ClipboardAffixValidationReport = {
@@ -71,6 +91,7 @@ export type ClipboardAffixValidationReport = {
   checkedSampleCount: number;
   candidateLineCount: number;
   matchedCandidateCount: number;
+  ambiguousCandidateCount: number;
   unmatchedCandidateCount: number;
   matchRate: number;
   unmatchedExamples: ClipboardAffixValidationUnmatched[];

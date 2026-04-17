@@ -1,3 +1,5 @@
+import type { ClipboardAffixAnalysisLine } from "./affix-dictionary.types";
+
 export type ClipboardLocale = "en" | "ko" | "unknown";
 
 export type ClipboardSectionKind =
@@ -34,10 +36,12 @@ export type ClipboardInfluenceFlags = {
 export type ClipboardParsedItem = {
   rawText: string;
   locale: ClipboardLocale;
+  itemClass: string | null;
   rarity: string | null;
   itemName: string | null;
   baseType: string | null;
   sections: ClipboardSection[];
+  explicitAffixLines: ClipboardAffixAnalysisLine[];
   influences: ClipboardInfluenceFlags;
   warnings: string[];
 };

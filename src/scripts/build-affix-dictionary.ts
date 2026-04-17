@@ -1,6 +1,7 @@
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import type {
+  AffixValueBounds,
   CanonicalModRecord,
   CountingPolicyArtifact,
   EnglishAffixDictionaryEntry,
@@ -18,6 +19,8 @@ type TranslationStringRecord = {
 
 type ModStatRecord = {
   id?: unknown;
+  min?: unknown;
+  max?: unknown;
 };
 
 type SpawnWeightRecord = {
@@ -26,18 +29,21 @@ type SpawnWeightRecord = {
 };
 
 type ModRecord = {
+  adds_tags?: unknown;
   domain?: unknown;
   generation_type?: unknown;
   groups?: unknown;
   spawn_weights?: unknown;
   stats?: unknown;
   text?: unknown;
+  type?: unknown;
 };
 
 const ROOT_DIR = process.cwd();
 const VENDOR_ROOT = path.join(ROOT_DIR, "vendor", "poe-static");
 const OUTPUT_DIR = path.join(ROOT_DIR, "src", "generated", "affix-dictionary");
 const ID_SEPARATOR = "\u0000";
+const SUPPORTED_AFFIX_DOMAINS = new Set(["item", "jewel", "abyss_jewel", "misc", "crafted"]);
 
 function readStringFlag(flagName: string): string | null {
   const prefix = `${flagName}=`;
@@ -88,8 +94,11 @@ function explodeTemplates(values: string[]): string[] {
 function normalizeAffixTextTemplate(text: string): string {
   return text
     .replace(/\{[0-9]+\}/g, "#")
+    .replace(/\(\s*[+-]?\d+(?:\.\d+)?\s*-\s*[+-]?\d+(?:\.\d+)?\s*\)/g, "#")
+    .replace(/\(\s*[+-]?\d+(?:\.\d+)?\s*\)/g, "#")
     .replace(/[+-]?\d+(?:\.\d+)?(?:\s*-\s*[+-]?\d+(?:\.\d+)?)?/g, "#")
     .replace(/\(\s*#(?:\s*-\s*#)?\s*\)/g, "#")
+    .replace(/\+\s*#/g, "#")
     .replace(/\s+/g, " ")
     .trim()
     .toLowerCase();
@@ -142,7 +151,11 @@ function buildCanonicalModRecord(
   translationMap: Map<string, string[]>,
 ): CanonicalModRecord | null {
   const domain = typeof mod.domain === "string" ? mod.domain : null;
+  const modType = typeof mod.type === "string" ? mod.type : null;
   const generationType = typeof mod.generation_type === "string" ? mod.generation_type : null;
+  const addsTags = Array.isArray(mod.adds_tags)
+    ? mod.adds_tags.filter((value): value is string => typeof value === "string")
+    : [];
   const groups = Array.isArray(mod.groups)
     ? mod.groups.filter((value): value is string => typeof value === "string")
     : [];
@@ -156,6 +169,10 @@ function buildCanonicalModRecord(
   const statIds = stats
     .map((value) => (typeof value.id === "string" ? value.id : null))
     .filter((value): value is string => value !== null);
+  const statValueBounds: AffixValueBounds[] = stats.map((value) => ({
+    min: typeof value.min === "number" ? value.min : null,
+    max: typeof value.max === "number" ? value.max : null,
+  }));
 
   const translatedTemplates =
     statIds.length > 0 ? translationMap.get(statIds.join(ID_SEPARATOR)) ?? [] : [];
@@ -170,17 +187,20 @@ function buildCanonicalModRecord(
     canonicalModId: sourceModId,
     sourceModId,
     domain,
+    modType,
     generationType,
     groups,
     statIds,
     sourceVersion,
     isHybrid: statIds.length > 1,
+    addsTags,
     allowedTags: uniqueStrings(
       spawnWeights
         .filter((value) => typeof value.weight === "number" && value.weight > 0)
         .map((value) => (typeof value.tag === "string" ? value.tag : null))
         .filter((value): value is string => value !== null),
     ),
+    statValueBounds,
     englishTemplates,
   };
 }
@@ -188,7 +208,7 @@ function buildCanonicalModRecord(
 function buildEnglishDictionaryEntry(
   record: CanonicalModRecord,
 ): EnglishAffixDictionaryEntry | null {
-  if (record.domain !== "item") {
+  if (!SUPPORTED_AFFIX_DOMAINS.has(record.domain)) {
     return null;
   }
 
@@ -207,7 +227,13 @@ function buildEnglishDictionaryEntry(
   return {
     canonicalModId: record.canonicalModId,
     sourceModId: record.sourceModId,
+    domain: record.domain,
+    modType: record.modType,
     affixKind: record.generationType,
+    groups: record.groups,
+    addsTags: record.addsTags,
+    allowedTags: record.allowedTags,
+    statValueBounds: record.statValueBounds,
     textTemplatesEn: record.englishTemplates,
     normalizedTextTemplatesEn,
     matchTokensEn: uniqueStrings(

@@ -161,8 +161,17 @@ async function writeLine(
   }
 
   await new Promise<void>((resolveWrite, rejectWrite) => {
-    stream.once("drain", resolveWrite);
-    stream.once("error", rejectWrite);
+    const handleDrain = (): void => {
+      stream.off("error", handleError);
+      resolveWrite();
+    };
+    const handleError = (error: Error): void => {
+      stream.off("drain", handleDrain);
+      rejectWrite(error);
+    };
+
+    stream.once("drain", handleDrain);
+    stream.once("error", handleError);
   });
 }
 
@@ -188,25 +197,64 @@ async function main(): Promise<void> {
 
   await mkdir(dirname(outputPath), { recursive: true });
 
-  const summaryResult = await pool.query<{
-    row_count: string;
-    min_source_updated_at: string | null;
-    max_source_updated_at: string | null;
-  }>(
-    `
-      SELECT
-        COUNT(*)::text AS row_count,
-        MIN(source_updated_at)::text AS min_source_updated_at,
-        MAX(source_updated_at)::text AS max_source_updated_at
-      FROM training_features_labeled
-      WHERE source_updated_at >= NOW() - ($1::int * INTERVAL '1 day')
-        AND ($2::text[] IS NULL OR model_segment = ANY($2::text[]))
-    `,
-    [days, modelSegments],
-  );
+  let totalRows: number | null = null;
+  let summaryRow:
+    | {
+        min_source_updated_at: string | null;
+        max_source_updated_at: string | null;
+      }
+    | undefined;
 
-  const summaryRow = summaryResult.rows[0];
-  const totalRows = Number(summaryRow?.row_count ?? "0");
+  if (modelSegments === null) {
+    const [minResult, maxResult] = await Promise.all([
+      pool.query<{ source_updated_at: string | null }>(
+        `
+          SELECT source_updated_at::text AS source_updated_at
+          FROM training_features_labeled
+          WHERE source_updated_at >= NOW() - ($1::int * INTERVAL '1 day')
+          ORDER BY source_updated_at ASC, listing_key ASC
+          LIMIT 1
+        `,
+        [days],
+      ),
+      pool.query<{ source_updated_at: string | null }>(
+        `
+          SELECT source_updated_at::text AS source_updated_at
+          FROM training_features_labeled
+          WHERE source_updated_at >= NOW() - ($1::int * INTERVAL '1 day')
+          ORDER BY source_updated_at DESC, listing_key DESC
+          LIMIT 1
+        `,
+        [days],
+      ),
+    ]);
+
+    summaryRow = {
+      min_source_updated_at: minResult.rows[0]?.source_updated_at ?? null,
+      max_source_updated_at: maxResult.rows[0]?.source_updated_at ?? null,
+    };
+  } else {
+    const summaryResult = await pool.query<{
+      row_count: string;
+      min_source_updated_at: string | null;
+      max_source_updated_at: string | null;
+    }>(
+      `
+        SELECT
+          COUNT(*)::text AS row_count,
+          MIN(source_updated_at)::text AS min_source_updated_at,
+          MAX(source_updated_at)::text AS max_source_updated_at
+        FROM training_features_labeled
+        WHERE source_updated_at >= NOW() - ($1::int * INTERVAL '1 day')
+          AND model_segment = ANY($2::text[])
+      `,
+      [days, modelSegments],
+    );
+
+    const segmentSummaryRow = summaryResult.rows[0];
+    summaryRow = segmentSummaryRow;
+    totalRows = Number(segmentSummaryRow?.row_count ?? "0");
+  }
 
   const stream = createWriteStream(outputPath, { encoding: "utf-8" });
   await writeLine(stream, `${CSV_HEADERS.join(",")}\n`);
@@ -220,82 +268,81 @@ async function main(): Promise<void> {
       const result: QueryResult<ExportRow> = await pool.query<ExportRow>(
         `
           SELECT
-            listing_key,
-            source_updated_at::text,
-            league,
-            model_segment,
-            clean_reason,
-            target_price_amount::text,
-            target_price_currency,
-            item_class,
-            base_type,
-            rarity,
-            frame_type,
-            ilvl,
-            identified,
-            corrupted,
-            fractured,
-            synthesised,
-            duplicated,
-            influence_shaper,
-            influence_elder,
-            influence_crusader,
-            influence_redeemer,
-            influence_hunter,
-            influence_warlord,
-            influence_searing,
-            influence_tangled,
-            socket_count,
-            link_count,
-            white_socket_count,
-            prefix_count,
-            suffix_count,
-            explicit_mod_count,
-            implicit_mod_count,
-            crafted_mod_count,
-            fractured_mod_count,
-            enchant_mod_count,
-            quality::text,
-            armour::text,
-            evasion::text,
-            energy_shield::text,
-            ward::text,
-            physical_dps::text,
-            elemental_dps::text,
-            attack_speed::text,
-            crit_chance::text,
-            move_speed::text,
-            life_roll_sum::text,
-            resistance_roll_sum::text,
-            attribute_roll_sum::text,
-            jewel_type,
-            cluster_size,
-            cluster_passive_count,
-            notable_count,
-            damage_mod_count,
-            defence_mod_count,
-            utility_mod_count,
-            gem_level,
-            gem_quality::text,
-            is_awakened,
-            is_vaal,
-            is_support_gem,
-            array_to_string(gem_tags, '|') AS gem_tags,
-            exchange_rate_source,
-            exchange_rate_sample_time_utc::text,
-            exchange_rate_chaos_equivalent::text,
-            target_price_chaos::text,
-            target_price_log1p::text,
-            label_reason
-          FROM training_features_labeled
-          WHERE source_updated_at >= NOW() - ($1::int * INTERVAL '1 day')
-            AND ($2::text[] IS NULL OR model_segment = ANY($2::text[]))
+            t.listing_key,
+            t.source_updated_at::text AS source_updated_at,
+            t.league,
+            t.model_segment,
+            t.clean_reason,
+            t.target_price_amount::text,
+            t.target_price_currency,
+            t.item_class,
+            t.base_type,
+            t.rarity,
+            t.frame_type,
+            t.ilvl,
+            t.identified,
+            t.corrupted,
+            t.fractured,
+            t.synthesised,
+            t.duplicated,
+            t.influence_shaper,
+            t.influence_elder,
+            t.influence_crusader,
+            t.influence_redeemer,
+            t.influence_hunter,
+            t.influence_warlord,
+            t.influence_searing,
+            t.influence_tangled,
+            t.socket_count,
+            t.link_count,
+            t.white_socket_count,
+            t.prefix_count,
+            t.suffix_count,
+            t.explicit_mod_count,
+            t.implicit_mod_count,
+            t.crafted_mod_count,
+            t.fractured_mod_count,
+            t.enchant_mod_count,
+            t.quality::text,
+            t.armour::text,
+            t.evasion::text,
+            t.energy_shield::text,
+            t.ward::text,
+            t.physical_dps::text,
+            t.elemental_dps::text,
+            t.attack_speed::text,
+            t.crit_chance::text,
+            t.move_speed::text,
+            t.life_roll_sum::text,
+            t.resistance_roll_sum::text,
+            t.attribute_roll_sum::text,
+            t.jewel_type,
+            t.cluster_size,
+            t.cluster_passive_count,
+            t.notable_count,
+            t.damage_mod_count,
+            t.defence_mod_count,
+            t.utility_mod_count,
+            t.gem_level,
+            t.gem_quality::text,
+            t.is_awakened,
+            t.is_vaal,
+            t.is_support_gem,
+            array_to_string(t.gem_tags, '|') AS gem_tags,
+            t.exchange_rate_source,
+            t.exchange_rate_sample_time_utc::text,
+            t.exchange_rate_chaos_equivalent::text,
+            t.target_price_chaos::text,
+            t.target_price_log1p::text,
+            t.label_reason
+          FROM training_features_labeled t
+          WHERE t.source_updated_at >= NOW() - ($1::int * INTERVAL '1 day')
+            AND ($2::text[] IS NULL OR t.model_segment = ANY($2::text[]))
             AND (
               $3::timestamptz IS NULL
-              OR source_updated_at > $3::timestamptz
-              OR (source_updated_at = $3::timestamptz AND listing_key > $4::text)
+              OR (t.source_updated_at, t.listing_key) > ($3::timestamptz, $4::text)
             )
-          ORDER BY source_updated_at ASC, listing_key ASC
+          ORDER BY t.source_updated_at ASC, t.listing_key ASC
           LIMIT $5
         `,
         [days, modelSegments, lastUpdatedAt, lastListingKey, batchSize],
@@ -305,10 +352,10 @@ async function main(): Promise<void> {
         break;
       }
 
-      for (const row of result.rows) {
-        const line = CSV_HEADERS.map((header) => formatCsvValue(row[header])).join(",");
-        await writeLine(stream, `${line}\n`);
-      }
+      const batchCsv = result.rows
+        .map((row) => CSV_HEADERS.map((header) => formatCsvValue(row[header])).join(","))
+        .join("\n");
+      await writeLine(stream, `${batchCsv}\n`);
 
       exportedRows += result.rows.length;
 

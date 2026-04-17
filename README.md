@@ -1,8 +1,8 @@
 # PoE1 Local Item Value Prediction System
 
-Path of Exile 1 `public-stash-tabs` 데이터를 로컬에서 수집하고, 원본 응답과 정규화된 일부 데이터를 PostgreSQL에 저장하기 위한 PoC 프로젝트입니다.
+Path of Exile 1 `public-stash-tabs` 데이터를 로컬에서 수집하고, 정규화/ETL/학습용 export를 거쳐 로컬 가격 예측 실험까지 이어가기 위한 프로젝트입니다.
 
-현재 단계의 목적은 어디까지나 `수집`과 `검증`입니다. 모델 학습, UI, 배포는 아직 범위 밖입니다.
+현재 기준선은 `collector + ETL + CatBoost 1차 학습 시도 + English clipboard affix dictionary V1`까지 포함합니다. UI와 배포는 아직 범위 밖입니다.
 
 ## 현재까지 확인된 전제
 
@@ -682,6 +682,30 @@ python ml/train_catboost.py --dataset artifacts/datasets/YOUR_FILE.csv
 4. `observed_hour_utc`, `observed_weekday_utc`는 `source_updated_at`에서 파생 생성
 5. 결과물로 `model.cbm`, `metrics.json`, `feature_importance.csv`, `run_info.json` 저장
 
+최근 7일 ETL을 아래처럼 돌렸다면:
+
+```bash
+npm run etl:training -- --reset-cursors --since-hours=168 --prune-before-run --limit=10000 --max-batches-per-stage=1
+```
+
+로그 마지막에 `rawReachedEnd`, `cleanReachedEnd`, `labeledReachedEnd`가 모두 `true`이고 종료 코드가 `0`이면, 그 실행은 오류가 아니라 **현재 7일 범위 백필을 끝까지 처리하고 정상 종료한 것**입니다. 이 상태면 `export:training-dataset` 후 바로 1차 CatBoost 학습을 시도해도 됩니다.
+
+## Clipboard Affix Dictionary 상태
+
+현재 `Ctrl+C` 추론 경로용 affix dictionary는 English V1 기준으로 구현되어 있습니다.
+
+- canonical source: `vendor/poe-static/repoe-fork-poe1-2026-04-16/`
+- build: `npm run vendor:repoe-snapshot`, `npm run build:affix-dictionary`
+- validation: `npm run validate:affix-dictionary`
+- runtime 연결: `src/services/clipboard-parser.service.ts`, `src/services/clipboard-affix-analyzer.service.ts`
+
+현재 상태:
+
+- parser는 `itemClass`, `sections`, `explicitAffixLines`를 함께 반환
+- `explicitAffixLines`에는 canonical candidate 목록과, 유일 후보일 때의 `matchedCanonicalModId`가 포함됨
+- English V1 sample validation 결과는 `candidate 81 / matched 81 / unmatched 0 / ambiguous 25`
+- 즉, explicit affix line 탐지와 후보 연결은 동작하지만 `prefix_count` / `suffix_count` 복원은 아직 다음 단계입니다
+
 ## league 관측 스크립트
 
 10분 동안 league 값 관측:
@@ -770,6 +794,7 @@ gunzip -c backup.sql.gz | psql "postgres://postgres:postgres@localhost:5432/poe_
 - 현재 학습 피처 문서: `docs/TRAINING_FEATURES.md`
 - 현재 저장 정책 문서: `docs/STORAGE_POLICY.md`
 - 클립보드 호환 감사: `docs/CLIPBOARD_COMPATIBILITY_AUDIT.md`
+- affix source / build 전략: `docs/AFFIX_SOURCE_STRATEGY.md`
 - affix dictionary 준비사항: `docs/AFFIX_DICTIONARY_REQUIREMENTS.md`
 - legacy 구현 메모: `docs/IMPLEMENTATION_NOTES.md`
 - legacy 초기 계획: `docs/PLAN.md`

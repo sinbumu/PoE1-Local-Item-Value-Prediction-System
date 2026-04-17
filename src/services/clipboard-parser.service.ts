@@ -6,6 +6,7 @@ import type {
   ClipboardSectionKind,
   ParseClipboardOptions,
 } from "../types/clipboard.types";
+import { ClipboardAffixAnalyzerService } from "./clipboard-affix-analyzer.service";
 
 type LocaleDictionary = {
   itemClassLabels: string[];
@@ -17,6 +18,7 @@ type LocaleDictionary = {
 };
 
 const BLOCK_SEPARATOR = "--------";
+const clipboardAffixAnalyzer = new ClipboardAffixAnalyzerService();
 
 const LOCALE_DICTIONARIES: Record<Exclude<ClipboardLocale, "unknown">, LocaleDictionary> = {
   en: {
@@ -119,9 +121,12 @@ function parseHeaderBlock(
   lines: string[],
   locale: ClipboardLocale,
   warnings: string[],
-): Pick<ClipboardParsedItem, "rarity" | "itemName" | "baseType"> {
+): Pick<ClipboardParsedItem, "itemClass" | "rarity" | "itemName" | "baseType"> {
   const dictionary =
     locale === "unknown" ? null : LOCALE_DICTIONARIES[locale];
+  const itemClassLine = lines.find((line) =>
+    dictionary ? dictionary.itemClassLabels.some((label) => line.startsWith(label)) : false,
+  );
 
   const rarityLine = lines.find((line) =>
     dictionary ? dictionary.rarityLabels.some((label) => line.startsWith(label)) : false,
@@ -130,18 +135,24 @@ function parseHeaderBlock(
   if (!dictionary || !rarityLine) {
     warnings.push("header block does not match a known locale rarity label");
     return {
+      itemClass: null,
       rarity: null,
       itemName: lines[2] ?? null,
       baseType: lines[3] ?? lines[2] ?? null,
     };
   }
 
+  const itemClassLabel = itemClassLine
+    ? dictionary.itemClassLabels.find((label) => itemClassLine.startsWith(label))
+    : null;
+  const itemClass = itemClassLabel ? itemClassLine?.slice(itemClassLabel.length).trim() || null : null;
   const rarityLabel = dictionary.rarityLabels.find((label) => rarityLine.startsWith(label));
   const rarity = rarityLabel ? rarityLine.slice(rarityLabel.length).trim() || null : null;
   const itemName = lines[2] ?? null;
   const baseType = lines[3] ?? lines[2] ?? null;
 
   return {
+    itemClass,
     rarity,
     itemName,
     baseType,
@@ -254,10 +265,12 @@ export class ClipboardParserService {
       return {
         rawText: normalized,
         locale: options?.localeHint ?? "unknown",
+        itemClass: null,
         rarity: null,
         itemName: null,
         baseType: null,
         sections: [],
+        explicitAffixLines: [],
         influences: createEmptyInfluenceFlags(),
         warnings: ["clipboard text is empty"],
       };
@@ -272,16 +285,22 @@ export class ClipboardParserService {
       warnings.push("locale could not be detected automatically");
     }
 
-    return {
+    const parsedItem: ClipboardParsedItem = {
       rawText: normalized,
       locale,
+      itemClass: header.itemClass,
       rarity: header.rarity,
       itemName: header.itemName,
       baseType: header.baseType,
       sections,
+      explicitAffixLines: [],
       influences: parseInfluences(allLines, locale),
       warnings,
     };
+
+    parsedItem.explicitAffixLines = clipboardAffixAnalyzer.extractExplicitCandidateLines(parsedItem);
+
+    return parsedItem;
   }
 
   parseSections(rawText: string, options?: ParseClipboardOptions): ClipboardSection[] {

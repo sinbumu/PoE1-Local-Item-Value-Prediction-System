@@ -15,6 +15,24 @@
 4. labeled dataset CSV export
 5. `CatBoost` 학습 실행
 
+## ETL 완료 판독
+
+최근 7일 ETL을 아래처럼 실행했다면:
+
+```bash
+npm run etl:training -- --reset-cursors --since-hours=168 --prune-before-run --limit=10000 --max-batches-per-stage=1
+```
+
+로그의 마지막이 아래 조건이면 해당 윈도우 백필은 끝난 것으로 본다.
+
+- `rawReachedEnd: true`
+- `cleanReachedEnd: true`
+- `labeledReachedEnd: true`
+- 마지막 종료 코드 `0`
+
+즉, 이 경우에는 ETL이 오류로 멈춘 것이 아니라 **현재 7일 범위를 끝까지 따라잡고 정상 종료한 것**이다.
+지속 tailing이 필요하면 `--daemon`으로 다시 돌리고, 일단 학습 시도만 하려면 바로 export 후 학습으로 넘어가도 된다.
+
 ## ETL 백필 예시
 
 ```bash
@@ -41,6 +59,9 @@ npm run build:training-features-labeled -- --reset-cursor --until-end
 ```bash
 npm run export:training-dataset -- --days=7
 ```
+
+ETL이 위 조건으로 완료됐다면, 일반적으로 바로 이 export를 실행해서 1차 CatBoost 학습을 시도해도 된다.
+다만 export 전에 collector가 계속 최신 데이터를 쌓고 있으므로, 엄밀히 같은 시점 스냅샷이 필요하면 export 직전 한 번 더 ETL을 짧게 실행하는 편이 안전하다.
 
 특정 세그먼트만 export:
 

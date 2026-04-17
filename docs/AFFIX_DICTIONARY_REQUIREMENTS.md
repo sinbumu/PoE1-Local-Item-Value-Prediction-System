@@ -246,25 +246,45 @@ affix dictionary는 "explicit affix로 세야 하는 줄"만 정확히 대상으
 - `samples/clipboard/`
   - 영문/한글 샘플 정리본
 - `src/services/clipboard-parser.service.ts`
-  - locale-aware parser 골격
+  - locale-aware parser + `itemClass` / `explicitAffixLines` 출력
+- `src/services/clipboard-affix-analyzer.service.ts`
+  - explicit affix candidate 추출과 RePoE 기반 후보 축소
+- `src/scripts/vendor-repoe-snapshot.ts`
+  - RePoE snapshot vendor 스크립트
+- `src/scripts/build-affix-dictionary.ts`
+  - canonical mod / English dictionary / counting policy 생성 스크립트
+- `src/scripts/validate-affix-dictionary.ts`
+  - English clipboard sample 기준 dictionary validation 스크립트
 - `src/scripts/validate-clipboard-samples.ts`
   - 샘플 검증 스크립트
 - `src/config/clipboard-safe-feature-policy.json`
   - 현재 학습용 clipboard-safe feature whitelist
 - `src/config/clipboard-affix-dictionary.ts`
-  - affix dictionary 골격
+  - generated English affix dictionary runtime 로더
+- `src/generated/affix-dictionary/`
+  - generated artifact 기준선
+- `vendor/poe-static/repoe-fork-poe1-2026-04-16/`
+  - 현재 canonical source snapshot
 
-즉, parser와 학습 whitelist의 기반은 준비됐고, 아직 비어 있는 핵심은 dictionary source와 counting spec이다.
+즉, parser 골격만 있는 단계는 이미 지났고, **English V1 dictionary build / runtime wiring / sample validation까지는 구현된 상태**다.
+
+2026-04-16 기준 English V1 validation:
+
+- scope sample: `rare_equipment`, `normal_jewel`, `crafted_fractured_influenced_item`
+- candidate line: `81`
+- matched: `81`
+- unmatched: `0`
+- ambiguous: `25`
 
 ## 아직 없는 것
 
 아직 비어 있거나 미정인 것은 아래다.
 
-- 실제 affix dictionary 본체
-- locale별 mod canonical mapping 테이블
-- prefix/suffix counting 규칙 문서의 세부안
+- 한국어 overlay dictionary
+- `prefix_count` / `suffix_count` 실제 산출 구현
 - clipboard vs ETL parity 테스트
-- dictionary 생성/업데이트 절차
+- ambiguity를 더 줄이기 위한 family disambiguation 정책
+- dictionary 생성/업데이트 운영 절차의 상세 문서화
 
 ## 제3자가 바로 이해해야 할 결론
 
@@ -277,16 +297,16 @@ affix dictionary는 "explicit affix로 세야 하는 줄"만 정확히 대상으
 
 즉, 다음 실질 작업은 "파서를 더 많이 짜는 것"보다:
 
-- dictionary를 어떤 기준으로 만들지 결정하고
+- 남은 ambiguity를 어떤 기준으로 줄일지 정하고
 - 어떤 규칙으로 count할지 문서화하고
-- 샘플로 그 결과를 검증하는 흐름
+- clipboard와 ETL parity를 검증하는 흐름
 
 을 고정하는 것이다.
 
 ## 다음 권장 작업
 
-1. affix dictionary source strategy 결정
+1. ambiguous family 처리 기준 확정
 2. prefix/suffix counting spec 초안 작성
-3. dictionary schema 확정
-4. 샘플 10~20개 기준 parity 체크 포맷 설계
-5. 그 뒤에 `prefix_count`, `suffix_count` 복원 구현
+3. clipboard vs ETL parity 체크 포맷 설계
+4. `prefix_count`, `suffix_count` 복원 구현
+5. 필요 시 한국어 overlay 범위 재검토

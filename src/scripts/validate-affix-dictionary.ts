@@ -1,6 +1,5 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { ClipboardAffixAnalyzerService } from "../services/clipboard-affix-analyzer.service";
 import { ClipboardParserService } from "../services/clipboard-parser.service";
 import type { ClipboardAffixValidationReport } from "../types/affix-dictionary.types";
 import countingPolicy from "../generated/affix-dictionary/counting_policy.generated.json";
@@ -30,7 +29,6 @@ async function main(): Promise<void> {
   const failOnUnmatched = readBooleanFlag("--fail-on-unmatched");
   const includeAllEnglish = readBooleanFlag("--all-en");
   const parser = new ClipboardParserService();
-  const analyzer = new ClipboardAffixAnalyzerService();
   const manifest = JSON.parse(await readFile(MANIFEST_PATH, "utf8")) as ManifestEntry[];
 
   const englishEntries = manifest.filter(
@@ -41,20 +39,21 @@ async function main(): Promise<void> {
   const unmatchedExamples: ClipboardAffixValidationReport["unmatchedExamples"] = [];
   let candidateLineCount = 0;
   let matchedCandidateCount = 0;
+  let ambiguousCandidateCount = 0;
 
   for (const entry of englishEntries) {
     const rawText = await readFile(path.join(ROOT_DIR, entry.outputTextPath), "utf8");
     const parsed = parser.parse(rawText, { localeHint: "en" });
-    const analysisLines = analyzer.extractExplicitCandidateLines(parsed);
+    const analysisLines = parsed.explicitAffixLines;
 
     for (const line of analysisLines) {
       candidateLineCount += 1;
-      if (line.matchedCanonicalModId) {
+      if (line.candidateCanonicalModIds.length > 0) {
         matchedCandidateCount += 1;
-        continue;
-      }
-
-      if (unmatchedExamples.length < 50) {
+        if (line.isAmbiguous) {
+          ambiguousCandidateCount += 1;
+        }
+      } else if (unmatchedExamples.length < 50) {
         unmatchedExamples.push({
           sampleId: entry.id,
           category: entry.category,
@@ -72,6 +71,7 @@ async function main(): Promise<void> {
     checkedSampleCount: englishEntries.length,
     candidateLineCount,
     matchedCandidateCount,
+    ambiguousCandidateCount,
     unmatchedCandidateCount,
     matchRate: candidateLineCount === 0 ? 0 : matchedCandidateCount / candidateLineCount,
     unmatchedExamples,

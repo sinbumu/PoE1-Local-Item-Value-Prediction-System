@@ -10,6 +10,37 @@
 - 코딩 에이전트가 **source 선택을 다시 조사하는 데 시간을 쓰지 않고**, 정해진 전략에 따라 구현할 수 있게 한다.
 - 영어 우선 / 한국어 선택적 지원이라는 현재 캡스톤 범위를 명확히 한다.
 
+## 현재 구현 상태
+
+2026-04-16 기준 현재 저장소에는 아래 구현이 반영되어 있다.
+
+- vendored canonical source:
+  - `vendor/poe-static/repoe-fork-poe1-2026-04-16/`
+- build / validation 스크립트:
+  - `npm run vendor:repoe-snapshot`
+  - `npm run build:affix-dictionary`
+  - `npm run validate:affix-dictionary`
+- generated artifact:
+  - `src/generated/affix-dictionary/canonical_mods.generated.json`
+  - `src/generated/affix-dictionary/affix_dictionary_en.generated.json`
+  - `src/generated/affix-dictionary/counting_policy.generated.json`
+- runtime 연결:
+  - `src/config/clipboard-affix-dictionary.ts`
+  - `src/services/clipboard-affix-analyzer.service.ts`
+  - `src/services/clipboard-parser.service.ts`
+
+현재 English V1 validation 기준선:
+
+- scope: `rare_equipment`, `normal_jewel`, `crafted_fractured_influenced_item`
+- checked sample count: `16`
+- candidate explicit line count: `81`
+- matched candidate count: `81`
+- unmatched candidate count: `0`
+- ambiguous candidate count: `25`
+
+즉, V1에서 **문자열 기반 explicit affix 후보 탐지와 RePoE 기반 English canonical 후보 연결은 동작**하고 있다.
+다만 아직 `source_mod_id`를 항상 하나로 확정할 수 있는 단계는 아니며, 일부 라인은 여전히 같은 family 내부의 복수 후보를 유지한다.
+
 ---
 
 ## 2. 이번 프로젝트에서 고정하는 결정사항
@@ -70,14 +101,26 @@
 최소한 아래 파일들은 검토 및 vendor 대상이다.
 
 - `mods.json`
-- `mods_by_base.json`
 - `stats.json`
 - `stat_translations.json`
 - `base_items.json`
 - `item_classes.json`
-- `crafting_bench_options.json`
 - `mod_types.json`
 - `tags.json`
+
+현재 실제 vendor 기준선:
+
+- 포함:
+  - `mods.json`
+  - `stats.json`
+  - `stat_translations.json`
+  - `base_items.json`
+  - `item_classes.json`
+  - `mod_types.json`
+  - `tags.json`
+- 현재 미포함:
+  - `mods_by_base.json`
+  - `crafting_bench_options.json`
 
 필요 시 추가 검토:
 - `essences.json`
@@ -271,6 +314,12 @@ counting rule을 코드 밖에서 관리하기 위한 정책 파일
 - locale dictionary artifact
 - counting policy artifact
 
+현재 프로젝트 출력 경로:
+
+- `src/generated/affix-dictionary/canonical_mods.generated.json`
+- `src/generated/affix-dictionary/affix_dictionary_en.generated.json`
+- `src/generated/affix-dictionary/counting_policy.generated.json`
+
 ## 7.3 권장 build 단계
 
 ### Step 1. RePoE snapshot vendor
@@ -291,6 +340,12 @@ RePoE `mods.json` / `stats.json` / `stat_translations.json`를 기반으로 mod 
 ### Step 6. validation against clipboard samples
 생성된 dictionary를 실제 `samples/clipboard/`에 대해 검증한다.
 
+현재 검증 스크립트:
+
+```bash
+npm run validate:affix-dictionary
+```
+
 ---
 
 ## 8. matching 전략
@@ -307,13 +362,15 @@ RePoE `mods.json` / `stats.json` / `stat_translations.json`를 기반으로 mod 
 3. 공백/구두점/locale 특이 표현 normalize
 4. section gating 수행
 5. dictionary exact / normalized match 시도
-6. 실패 시 stat translation 기반 fallback
-7. 여전히 실패하면 `unmatched_explicit`로 남김
+6. item class / domain / tag / numeric range 기반 후보 축소
+7. 하나로 확정되지 않으면 `ambiguous candidates`로 남김
+8. 여전히 실패하면 `unmatched_explicit`로 남김
 
 ## 8.3 중요한 원칙
 - 애매한 match를 억지로 붙이지 않는다.
 - 잘못된 affix count보다 `null`이 낫다.
 - matching 실패 케이스는 누적 저장해서 dictionary를 보강한다.
+- 복수 후보가 남으면 `matched_canonical_mod_id`를 강제로 채우지 않고 candidate 목록을 유지한다.
 
 ---
 
@@ -397,11 +454,12 @@ V1에서는 보수적인 counting policy를 적용한다.
 ### Phase 4. parser integration
 - clipboard parser output을 dictionary matcher에 연결
 - explicit line canonicalization 구현
-- `prefix_count`, `suffix_count` 후보 계산 구현
+- parser output에 `explicitAffixLines`와 candidate metadata를 포함
+- `prefix_count`, `suffix_count` 후보 계산은 다음 단계로 넘김
 
 ### Phase 5. validation
 - `samples/clipboard/` 기반 검증 스크립트 구현
-- unmatched rate, partial rate, confidence report 생성
+- unmatched rate, ambiguous rate, confidence report 생성
 
 ### Phase 6. optional korean overlay
 - 영문 V1이 안정화되었을 때만 진행
