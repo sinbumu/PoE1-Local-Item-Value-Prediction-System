@@ -6,9 +6,16 @@ import json
 from datetime import datetime, timezone
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
-from catboost import CatBoostRegressor, Pool
+from catboost import Pool
+
+from training_pipeline import (
+    build_model,
+    ensure_output_dir,
+    evaluate_predictions,
+    max_rss_mb,
+    train_staged_catboost,
+)
 
 DEFAULT_FEATURE_POLICY_PATH = (
     Path(__file__).resolve().parents[1]
@@ -19,8 +26,13 @@ DEFAULT_FEATURE_POLICY_PATH = (
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Train first CatBoost regressor from labeled CSV")
-    parser.add_argument("--dataset", required=True, help="Path to exported labeled CSV")
+    parser = argparse.ArgumentParser(description="Train CatBoost regressor from CSV or staged manifest")
+    source_group = parser.add_mutually_exclusive_group(required=True)
+    source_group.add_argument("--dataset", help="Path to exported labeled CSV (legacy mode)")
+    source_group.add_argument(
+        "--staged-manifest",
+        help="Path to staged manifest.json produced by stage-training-dataset.ts",
+    )
     parser.add_argument(
         "--output-dir",
         default=None,
@@ -38,23 +50,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--iterations", type=int, default=2000)
     parser.add_argument("--learning-rate", type=float, default=0.05)
     parser.add_argument("--depth", type=int, default=8)
+    parser.add_argument("--thread-count", type=int, default=-1)
+    parser.add_argument("--segment", default=None, help="Segment name for staged manifest mode")
     parser.add_argument(
         "--feature-policy",
         default=str(DEFAULT_FEATURE_POLICY_PATH),
         help="Path to clipboard-safe feature policy JSON",
     )
     return parser.parse_args()
-
-
-def ensure_output_dir(path_arg: str | None) -> Path:
-    if path_arg:
-        output_dir = Path(path_arg).resolve()
-    else:
-        timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-        output_dir = Path("ml/runs").resolve() / timestamp
-
-    output_dir.mkdir(parents=True, exist_ok=True)
-    return output_dir
 
 
 def validate_split_ratios(train_ratio: float, valid_ratio: float) -> None:
@@ -178,49 +181,10 @@ def split_time_ordered(
     return train_df, valid_df, test_df
 
 
-def rmse(y_true: np.ndarray, y_pred: np.ndarray) -> float:
-    return float(np.sqrt(np.mean(np.square(y_true - y_pred))))
-
-
-def mae(y_true: np.ndarray, y_pred: np.ndarray) -> float:
-    return float(np.mean(np.abs(y_true - y_pred)))
-
-
-def mape(y_true: np.ndarray, y_pred: np.ndarray) -> float:
-    denominator = np.where(np.abs(y_true) < 1e-9, 1.0, y_true)
-    return float(np.mean(np.abs((y_true - y_pred) / denominator)) * 100.0)
-
-
-def evaluate_predictions(
-    target_column: str,
-    y_true: np.ndarray,
-    y_pred: np.ndarray,
-    chaos_true: np.ndarray,
-) -> dict[str, float]:
-    metrics = {
-        f"{target_column}_rmse": rmse(y_true, y_pred),
-        f"{target_column}_mae": mae(y_true, y_pred),
-    }
-
-    if target_column == "target_price_log1p":
-        chaos_pred = np.expm1(y_pred)
-        metrics["target_price_chaos_rmse"] = rmse(chaos_true, chaos_pred)
-        metrics["target_price_chaos_mae"] = mae(chaos_true, chaos_pred)
-        metrics["target_price_chaos_mape"] = mape(chaos_true, chaos_pred)
-    else:
-        metrics["target_price_chaos_rmse"] = rmse(chaos_true, y_pred)
-        metrics["target_price_chaos_mae"] = mae(chaos_true, y_pred)
-        metrics["target_price_chaos_mape"] = mape(chaos_true, y_pred)
-
-    return metrics
-
-
-def main() -> int:
-    args = parse_args()
+def train_legacy_dataset(args: argparse.Namespace, output_dir: Path) -> dict[str, str]:
     validate_split_ratios(args.train_ratio, args.valid_ratio)
 
     dataset_path = Path(args.dataset).resolve()
-    output_dir = ensure_output_dir(args.output_dir)
     feature_policy_path = Path(args.feature_policy).resolve()
     feature_policy = load_feature_policy(feature_policy_path)
 
@@ -247,18 +211,18 @@ def main() -> int:
     valid_pool = Pool(valid_x, label=valid_y, cat_features=categorical_columns)
     test_pool = Pool(test_x, label=test_y, cat_features=categorical_columns)
 
-    model = CatBoostRegressor(
-        loss_function="RMSE",
-        eval_metric="RMSE",
+    model = build_model(
         random_seed=args.random_seed,
         iterations=args.iterations,
         learning_rate=args.learning_rate,
         depth=args.depth,
-        early_stopping_rounds=100,
-        verbose=100,
     )
 
+    fit_started_at = datetime.now(timezone.utc)
     model.fit(train_pool, eval_set=valid_pool, use_best_model=True)
+    fit_elapsed_seconds = (
+        datetime.now(timezone.utc) - fit_started_at
+    ).total_seconds()
 
     valid_predictions = model.predict(valid_pool)
     test_predictions = model.predict(test_pool)
@@ -273,6 +237,8 @@ def main() -> int:
         "feature_count": int(train_x.shape[1]),
         "categorical_feature_count": int(len(categorical_columns)),
         "best_iteration": int(model.get_best_iteration()),
+        "fit_elapsed_seconds": fit_elapsed_seconds,
+        "max_rss_mb": max_rss_mb(),
         "validation": evaluate_predictions(
             args.target_column,
             valid_y.to_numpy(),
@@ -303,43 +269,73 @@ def main() -> int:
     feature_importance.to_csv(feature_importance_path, index=False)
 
     run_info = {
-      "generated_at": datetime.now(timezone.utc).isoformat(),
-      "dataset_path": str(dataset_path),
-      "feature_policy_path": str(feature_policy_path),
-      "feature_policy_name": feature_policy["policyName"],
-      "feature_policy_version": feature_policy["version"],
-      "target_column": args.target_column,
-      "feature_columns": train_x.columns.tolist(),
-      "categorical_columns": categorical_columns,
-      "missing_feature_columns": missing_feature_columns,
-      "metrics": metrics,
-      "split": {
-          "train_ratio": args.train_ratio,
-          "valid_ratio": args.valid_ratio,
-          "test_ratio": 1.0 - args.train_ratio - args.valid_ratio,
-          "train_range": [
-              train_df["source_updated_at"].min().isoformat(),
-              train_df["source_updated_at"].max().isoformat(),
-          ],
-          "valid_range": [
-              valid_df["source_updated_at"].min().isoformat(),
-              valid_df["source_updated_at"].max().isoformat(),
-          ],
-          "test_range": [
-              test_df["source_updated_at"].min().isoformat(),
-              test_df["source_updated_at"].max().isoformat(),
-          ],
-      },
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "dataset_path": str(dataset_path),
+        "feature_policy_path": str(feature_policy_path),
+        "feature_policy_name": feature_policy["policyName"],
+        "feature_policy_version": feature_policy["version"],
+        "target_column": args.target_column,
+        "feature_columns": train_x.columns.tolist(),
+        "categorical_columns": categorical_columns,
+        "missing_feature_columns": missing_feature_columns,
+        "metrics": metrics,
+        "split": {
+            "train_ratio": args.train_ratio,
+            "valid_ratio": args.valid_ratio,
+            "test_ratio": 1.0 - args.train_ratio - args.valid_ratio,
+            "train_range": [
+                train_df["source_updated_at"].min().isoformat(),
+                train_df["source_updated_at"].max().isoformat(),
+            ],
+            "valid_range": [
+                valid_df["source_updated_at"].min().isoformat(),
+                valid_df["source_updated_at"].max().isoformat(),
+            ],
+            "test_range": [
+                test_df["source_updated_at"].min().isoformat(),
+                test_df["source_updated_at"].max().isoformat(),
+            ],
+        },
     }
 
     metrics_path.write_text(f"{json.dumps(metrics, indent=2)}\n", encoding="utf-8")
     run_info_path.write_text(f"{json.dumps(run_info, indent=2)}\n", encoding="utf-8")
 
-    print("training completed")
-    print(f"model: {model_path}")
-    print(f"metrics: {metrics_path}")
-    print(f"feature importance: {feature_importance_path}")
+    return {
+        "model_path": str(model_path),
+        "metrics_path": str(metrics_path),
+        "feature_importance_path": str(feature_importance_path),
+        "run_info_path": str(run_info_path),
+    }
 
+
+def main() -> int:
+    args = parse_args()
+    output_dir = ensure_output_dir(args.output_dir)
+
+    if args.staged_manifest:
+        result = train_staged_catboost(
+            manifest_path=Path(args.staged_manifest).resolve(),
+            output_dir=output_dir,
+            target_column=args.target_column,
+            segment=args.segment,
+            random_seed=args.random_seed,
+            iterations=args.iterations,
+            learning_rate=args.learning_rate,
+            depth=args.depth,
+            thread_count=args.thread_count,
+        )
+        print("training completed")
+        print(f"model: {result['model_path']}")
+        print(f"metrics: {result['metrics_path']}")
+        print(f"feature importance: {result['feature_importance_path']}")
+        return 0
+
+    result = train_legacy_dataset(args, output_dir)
+    print("training completed")
+    print(f"model: {result['model_path']}")
+    print(f"metrics: {result['metrics_path']}")
+    print(f"feature importance: {result['feature_importance_path']}")
     return 0
 
 

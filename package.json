@@ -19,6 +19,7 @@
     "build:training-features-labeled": "tsx src/scripts/build-training-features-labeled.ts",
     "etl:training": "tsx src/scripts/run-training-etl.ts",
     "export:training-dataset": "tsx src/scripts/export-training-dataset.ts",
+    "stage:training-dataset": "tsx src/scripts/stage-training-dataset.ts",
     "collect:exchange-rates": "tsx src/scripts/collect-exchange-rates.ts",
     "inspect": "tsx src/scripts/inspect-sample.ts",
     "inspect:summary": "tsx src/scripts/inspect-ingestion-summary.ts",

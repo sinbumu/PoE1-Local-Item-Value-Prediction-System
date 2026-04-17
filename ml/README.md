@@ -1,19 +1,12 @@
 # ML Workflow
 
-이 디렉토리는 수집기/maintenance/ETL과 분리된 `CatBoost` 학습 실험 공간입니다.
+이 디렉토리는 `training_features_labeled`를 CatBoost 실험으로 연결하는 경로입니다. 현재 기본 경로는 `CSV 전체 적재 -> pandas`가 아니라, `DB -> staged split CSV -> CatBoost file Pool`입니다.
 
 ## 목적
 
-- Node/TypeScript 쪽은 `collector`, `maintenance`, ETL, DB 관리 유지
-- Python 쪽은 exported dataset 기반 학습/평가/모델 저장 담당
-
-## 권장 흐름
-
-1. `training_features_raw` 백필
-2. `training_features_clean` 백필
-3. `training_features_labeled` 백필
-4. labeled dataset CSV export
-5. `CatBoost` 학습 실행
+- ETL이 만든 최근 7일 labeled 데이터를 공통 split spec으로 고정
+- 같은 스냅샷으로 `글로벌 1개 모델`과 `model_segment`별 모델을 비교
+- 대용량 데이터에서도 `pandas.read_csv()` 전체 적재 병목을 피하기
 
 ## ETL 완료 판독
 
@@ -23,56 +16,14 @@
 npm run etl:training -- --reset-cursors --since-hours=168 --prune-before-run --limit=10000 --max-batches-per-stage=1
 ```
 
-로그의 마지막이 아래 조건이면 해당 윈도우 백필은 끝난 것으로 본다.
+로그 마지막이 아래 조건이면 현재 7일 범위 백필은 정상 종료로 본다.
 
 - `rawReachedEnd: true`
 - `cleanReachedEnd: true`
 - `labeledReachedEnd: true`
 - 마지막 종료 코드 `0`
 
-즉, 이 경우에는 ETL이 오류로 멈춘 것이 아니라 **현재 7일 범위를 끝까지 따라잡고 정상 종료한 것**이다.
-지속 tailing이 필요하면 `--daemon`으로 다시 돌리고, 일단 학습 시도만 하려면 바로 export 후 학습으로 넘어가도 된다.
-
-## ETL 백필 예시
-
-```bash
-npm run build:training-features -- --reset-cursor --until-end
-```
-
-```bash
-npm run build:training-features-clean -- --reset-cursor --until-end
-```
-
-```bash
-npm run build:training-features-labeled -- --reset-cursor --until-end
-```
-
-주의:
-
-- 세 단계는 보통 **동시에 돌리기보다 순차 실행**이 안전합니다.
-- `collector`는 계속 켜두고, ETL 중 DB 부하가 크면 `maintenance`는 잠시 내려두는 편이 안전합니다.
-
-## 학습용 CSV export
-
-최근 7일 labeled row 전체 export:
-
-```bash
-npm run export:training-dataset -- --days=7
-```
-
-ETL이 위 조건으로 완료됐다면, 일반적으로 바로 이 export를 실행해서 1차 CatBoost 학습을 시도해도 된다.
-다만 export 전에 collector가 계속 최신 데이터를 쌓고 있으므로, 엄밀히 같은 시점 스냅샷이 필요하면 export 직전 한 번 더 ETL을 짧게 실행하는 편이 안전하다.
-
-특정 세그먼트만 export:
-
-```bash
-npm run export:training-dataset -- --days=7 --segments=rare_equipment,jewel
-```
-
-출력:
-
-- 기본 경로: `artifacts/datasets/`
-- CSV와 `.manifest.json`이 함께 생성됨
+이 상태면 export만 하던 이전 흐름 대신, 바로 `stage -> train/compare`로 넘어가면 된다.
 
 ## Python 환경
 
@@ -82,46 +33,134 @@ source ml/.venv/bin/activate
 pip install -r ml/requirements.txt
 ```
 
-## 첫 학습 실행
+## 권장 흐름
+
+1. 최근 7일 ETL 완료 확인
+2. 스테이징 파일 생성
+3. 글로벌 모델 또는 세그먼트 모델 학습
+4. 비교 리포트 생성
+
+## 1. 학습 스테이징 생성
+
+기본 예시:
+
+```bash
+npm run stage:training-dataset -- --days=7 --output-dir=artifacts/training-staging/last_7d
+```
+
+특정 세그먼트만 스테이징하고 싶다면:
+
+```bash
+npm run stage:training-dataset -- --days=7 --segments=rare_equipment,jewel --output-dir=artifacts/training-staging/last_7d_focus
+```
+
+출력:
+
+- `manifest.json`
+- `split_spec.json`
+- `target_price_log1p.cd`
+- `target_price_chaos.cd`
+- `global/train.csv`, `global/valid.csv`, `global/test.csv`
+- `segments/<model_segment>/train.csv`, `valid.csv`, `test.csv`
+
+핵심:
+
+- split은 전역 시간순 row 경계를 기준으로 한 번만 계산된다.
+- 세그먼트별 파일도 같은 split spec을 공유하므로 공정 비교가 가능하다.
+- 학습 입력 컬럼은 `src/config/clipboard-safe-feature-policy.json`의 active/derived feature만 사용한다.
+
+## 2. 글로벌 모델 학습
+
+```bash
+python ml/train_catboost.py \
+  --staged-manifest artifacts/training-staging/last_7d/manifest.json \
+  --output-dir ml/runs/global_last_7d
+```
+
+주요 옵션:
+
+```bash
+python ml/train_catboost.py \
+  --staged-manifest artifacts/training-staging/last_7d/manifest.json \
+  --target-column target_price_log1p \
+  --iterations 3000 \
+  --learning-rate 0.03 \
+  --depth 8 \
+  --thread-count 8 \
+  --output-dir ml/runs/global_last_7d_tuned
+```
+
+## 3. 세그먼트 모델 학습
+
+예: `rare_equipment`만 별도 학습
+
+```bash
+python ml/train_catboost.py \
+  --staged-manifest artifacts/training-staging/last_7d/manifest.json \
+  --segment rare_equipment \
+  --output-dir ml/runs/segment_rare_equipment
+```
+
+주의:
+
+- 세그먼트 학습도 같은 `split_spec.json`을 그대로 사용한다.
+- `model_segment` 컬럼은 세그먼트 파일에도 남겨 두지만 값이 상수라 CatBoost가 사실상 무시하게 된다.
+
+## 4. 글로벌 vs 세그먼트 비교
+
+```bash
+python ml/run_training_comparison.py \
+  --staged-manifest artifacts/training-staging/last_7d/manifest.json \
+  --output-dir ml/runs/comparison_last_7d
+```
+
+출력:
+
+- `global/` 아래 글로벌 모델 산출물
+- `segments/<segment>/` 아래 세그먼트 모델 산출물
+- `comparison_summary.csv`
+- `comparison_summary.json`
+- `run_info.json`
+
+비교 기준:
+
+- `target_price_log1p` RMSE / MAE
+- `target_price_chaos` RMSE / MAE / MAPE
+- 세그먼트별 winner 판정
+- 학습 시간과 메모리 사용량
+
+## 현재 기준선
+
+현재 저장소 기준 가장 최근 7일 전체 비교 런은 아래 결과를 남겼다.
+
+- 스테이징 스냅샷: `artifacts/training-staging/last_7d_full_test_v2`
+- 비교 런: `ml/runs/comparison_last_7d_full_baseline_100iter_d8`
+- 설정: `target_price_log1p`, `iterations=100`, `depth=8`, `learning_rate=0.05`
+
+핵심 결과:
+
+- 글로벌 모델 test `target_price_log1p_rmse`: `1.8808`
+- 세그먼트 모델은 `jewel`, `rare_equipment`, `skill_gem`, `unique_equipment` 4개 모두에서 글로벌보다 낮은 RMSE를 기록
+- 따라서 현재 1차 기준선은 **글로벌 1개 모델보다 `model_segment` 라우팅 기반 4개 모델**로 보는 것이 적절하다
+
+세그먼트별 test `target_price_log1p_rmse`:
+
+- `jewel`: `1.9318 -> 1.8346`
+- `rare_equipment`: `1.8014 -> 1.7666`
+- `skill_gem`: `1.7292 -> 1.6902`
+- `unique_equipment`: `2.1276 -> 1.9380`
+
+운영 판단:
+
+- V1 로컬 유틸리티 앱은 `model_segment` 판별 후 해당 세그먼트 모델을 선택하는 구조를 기본안으로 삼는다.
+- 글로벌 모델은 비교 기준선과 fallback 실험용으로 유지한다.
+
+## 레거시 CSV 모드
+
+작은 샘플을 빠르게 실험할 때는 기존 CSV 직접 학습도 그대로 쓸 수 있다.
 
 ```bash
 python ml/train_catboost.py --dataset artifacts/datasets/YOUR_FILE.csv
 ```
 
-옵션 예시:
-
-```bash
-python ml/train_catboost.py \
-  --dataset artifacts/datasets/YOUR_FILE.csv \
-  --target-column target_price_log1p \
-  --output-dir ml/runs/first_full_run
-```
-
-## 현재 학습 스크립트 특징
-
-- 시간 순서 기준 `train / valid / test` 분할
-- 기본 타깃은 `target_price_log1p`
-- 기본적으로 `src/config/clipboard-safe-feature-policy.json`의 `clipboard_safe_v1` 화이트리스트만 feature로 사용
-- 즉 "CSV에 있는 컬럼 전체"가 아니라, 현재 클립보드 호환으로 승인된 컬럼만 학습 입력으로 사용
-- `observed_hour_utc`, `observed_weekday_utc`는 `source_updated_at`에서 파생 생성
-- 실행 결과로 아래 파일 생성
-  - `model.cbm`
-  - `metrics.json`
-  - `feature_importance.csv`
-  - `run_info.json`
-
-정책 파일을 바꾸고 싶다면:
-
-```bash
-python ml/train_catboost.py \
-  --dataset artifacts/datasets/YOUR_FILE.csv \
-  --feature-policy src/config/clipboard-safe-feature-policy.json
-```
-
-## 다음 확장 후보
-
-- segment별 별도 모델
-- outlier clipping / target winsorization
-- categorical/text feature 확장
-- mod key 정규화 후 피처 추가
-- 학습 결과 비교용 실험 관리 파일 추가
+이 모드는 여전히 전체 CSV를 pandas로 올리므로, 최근 7일 전체 학습의 기본 경로로는 권장하지 않는다.

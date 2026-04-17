@@ -607,7 +607,7 @@ npm run build:training-features-labeled -- --reset-cursor
 
 ### 실제 학습용 export
 
-`training_features_labeled`가 쌓인 뒤에는 최근 N일 구간을 학습용 CSV로 export할 수 있습니다.
+`training_features_labeled`가 쌓인 뒤에는 최근 N일 구간을 inspection/export 용 CSV로 뽑을 수 있습니다.
 
 기본 예시:
 
@@ -629,14 +629,17 @@ npm run export:training-dataset -- --days=7 --segments=rare_equipment,jewel
 주의:
 
 - export는 `training_features_labeled`만 대상으로 합니다.
-- 즉 실제 CatBoost 학습 직전 단계의 canonical dataset export 용도입니다.
+- 작은 샘플 검토나 ad-hoc 분석에는 여전히 유용합니다.
+- 하지만 최근 7일 전체 CatBoost 학습 기본 경로는 이제 아래의 `stage:training-dataset` 기반입니다.
 
 ### 추천 실행 순서
 
-실제 1차 학습을 준비할 때는 아래처럼 **통합 ETL -> export** 순서가 가장 단순합니다.
+실제 1차 학습/비교를 준비할 때는 아래처럼 **통합 ETL -> stage -> train/compare** 순서를 권장합니다.
 
 1. `npm run etl:training -- --reset-cursors --limit=10000`
-2. `npm run export:training-dataset -- --days=7`
+2. `npm run stage:training-dataset -- --days=7 --output-dir=artifacts/training-staging/last_7d`
+3. `python ml/train_catboost.py --staged-manifest artifacts/training-staging/last_7d/manifest.json`
+4. `python ml/run_training_comparison.py --staged-manifest artifacts/training-staging/last_7d/manifest.json`
 
 설명:
 
@@ -652,8 +655,15 @@ npm run etl:training -- --reset-cursors --limit=10000
 npm run etl:training -- --daemon --limit=10000 --max-batches-per-stage=10
 ```
 
+- 학습용 스테이징은 다음처럼 생성합니다:
+
+```bash
+npm run stage:training-dataset -- --days=7 --output-dir=artifacts/training-staging/last_7d
+```
+
+- 스테이징 결과물에는 `manifest.json`, `split_spec.json`, `global/*.csv`, `segments/<segment>/*.csv`, CatBoost `.cd` 파일이 함께 포함됩니다.
 - 개별 단계 스크립트는 디버깅/부분 재실행용으로 남겨둡니다.
-- `collector`, `maintenance`는 계속 켜둬도 되지만, DB 부하가 크면 ETL 실행 중에는 상태를 보면서 조절하는 것이 좋습니다.
+- `collector`는 계속 켜두고, DB 부하가 크면 `maintenance`는 ETL/학습 준비 중 잠시 내리는 편이 안전합니다.
 
 ## ML 디렉토리
 
@@ -661,7 +671,10 @@ npm run etl:training -- --daemon --limit=10000 --max-batches-per-stage=10
 
 구성:
 
-- `ml/train_catboost.py`: 첫 `CatBoost` 회귀 학습 골격
+- `src/scripts/stage-training-dataset.ts`: 학습용 staged split CSV / split spec 생성
+- `ml/train_catboost.py`: 글로벌 또는 세그먼트 `CatBoost` 학습
+- `ml/run_training_comparison.py`: 글로벌 vs 세그먼트 비교 러너
+- `ml/training_pipeline.py`: staged manifest 공용 학습 유틸리티
 - `ml/requirements.txt`: Python 학습 의존성
 - `ml/README.md`: 학습 실행 가이드
 
@@ -671,16 +684,32 @@ npm run etl:training -- --daemon --limit=10000 --max-batches-per-stage=10
 python3 -m venv ml/.venv
 source ml/.venv/bin/activate
 pip install -r ml/requirements.txt
-python ml/train_catboost.py --dataset artifacts/datasets/YOUR_FILE.csv
+npm run stage:training-dataset -- --days=7 --output-dir=artifacts/training-staging/last_7d
+python ml/train_catboost.py --staged-manifest artifacts/training-staging/last_7d/manifest.json
 ```
 
 현재 학습 스크립트 특징:
 
-1. 시간 순서 기준 `train / valid / test` 분할
+1. 전역 시간순 기준 `train / valid / test` split spec 고정
 2. 기본 타깃은 `target_price_log1p`
 3. 기본적으로 `src/config/clipboard-safe-feature-policy.json`의 클립보드 호환 화이트리스트만 feature로 사용
-4. `observed_hour_utc`, `observed_weekday_utc`는 `source_updated_at`에서 파생 생성
-5. 결과물로 `model.cbm`, `metrics.json`, `feature_importance.csv`, `run_info.json` 저장
+4. `observed_hour_utc`, `observed_weekday_utc`는 스테이징 단계에서 생성
+5. 같은 staged snapshot으로 글로벌 1개 모델과 `model_segment`별 모델 비교 가능
+6. 결과물로 `model.cbm`, `metrics.json`, `feature_importance.csv`, `run_info.json`, `comparison_summary.*` 저장
+
+현재 기준선:
+
+- 최근 7일 전체 스냅샷 비교 런: `ml/runs/comparison_last_7d_full_baseline_100iter_d8`
+- 스테이징 기준 snapshot: `artifacts/training-staging/last_7d_full_test_v2`
+- 비교 결과, `jewel`, `rare_equipment`, `skill_gem`, `unique_equipment` 4개 세그먼트 모두에서 세그먼트 모델이 글로벌 모델보다 더 낮은 `target_price_log1p` test RMSE를 기록했습니다.
+- 따라서 현재 1차 운영 기준선은 **글로벌 1개 모델**보다 **`model_segment` 라우팅 기반 세그먼트 모델 묶음**입니다.
+
+세그먼트별 test `target_price_log1p_rmse`:
+
+- `jewel`: 글로벌 `1.9318` -> 세그먼트 `1.8346`
+- `rare_equipment`: 글로벌 `1.8014` -> 세그먼트 `1.7666`
+- `skill_gem`: 글로벌 `1.7292` -> 세그먼트 `1.6902`
+- `unique_equipment`: 글로벌 `2.1276` -> 세그먼트 `1.9380`
 
 최근 7일 ETL을 아래처럼 돌렸다면:
 
@@ -688,7 +717,7 @@ python ml/train_catboost.py --dataset artifacts/datasets/YOUR_FILE.csv
 npm run etl:training -- --reset-cursors --since-hours=168 --prune-before-run --limit=10000 --max-batches-per-stage=1
 ```
 
-로그 마지막에 `rawReachedEnd`, `cleanReachedEnd`, `labeledReachedEnd`가 모두 `true`이고 종료 코드가 `0`이면, 그 실행은 오류가 아니라 **현재 7일 범위 백필을 끝까지 처리하고 정상 종료한 것**입니다. 이 상태면 `export:training-dataset` 후 바로 1차 CatBoost 학습을 시도해도 됩니다.
+로그 마지막에 `rawReachedEnd`, `cleanReachedEnd`, `labeledReachedEnd`가 모두 `true`이고 종료 코드가 `0`이면, 그 실행은 오류가 아니라 **현재 7일 범위 백필을 끝까지 처리하고 정상 종료한 것**입니다. 이 상태면 `stage:training-dataset` 후 바로 1차 CatBoost 학습/비교를 시도해도 됩니다.
 
 ## Clipboard Affix Dictionary 상태
 
