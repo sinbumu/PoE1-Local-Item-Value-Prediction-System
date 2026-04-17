@@ -711,6 +711,55 @@ python ml/train_catboost.py --staged-manifest artifacts/training-staging/last_7d
 - `skill_gem`: 글로벌 `1.7292` -> 세그먼트 `1.6902`
 - `unique_equipment`: 글로벌 `2.1276` -> 세그먼트 `1.9380`
 
+보고 이후 권장 실행 순서:
+
+1. ETL을 다시 돌려 최근 7일 범위를 최신화한다.
+2. ETL이 따라잡힌 뒤에는 **기존 staging output dir를 재사용하지 말고 새 output dir로 다시 스테이징**하는 편이 가장 안전하다.
+3. 바로 전체 세그먼트 학습을 돌리기보다, 먼저 `rare_equipment` 같은 단일 세그먼트로 한 번 더 학습한다.
+4. 단일 세그먼트 결과와 리소스 사용이 문제 없으면 그 다음 전체 세그먼트 비교/학습으로 확장한다.
+
+주의:
+
+- 현재 `stage:training-dataset` 스크립트는 생성 대상 CSV와 manifest는 다시 쓰지만, output dir 전체를 비우지는 않습니다.
+- 즉 **같은 staging 경로를 재사용할 때는 직접 지운 뒤 실행하는 편이 확실**합니다.
+- 가장 쉬운 운영 방식은 매번 새 `--output-dir`를 쓰는 것입니다.
+
+예시 1. ETL 최신화 후 rare 장비만 먼저:
+
+```bash
+npm run stage:training-dataset -- \
+  --days=7 \
+  --segments=rare_equipment \
+  --output-dir=artifacts/training-staging/post_report_rare_equipment
+```
+
+```bash
+ml/.venv/bin/python ml/train_catboost.py \
+  --staged-manifest artifacts/training-staging/post_report_rare_equipment/manifest.json \
+  --segment rare_equipment \
+  --iterations 300 \
+  --depth 8 \
+  --learning-rate 0.05 \
+  --output-dir ml/runs/rare_equipment_post_report_300iter_d8
+```
+
+예시 2. 이상 없으면 전체 세그먼트 비교:
+
+```bash
+npm run stage:training-dataset -- \
+  --days=7 \
+  --output-dir=artifacts/training-staging/post_report_all_segments
+```
+
+```bash
+ml/.venv/bin/python ml/run_training_comparison.py \
+  --staged-manifest artifacts/training-staging/post_report_all_segments/manifest.json \
+  --iterations 300 \
+  --depth 8 \
+  --learning-rate 0.05 \
+  --output-dir ml/runs/comparison_post_report_300iter_d8
+```
+
 최근 7일 ETL을 아래처럼 돌렸다면:
 
 ```bash

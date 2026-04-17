@@ -69,6 +69,24 @@ npm run stage:training-dataset -- --days=7 --segments=rare_equipment,jewel --out
 - 세그먼트별 파일도 같은 split spec을 공유하므로 공정 비교가 가능하다.
 - 학습 입력 컬럼은 `src/config/clipboard-safe-feature-policy.json`의 active/derived feature만 사용한다.
 
+스테이징 디렉터리 정리 규칙:
+
+- 가장 안전한 방법은 **매번 새 `--output-dir`를 쓰는 것**이다.
+- 현재 `stage:training-dataset` 스크립트는 `train.csv`, `valid.csv`, `test.csv`, `manifest.json`, `split_spec.json`은 다시 쓰지만, 기존 output dir 안의 **사용하지 않게 된 오래된 세그먼트 하위 디렉터리까지 자동 삭제하지는 않는다**.
+- 따라서 이전 결과를 완전히 버리고 같은 경로를 다시 쓰고 싶다면, **직접 해당 staging 디렉터리를 지운 뒤 실행**하는 편이 확실하다.
+
+예:
+
+```bash
+rm -rf artifacts/training-staging/post_report_rare_equipment
+```
+
+또는 더 권장:
+
+```bash
+npm run stage:training-dataset -- --days=7 --segments=rare_equipment --output-dir=artifacts/training-staging/post_report_rare_equipment_20260418
+```
+
 ## 2. 글로벌 모델 학습
 
 ```bash
@@ -154,6 +172,60 @@ python ml/run_training_comparison.py \
 
 - V1 로컬 유틸리티 앱은 `model_segment` 판별 후 해당 세그먼트 모델을 선택하는 구조를 기본안으로 삼는다.
 - 글로벌 모델은 비교 기준선과 fallback 실험용으로 유지한다.
+
+## 보고 이후 권장 실행 순서
+
+현재 기준으로는 아래 순서를 권장한다.
+
+1. ETL이 최근 7일 범위를 다시 따라잡게 둔다.
+2. ETL 최신화가 끝나면 **새 output dir**로 새 staged snapshot을 만든다.
+3. 바로 전체 비교를 다시 돌리지 말고, 먼저 `rare_equipment` 같은 단일 세그먼트만 학습한다.
+4. 단일 세그먼트 결과와 리소스 사용이 문제 없으면, 그 다음 전체 세그먼트 비교나 전체 세그먼트 학습으로 확장한다.
+
+### A. ETL 최신화 후 rare 장비만 먼저 검증
+
+```bash
+npm run stage:training-dataset -- \
+  --days=7 \
+  --segments=rare_equipment \
+  --output-dir=artifacts/training-staging/post_report_rare_equipment
+```
+
+```bash
+ml/.venv/bin/python ml/train_catboost.py \
+  --staged-manifest artifacts/training-staging/post_report_rare_equipment/manifest.json \
+  --segment rare_equipment \
+  --iterations 300 \
+  --depth 8 \
+  --learning-rate 0.05 \
+  --output-dir ml/runs/rare_equipment_post_report_300iter_d8
+```
+
+### B. 이상 없으면 전체 세그먼트 비교로 확장
+
+```bash
+npm run stage:training-dataset -- \
+  --days=7 \
+  --output-dir=artifacts/training-staging/post_report_all_segments
+```
+
+```bash
+ml/.venv/bin/python ml/run_training_comparison.py \
+  --staged-manifest artifacts/training-staging/post_report_all_segments/manifest.json \
+  --iterations 300 \
+  --depth 8 \
+  --learning-rate 0.05 \
+  --output-dir ml/runs/comparison_post_report_300iter_d8
+```
+
+정리:
+
+- **직접 지워야 하는가?**  
+  같은 staging 경로를 재사용한다면 지우는 편이 확실하다.
+- **스크립트가 자동 정리하는가?**  
+  핵심 파일은 덮어쓰지만, output dir 전체를 깨끗하게 비우지는 않는다.
+- **지금 추천 흐름은?**  
+  ETL 최신화 후 `rare_equipment` 단일 세그먼트 먼저, 문제 없으면 전체 확장.
 
 ## 레거시 CSV 모드
 
