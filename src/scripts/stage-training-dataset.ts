@@ -2,7 +2,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { createWriteStream } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 
-import type { QueryResult } from "pg";
+import type { PoolClient, QueryResult } from "pg";
 
 import featurePolicy from "../config/clipboard-safe-feature-policy.json";
 import { closePool, pool } from "../db/client";
@@ -370,247 +370,264 @@ async function main(): Promise<void> {
   const log1pCdPath = join(outputDir, "target_price_log1p.cd");
   const chaosCdPath = join(outputDir, "target_price_chaos.cd");
 
-  await pool.query("SELECT 1");
-
-  const snapshotWindowResult = await pool.query<SnapshotWindowRow>(
-    `
-      SELECT
-        NOW()::text AS snapshot_now,
-        (NOW() - ($1::int * INTERVAL '1 day'))::text AS lower_bound
-    `,
-    [days],
-  );
-  const snapshotWindow = snapshotWindowResult.rows[0];
-  const snapshotNow = snapshotWindow?.snapshot_now;
-  const lowerBound = snapshotWindow?.lower_bound;
-  if (!snapshotNow || !lowerBound) {
-    throw new Error("snapshot window를 계산하지 못했습니다.");
-  }
-
-  const summaryResult = await pool.query<SummaryRow>(
-    `
-      SELECT
-        COUNT(*)::text AS row_count,
-        MIN(t.source_updated_at)::text AS min_source_updated_at,
-        MAX(t.source_updated_at)::text AS max_source_updated_at
-      FROM training_features_labeled t
-      WHERE t.source_updated_at >= $1::timestamptz
-        AND t.source_updated_at <= $2::timestamptz
-        AND ($3::text[] IS NULL OR t.model_segment = ANY($3::text[]))
-    `,
-    [lowerBound, snapshotNow, modelSegments],
-  );
-
-  const summary = summaryResult.rows[0];
-  const totalRows = Number(summary?.row_count ?? "0");
-  if (!Number.isFinite(totalRows) || totalRows < 100) {
-    throw new Error(`학습 스테이징 대상 row 수가 너무 적습니다: ${totalRows}`);
-  }
-
-  const trainRowEnd = Math.max(Math.floor(totalRows * trainRatio), 1);
-  const validRowEnd = Math.max(trainRowEnd + Math.floor(totalRows * validRatio), trainRowEnd + 1);
-  const adjustedValidRowEnd = Math.min(validRowEnd, totalRows - 1);
-
-  logger.info(
-    {
-      days,
-      batchSize,
-      modelSegments,
-      outputDir,
-      totalRows,
-      snapshotNow,
-      lowerBound,
-      trainRatio,
-      validRatio,
-      trainRowEnd,
-      validRowEnd: adjustedValidRowEnd,
-    },
-    "Starting training dataset staging",
-  );
-
-  const { streams: globalStreams, csvPaths: globalCsvPaths } = await createSplitStreams(
-    join(outputDir, "global"),
-  );
-  const segmentStreams = new Map<string, SplitStreams>();
-  const segmentInfo = new Map<string, SegmentStageInfo>();
-  const globalStats = createEmptyStats();
-
-  const ensureSegment = async (segment: string): Promise<SplitStreams> => {
-    const existing = segmentStreams.get(segment);
-    if (existing) {
-      return existing;
-    }
-
-    const { streams, csvPaths } = await createSplitStreams(join(outputDir, "segments", segment));
-    segmentStreams.set(segment, streams);
-    segmentInfo.set(segment, {
-      csvPaths,
-      stats: createEmptyStats(),
-    });
-    return streams;
-  };
-
-  let rowNumber = 0;
-  let lastUpdatedAt: string | null = null;
-  let lastListingKey: string | null = null;
-  let trainBoundary: SplitCursor | null = null;
-  let validBoundary: SplitCursor | null = null;
+  const client = await pool.connect();
+  let transactionOpen = false;
 
   try {
-    while (true) {
-      const result: QueryResult<StageRow> = await pool.query<StageRow>(
-        `
-          SELECT
-            t.listing_key,
-            t.source_updated_at::text AS source_updated_at,
-            ${buildColumnSelectors().join(",\n            ")}
-          FROM training_features_labeled t
-          WHERE t.source_updated_at >= $1::timestamptz
-            AND t.source_updated_at <= $2::timestamptz
-            AND ($3::text[] IS NULL OR t.model_segment = ANY($3::text[]))
-            AND (
-              $4::timestamptz IS NULL
-              OR (t.source_updated_at, t.listing_key) > ($4::timestamptz, $5::text)
-            )
-          ORDER BY t.source_updated_at ASC, t.listing_key ASC
-          LIMIT $6
-        `,
-        [lowerBound, snapshotNow, modelSegments, lastUpdatedAt, lastListingKey, batchSize],
-      );
+    await client.query("BEGIN TRANSACTION ISOLATION LEVEL REPEATABLE READ READ ONLY");
+    transactionOpen = true;
 
-      if (result.rows.length === 0) {
-        break;
+    const snapshotWindowResult = await client.query<SnapshotWindowRow>(
+      `
+        SELECT
+          NOW()::text AS snapshot_now,
+          (NOW() - ($1::int * INTERVAL '1 day'))::text AS lower_bound
+      `,
+      [days],
+    );
+    const snapshotWindow = snapshotWindowResult.rows[0];
+    const snapshotNow = snapshotWindow?.snapshot_now;
+    const lowerBound = snapshotWindow?.lower_bound;
+    if (!snapshotNow || !lowerBound) {
+      throw new Error("snapshot window를 계산하지 못했습니다.");
+    }
+
+    const summaryResult = await client.query<SummaryRow>(
+      `
+        SELECT
+          COUNT(*)::text AS row_count,
+          MIN(t.source_updated_at)::text AS min_source_updated_at,
+          MAX(t.source_updated_at)::text AS max_source_updated_at
+        FROM training_features_labeled t
+        WHERE t.source_updated_at >= $1::timestamptz
+          AND t.source_updated_at <= $2::timestamptz
+          AND ($3::text[] IS NULL OR t.model_segment = ANY($3::text[]))
+      `,
+      [lowerBound, snapshotNow, modelSegments],
+    );
+
+    const summary = summaryResult.rows[0];
+    const totalRows = Number(summary?.row_count ?? "0");
+    if (!Number.isFinite(totalRows) || totalRows < 100) {
+      throw new Error(`학습 스테이징 대상 row 수가 너무 적습니다: ${totalRows}`);
+    }
+
+    const trainRowEnd = Math.max(Math.floor(totalRows * trainRatio), 1);
+    const validRowEnd = Math.max(trainRowEnd + Math.floor(totalRows * validRatio), trainRowEnd + 1);
+    const adjustedValidRowEnd = Math.min(validRowEnd, totalRows - 1);
+
+    logger.info(
+      {
+        days,
+        batchSize,
+        modelSegments,
+        outputDir,
+        totalRows,
+        snapshotNow,
+        lowerBound,
+        trainRatio,
+        validRatio,
+        trainRowEnd,
+        validRowEnd: adjustedValidRowEnd,
+      },
+      "Starting training dataset staging",
+    );
+
+    const { streams: globalStreams, csvPaths: globalCsvPaths } = await createSplitStreams(
+      join(outputDir, "global"),
+    );
+    const segmentStreams = new Map<string, SplitStreams>();
+    const segmentInfo = new Map<string, SegmentStageInfo>();
+    const globalStats = createEmptyStats();
+
+    const ensureSegment = async (segment: string): Promise<SplitStreams> => {
+      const existing = segmentStreams.get(segment);
+      if (existing) {
+        return existing;
       }
 
-      for (const row of result.rows) {
-        rowNumber += 1;
-        const splitName = splitForRow(rowNumber, trainRowEnd, adjustedValidRowEnd);
-        const updatedAt = String(row.source_updated_at ?? "");
-        const listingKey = String(row.listing_key ?? "");
-        const modelSegment = String(row.model_segment ?? "");
-        const csvLine = `${TRAINING_HEADERS.map((header) => formatCsvValue(row[header])).join(",")}\n`;
+      const { streams, csvPaths } = await createSplitStreams(join(outputDir, "segments", segment));
+      segmentStreams.set(segment, streams);
+      segmentInfo.set(segment, {
+        csvPaths,
+        stats: createEmptyStats(),
+      });
+      return streams;
+    };
 
-        await writeLine(globalStreams[splitName], csvLine);
-        updateStats(globalStats[splitName], updatedAt);
+    let rowNumber = 0;
+    let lastUpdatedAt: string | null = null;
+    let lastListingKey: string | null = null;
+    let trainBoundary: SplitCursor | null = null;
+    let validBoundary: SplitCursor | null = null;
 
-        const perSegmentStreams = await ensureSegment(modelSegment);
-        await writeLine(perSegmentStreams[splitName], csvLine);
+    try {
+      while (true) {
+        const result: QueryResult<StageRow> = await client.query<StageRow>(
+          `
+            SELECT
+              t.listing_key,
+              t.source_updated_at::text AS source_updated_at,
+              ${buildColumnSelectors().join(",\n            ")}
+            FROM training_features_labeled t
+            WHERE t.source_updated_at >= $1::timestamptz
+              AND t.source_updated_at <= $2::timestamptz
+              AND ($3::text[] IS NULL OR t.model_segment = ANY($3::text[]))
+              AND (
+                $4::timestamptz IS NULL
+                OR (t.source_updated_at, t.listing_key) > ($4::timestamptz, $5::text)
+              )
+            ORDER BY t.source_updated_at ASC, t.listing_key ASC
+            LIMIT $6
+          `,
+          [lowerBound, snapshotNow, modelSegments, lastUpdatedAt, lastListingKey, batchSize],
+        );
 
-        const perSegmentInfo = segmentInfo.get(modelSegment);
-        if (!perSegmentInfo) {
-          throw new Error(`세그먼트 정보가 초기화되지 않았습니다: ${modelSegment}`);
+        if (result.rows.length === 0) {
+          break;
         }
-        updateStats(perSegmentInfo.stats[splitName], updatedAt);
 
-        if (rowNumber === trainRowEnd) {
-          trainBoundary = { updatedAt, listingKey };
+        for (const row of result.rows) {
+          rowNumber += 1;
+          const splitName = splitForRow(rowNumber, trainRowEnd, adjustedValidRowEnd);
+          const updatedAt = String(row.source_updated_at ?? "");
+          const listingKey = String(row.listing_key ?? "");
+          const modelSegment = String(row.model_segment ?? "");
+          const csvLine = `${TRAINING_HEADERS.map((header) => formatCsvValue(row[header])).join(",")}\n`;
+
+          await writeLine(globalStreams[splitName], csvLine);
+          updateStats(globalStats[splitName], updatedAt);
+
+          const perSegmentStreams = await ensureSegment(modelSegment);
+          await writeLine(perSegmentStreams[splitName], csvLine);
+
+          const perSegmentInfo = segmentInfo.get(modelSegment);
+          if (!perSegmentInfo) {
+            throw new Error(`세그먼트 정보가 초기화되지 않았습니다: ${modelSegment}`);
+          }
+          updateStats(perSegmentInfo.stats[splitName], updatedAt);
+
+          if (rowNumber === trainRowEnd) {
+            trainBoundary = { updatedAt, listingKey };
+          }
+          if (rowNumber === adjustedValidRowEnd) {
+            validBoundary = { updatedAt, listingKey };
+          }
         }
-        if (rowNumber === adjustedValidRowEnd) {
-          validBoundary = { updatedAt, listingKey };
-        }
-      }
 
-      const lastRow = result.rows[result.rows.length - 1];
-      lastUpdatedAt = String(lastRow.source_updated_at ?? "");
-      lastListingKey = String(lastRow.listing_key ?? "");
+        const lastRow = result.rows[result.rows.length - 1];
+        lastUpdatedAt = String(lastRow.source_updated_at ?? "");
+        lastListingKey = String(lastRow.listing_key ?? "");
 
-      logger.info(
-        {
-          batchRowCount: result.rows.length,
-          stagedRows: rowNumber,
-          totalRows,
-          cursorUpdatedAt: lastUpdatedAt,
-          cursorListingKey: lastListingKey,
-        },
-        "Training staging batch completed",
-      );
-    }
-  } finally {
-    await closeSplitStreams(globalStreams);
-    for (const streams of segmentStreams.values()) {
-      await closeSplitStreams(streams);
-    }
-  }
-
-  if (rowNumber !== totalRows) {
-    throw new Error(`스테이징 row 수 불일치: expected=${totalRows}, actual=${rowNumber}`);
-  }
-  if (!trainBoundary || !validBoundary) {
-    throw new Error("split boundary cursor를 계산하지 못했습니다.");
-  }
-
-  const splitSpec = {
-    generatedAt: new Date().toISOString(),
-    sourceTable: "training_features_labeled",
-    days,
-    snapshotNow,
-    lowerBound,
-    totalRows,
-    trainRatio,
-    validRatio,
-    testRatio: 1 - trainRatio - validRatio,
-    trainRowEnd,
-    validRowEnd: adjustedValidRowEnd,
-    trainBoundary,
-    validBoundary,
-    sourceUpdatedAtMin: summary?.min_source_updated_at ?? null,
-    sourceUpdatedAtMax: summary?.max_source_updated_at ?? null,
-    globalRanges: globalStats,
-  };
-
-  const manifest = {
-    generatedAt: new Date().toISOString(),
-    outputDir,
-    sourceTable: "training_features_labeled",
-    sourceWindowDays: days,
-    snapshotNow,
-    lowerBound,
-    rowCount: totalRows,
-    modelSegmentsFilter: modelSegments,
-    featurePolicyName: policy.policyName,
-    featurePolicyVersion: policy.version,
-    featureColumns: FEATURE_COLUMNS,
-    categoricalColumns: CATEGORICAL_COLUMNS,
-    booleanColumns: [...BOOLEAN_COLUMNS],
-    targetColumns: [...TARGET_COLUMNS],
-    headers: TRAINING_HEADERS,
-    splitSpecPath,
-    columnDescriptions: {
-      target_price_log1p: log1pCdPath,
-      target_price_chaos: chaosCdPath,
-    },
-    global: {
-      csvPaths: globalCsvPaths,
-      stats: globalStats,
-    },
-    segments: Object.fromEntries(
-      [...segmentInfo.entries()].sort(([left], [right]) => left.localeCompare(right)).map(
-        ([segment, info]) => [
-          segment,
+        logger.info(
           {
-            csvPaths: info.csvPaths,
-            stats: info.stats,
+            batchRowCount: result.rows.length,
+            stagedRows: rowNumber,
+            totalRows,
+            cursorUpdatedAt: lastUpdatedAt,
+            cursorListingKey: lastListingKey,
           },
-        ],
-      ),
-    ),
-  };
+          "Training staging batch completed",
+        );
+      }
+    } finally {
+      await closeSplitStreams(globalStreams);
+      for (const streams of segmentStreams.values()) {
+        await closeSplitStreams(streams);
+      }
+    }
 
-  await mkdir(dirname(outputManifestPath), { recursive: true });
-  await writeFile(splitSpecPath, `${JSON.stringify(splitSpec, null, 2)}\n`, "utf-8");
-  await writeFile(log1pCdPath, `${buildCdLines("target_price_log1p").join("\n")}\n`, "utf-8");
-  await writeFile(chaosCdPath, `${buildCdLines("target_price_chaos").join("\n")}\n`, "utf-8");
-  await writeFile(outputManifestPath, `${JSON.stringify(manifest, null, 2)}\n`, "utf-8");
+    if (rowNumber !== totalRows) {
+      throw new Error(`스테이징 row 수 불일치: expected=${totalRows}, actual=${rowNumber}`);
+    }
+    if (!trainBoundary || !validBoundary) {
+      throw new Error("split boundary cursor를 계산하지 못했습니다.");
+    }
 
-  logger.info(
-    {
+    const splitSpec = {
+      generatedAt: new Date().toISOString(),
+      sourceTable: "training_features_labeled",
+      days,
+      snapshotNow,
+      lowerBound,
+      totalRows,
+      trainRatio,
+      validRatio,
+      testRatio: 1 - trainRatio - validRatio,
+      trainRowEnd,
+      validRowEnd: adjustedValidRowEnd,
+      trainBoundary,
+      validBoundary,
+      sourceUpdatedAtMin: summary?.min_source_updated_at ?? null,
+      sourceUpdatedAtMax: summary?.max_source_updated_at ?? null,
+      globalRanges: globalStats,
+    };
+
+    const manifest = {
+      generatedAt: new Date().toISOString(),
       outputDir,
-      manifestPath: outputManifestPath,
+      sourceTable: "training_features_labeled",
+      sourceWindowDays: days,
+      snapshotNow,
+      lowerBound,
+      rowCount: totalRows,
+      modelSegmentsFilter: modelSegments,
+      featurePolicyName: policy.policyName,
+      featurePolicyVersion: policy.version,
+      featureColumns: FEATURE_COLUMNS,
+      categoricalColumns: CATEGORICAL_COLUMNS,
+      booleanColumns: [...BOOLEAN_COLUMNS],
+      targetColumns: [...TARGET_COLUMNS],
+      headers: TRAINING_HEADERS,
       splitSpecPath,
-      segmentCount: segmentInfo.size,
-    },
-    "Training dataset staging completed",
-  );
+      columnDescriptions: {
+        target_price_log1p: log1pCdPath,
+        target_price_chaos: chaosCdPath,
+      },
+      global: {
+        csvPaths: globalCsvPaths,
+        stats: globalStats,
+      },
+      segments: Object.fromEntries(
+        [...segmentInfo.entries()].sort(([left], [right]) => left.localeCompare(right)).map(
+          ([segment, info]) => [
+            segment,
+            {
+              csvPaths: info.csvPaths,
+              stats: info.stats,
+            },
+          ],
+        ),
+      ),
+    };
+
+    await mkdir(dirname(outputManifestPath), { recursive: true });
+    await writeFile(splitSpecPath, `${JSON.stringify(splitSpec, null, 2)}\n`, "utf-8");
+    await writeFile(log1pCdPath, `${buildCdLines("target_price_log1p").join("\n")}\n`, "utf-8");
+    await writeFile(chaosCdPath, `${buildCdLines("target_price_chaos").join("\n")}\n`, "utf-8");
+    await writeFile(outputManifestPath, `${JSON.stringify(manifest, null, 2)}\n`, "utf-8");
+
+    await client.query("COMMIT");
+    transactionOpen = false;
+
+    logger.info(
+      {
+        outputDir,
+        manifestPath: outputManifestPath,
+        splitSpecPath,
+        segmentCount: segmentInfo.size,
+      },
+      "Training dataset staging completed",
+    );
+  } catch (error) {
+    if (transactionOpen) {
+      await client.query("ROLLBACK");
+      transactionOpen = false;
+    }
+    throw error;
+  } finally {
+    client.release();
+  }
 }
 
 main()
