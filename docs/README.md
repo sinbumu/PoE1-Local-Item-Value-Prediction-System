@@ -20,6 +20,8 @@
   - 현재 저장/cleanup/backup 정책
 - `MODEL_SCOPE.md`
   - 현재 모델 대상/비대상 범위
+- `TRAINING_BASELINE_REPORT_2026-04-19.md`
+  - 최근 7일 전체 `300 iter` 학습 비교 중간정리와 현재 기준선 해석
 - `REPORT_HANDOFF.md`
   - 다른 작성자/AI에게 넘길 최신 요약
 
@@ -54,6 +56,7 @@
 하지만 현재 구조 설명은 우선 아래 문서를 본다.
 
 - `TRAINING_ETL_OVERVIEW.md`
+- `TRAINING_BASELINE_REPORT_2026-04-19.md`
 - `TRAINING_FEATURES.md`
 - `STORAGE_POLICY.md`
 - `REPORT_HANDOFF.md`
@@ -63,10 +66,11 @@
 처음 프로젝트를 넘겨받는 경우:
 
 1. `REPORT_HANDOFF.md`
-2. `TRAINING_ETL_OVERVIEW.md`
-3. `TRAINING_FEATURES.md`
-4. `STORAGE_POLICY.md`
-5. 필요 시 `MODEL_SCOPE.md`
+2. `TRAINING_BASELINE_REPORT_2026-04-19.md`
+3. `TRAINING_ETL_OVERVIEW.md`
+4. `TRAINING_FEATURES.md`
+5. `STORAGE_POLICY.md`
+6. 필요 시 `MODEL_SCOPE.md`
 
 클립보드/추론 이슈를 볼 경우:
 
