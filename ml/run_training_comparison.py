@@ -57,7 +57,24 @@ def flatten_run_result(result: dict[str, Any]) -> dict[str, Any]:
     return {key: value for key, value in result.items() if key != "model"}
 
 
-def decide_winner(global_metrics: dict[str, float], segment_metrics: dict[str, float]) -> str:
+def decide_winner(
+    global_metrics: dict[str, float],
+    segment_metrics: dict[str, float],
+    primary_target_column: str,
+) -> str:
+    primary_rmse_key = f"{primary_target_column}_rmse"
+    primary_mae_key = f"{primary_target_column}_mae"
+
+    if segment_metrics[primary_rmse_key] < global_metrics[primary_rmse_key]:
+        return "segment"
+    if segment_metrics[primary_rmse_key] > global_metrics[primary_rmse_key]:
+        return "global"
+
+    if segment_metrics[primary_mae_key] < global_metrics[primary_mae_key]:
+        return "segment"
+    if segment_metrics[primary_mae_key] > global_metrics[primary_mae_key]:
+        return "global"
+
     if segment_metrics["target_price_chaos_rmse"] < global_metrics["target_price_chaos_rmse"]:
         return "segment"
     return "global"
@@ -152,7 +169,11 @@ def main() -> int:
         segment_runs[segment] = {
             "global_test": global_segment_test,
             "segment_model": flatten_run_result(segment_result),
-            "winner": decide_winner(global_segment_test["metrics"], segment_result["metrics"]["test"]),
+            "winner": decide_winner(
+                global_segment_test["metrics"],
+                segment_result["metrics"]["test"],
+                args.target_column,
+            ),
         }
 
         comparison_rows.append(
@@ -171,7 +192,11 @@ def main() -> int:
                 "segment_chaos_rmse": segment_result["metrics"]["test"]["target_price_chaos_rmse"],
                 "segment_chaos_mae": segment_result["metrics"]["test"]["target_price_chaos_mae"],
                 "segment_chaos_mape": segment_result["metrics"]["test"]["target_price_chaos_mape"],
-                "winner": decide_winner(global_segment_test["metrics"], segment_result["metrics"]["test"]),
+                "winner": decide_winner(
+                    global_segment_test["metrics"],
+                    segment_result["metrics"]["test"],
+                    args.target_column,
+                ),
                 "status": "trained",
             }
         )
@@ -205,6 +230,13 @@ def main() -> int:
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "manifest_path": str(manifest_path),
         "target_column": args.target_column,
+        "winner_rule": {
+            "primary_metric": f"{args.target_column}_rmse",
+            "tie_breakers": [
+                f"{args.target_column}_mae",
+                "target_price_chaos_rmse",
+            ],
+        },
         "global": flatten_run_result(global_result),
         "segments": segment_runs,
         "skipped_segments": skipped_segments,
@@ -220,6 +252,7 @@ def main() -> int:
         "manifest_path": str(manifest_path),
         "output_dir": str(output_dir),
         "target_column": args.target_column,
+        "winner_primary_metric": f"{args.target_column}_rmse",
         "segment_count": len(segment_names),
         "trained_segment_count": len(segment_runs),
         "skipped_segment_count": len(skipped_segments),

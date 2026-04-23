@@ -865,6 +865,7 @@ gunzip -c backup.sql.gz | psql "postgres://postgres:postgres@localhost:5432/poe_
 ## 관련 문서
 
 - 문서 인덱스 / 현재 기준선: `docs/README.md`
+- 중간 보고서 작성용 종합 정리: `docs/MIDTERM_REPORT_WRITING_GUIDE_2026-04-22.md`
 - 현재 학습/ETL 기준 문서: `docs/TRAINING_ETL_OVERVIEW.md`
 - 최신 handoff 요약: `docs/REPORT_HANDOFF.md`
 - 모델 스코프: `docs/MODEL_SCOPE.md`

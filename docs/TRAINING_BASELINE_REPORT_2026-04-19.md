@@ -87,9 +87,9 @@ ml/.venv/bin/python ml/run_training_comparison.py \
 
 즉 **1차 기준인 `target_price_log1p RMSE`만 보면 4개 중 3개 세그먼트에서 세그먼트 모델이 더 좋고, `skill_gem`만 글로벌 모델이 더 좋다.**
 
-## `winner` 컬럼 해석 주의
+## `winner` 컬럼 해석과 현재 판정 규칙
 
-현재 `comparison_summary.csv`의 `winner`는 내부적으로 `target_price_chaos_rmse` 기준으로 판정된다.
+`2026-04-19`에 생성된 기존 `comparison_summary.csv`의 `winner`는 내부적으로 `target_price_chaos_rmse` 기준으로 판정되었다.
 
 따라서 이번 결과에서:
 
@@ -102,6 +102,14 @@ ml/.venv/bin/python ml/run_training_comparison.py \
 2. 현재 자동 `winner` 판정: `target_price_chaos_rmse`
 
 현재 프로젝트에서 회귀 타깃 기본값이 `target_price_log1p`인 점을 감안하면, 이번 중간판단에서는 `winner` 컬럼보다 **`target_price_log1p_rmse` 비교를 우선 해석하는 것이 더 자연스럽다.**
+
+추가로 `2026-04-22`부터 `ml/run_training_comparison.py`의 `winner` 판정 로직은 아래 순서로 바뀌었다.
+
+1. `target_price_log1p_rmse`
+2. 동률이면 `target_price_log1p_mae`
+3. 그래도 동률이면 `target_price_chaos_rmse`
+
+즉 앞으로 새로 생성되는 비교 결과에서는 `jewel`도 자동으로 `segment` 승자로 기록되는 것이 맞다.
 
 ## 세그먼트별 해석
 
@@ -135,7 +143,13 @@ ml/.venv/bin/python ml/run_training_comparison.py \
   - gem 계열 피처가 아직 단순해서 분리 모델 이점이 작을 수 있음
   - 글로벌 모델이 다른 세그먼트 정보까지 함께 보며 regularization 효과를 받았을 가능성
 
-즉 현재 기준으로 `skill_gem`은 **무조건 세그먼트 분리**보다 **글로벌 fallback 유지**도 충분히 합리적이다.
+추가 점검으로 `skill_gem` 세그먼트 단독 학습을 한 번 더 실행했다.
+
+- 실행: `ml/runs/skill_gem_post_report_500iter_d6`
+- 설정: `iterations=500`, `depth=6`, `learning_rate=0.05`
+- 결과: test `target_price_log1p_rmse = 1.6180`
+
+이는 기존 글로벌 모델의 `1.5986`보다 여전히 나쁘다. 즉 현재 기준으로 `skill_gem`은 **무조건 세그먼트 분리**보다 **글로벌 fallback 유지**가 더 타당하다.
 
 ## 현재 기준선 결론
 
@@ -150,7 +164,7 @@ ml/.venv/bin/python ml/run_training_comparison.py \
 - `rare_equipment`: 세그먼트 모델
 - `jewel`: 세그먼트 모델
 - `unique_equipment`: 세그먼트 모델
-- `skill_gem`: 글로벌 모델 또는 추가 실험 후 결정
+- `skill_gem`: 글로벌 모델 유지
 
 즉, **“모든 세그먼트를 무조건 분리”**보다 **“혼합 운영 기준선”**이 현재 결과와 더 잘 맞는다.
 
@@ -161,7 +175,7 @@ ml/.venv/bin/python ml/run_training_comparison.py \
 1. `rare_equipment` 단독 모델을 현재 핵심 기준선으로 유지
 2. `jewel`, `unique_equipment`도 세그먼트 모델 유지
 3. `skill_gem`은 글로벌/세그먼트 중 글로벌 우선
-4. 비교 스크립트의 `winner` 판정 기준을 `target_price_log1p_rmse` 우선으로 바꿀지 검토
+4. 비교 스크립트는 이제 `target_price_log1p_rmse` 우선 판정으로 유지
 5. 추후 로컬 앱 라우팅은 “세그먼트별 모델 + 일부 글로벌 fallback” 구조로 설계
 
 ## 한 줄 요약
