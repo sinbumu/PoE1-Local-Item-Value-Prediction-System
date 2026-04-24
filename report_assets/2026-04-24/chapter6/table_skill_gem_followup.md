@@ -1,0 +1,5 @@
+| experiment | target_price_log1p_rmse | target_price_log1p_mae | target_price_chaos_rmse | notes |
+| --- | --- | --- | --- | --- |
+| global_on_skill_gem | 1.598579 | 1.21861 | 99038867.966174 | global model evaluated on skill_gem test split |
+| segment_skill_gem_300iter_d8 | 1.614477 | 1.245109 | 99038867.975136 | winner-rule comparison run segment model |
+| segment_skill_gem_500iter_d6 | 1.618026 | 1.24701 | 99038867.964862 | follow-up tuning run |

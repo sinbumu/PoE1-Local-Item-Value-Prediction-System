@@ -1,0 +1,5 @@
+| scope_group | examples | criterion | report_use |
+| --- | --- | --- | --- |
+| model_prediction_priority | rare_equipment, jewel, unique_equipment, skill_gem | 옵션/상태/레벨/롤 값에 따라 가격 편차가 큼 | 현재 모델 범위 정당화 |
+| external_price_priority | currency, fragment, scarab, essence, fossil, resonator, oil, divination_card, maps | 외부 시세 소스로 평균가 추종이 쉬움 | 왜 모든 아이템을 모델로 예측하지 않는지 설명 |
+| excluded_or_phase2 | timeless_jewel, very_rare_niche_items, korean_clipboard_support | 가격 규칙이 매우 특수하거나 현재 범위 밖 | 현 단계 구현 범위와 한계 명시 |

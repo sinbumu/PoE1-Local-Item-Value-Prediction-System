@@ -1,0 +1,7 @@
+term,definition
+normalized listing,priced item을 item 단위 row로 정규화한 중간 계층
+staged dataset,학습용 train/valid/test split CSV와 manifest를 함께 묶은 스냅샷
+global fallback,특정 세그먼트 전용 모델 대신 글로벌 모델을 사용하는 경로
+model_segment,"rare_equipment, jewel, unique_equipment, skill_gem 구분값"
+clipboard_safe_v1,현재 CatBoost 학습에 사용되는 Ctrl+C 재현 가능 피처 화이트리스트
+target_price_log1p,chaos equivalent 가격에 log1p를 적용한 현재 주 회귀 타깃

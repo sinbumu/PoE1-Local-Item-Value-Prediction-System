@@ -1,0 +1,6 @@
+| category | feature_count | notes |
+| --- | --- | --- |
+| active | 49 | direct training input |
+| derived | 2 | staging-derived training input |
+| conditional | 4 | not active in v1 |
+| excluded | 4 | not used in current training |

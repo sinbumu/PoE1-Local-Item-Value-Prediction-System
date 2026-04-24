@@ -1,0 +1,582 @@
+{
+  "generated_at": "2026-04-24T16:21:50.176676+00:00",
+  "report_date": "2026-04-24",
+  "base_dir": "report_assets/2026-04-24",
+  "generation_script": "reports_docs/generate_report_evidence_assets.py",
+  "assets": [
+    {
+      "chapter": "chapter2",
+      "type": "table",
+      "name": "table_item_scope_summary",
+      "title": "아이템 스코프 요약",
+      "description": "모델 대상, 외부 시세 우선 대상, 현재 범위 제외 대상을 한 표에 정리한다.",
+      "csv": "report_assets/2026-04-24/chapter2/table_item_scope_summary.csv",
+      "md": "report_assets/2026-04-24/chapter2/table_item_scope_summary.md",
+      "sources": [
+        "docs/MODEL_SCOPE.md",
+        "docs/poe1_report_draft_ch2_to_ch6.md"
+      ],
+      "claims": [
+        "왜 모든 아이템을 다 예측하지 않는지 설명",
+        "현재 모델 범위 정당화"
+      ]
+    },
+    {
+      "chapter": "chapter2",
+      "type": "figure",
+      "name": "figure_domain_scope_overview",
+      "title": "도메인 스코프 개요",
+      "description": "외부 시세 우선, 모델 예측 우선, 현재 범위 제외의 세 분류를 도식화한다.",
+      "png": "report_assets/2026-04-24/chapter2/figure_domain_scope_overview.png",
+      "sources": [
+        "docs/MODEL_SCOPE.md"
+      ],
+      "claims": [
+        "현재 모델 범위를 도메인적으로 정당화"
+      ]
+    },
+    {
+      "chapter": "chapter3",
+      "type": "table",
+      "name": "table_execution_environment",
+      "title": "실행 환경 요약",
+      "description": "보고서 작성 시점의 로컬 실행 환경과 주요 런타임 버전을 기록한다.",
+      "csv": "report_assets/2026-04-24/chapter3/table_execution_environment.csv",
+      "md": "report_assets/2026-04-24/chapter3/table_execution_environment.md",
+      "sources": [
+        "package.json",
+        "ml/requirements.txt",
+        "docs/poe1_report_draft_ch2_to_ch6.md"
+      ],
+      "claims": [
+        "로컬 MacBook 기반 실험 환경 설명"
+      ]
+    },
+    {
+      "chapter": "chapter3",
+      "type": "table",
+      "name": "table_component_roles",
+      "title": "구성 요소별 역할 표",
+      "description": "collector부터 clipboard parser까지 현재 저장소의 핵심 구성요소 역할을 정리한다.",
+      "csv": "report_assets/2026-04-24/chapter3/table_component_roles.csv",
+      "md": "report_assets/2026-04-24/chapter3/table_component_roles.md",
+      "sources": [
+        "README.md",
+        "docs/TRAINING_ETL_OVERVIEW.md",
+        "docs/CLIPBOARD_COMPATIBILITY_AUDIT.md"
+      ],
+      "claims": [
+        "전체 시스템 계층 설명"
+      ]
+    },
+    {
+      "chapter": "chapter3",
+      "type": "figure",
+      "name": "figure_system_architecture",
+      "title": "시스템 아키텍처 개요",
+      "description": "수집, 저장, ETL, staging, 학습, clipboard 입력 준비를 한 장에 배치한다.",
+      "png": "report_assets/2026-04-24/chapter3/figure_system_architecture.png",
+      "sources": [
+        "docs/MIDTERM_REPORT_WRITING_GUIDE_2026-04-22.md"
+      ],
+      "claims": [
+        "전체 시스템 구조 설명"
+      ]
+    },
+    {
+      "chapter": "chapter3",
+      "type": "figure",
+      "name": "figure_data_flow_pipeline",
+      "title": "데이터 흐름 파이프라인",
+      "description": "public-stash-tabs부터 staged dataset과 학습 비교까지의 순차 흐름을 도식화한다.",
+      "png": "report_assets/2026-04-24/chapter3/figure_data_flow_pipeline.png",
+      "sources": [
+        "docs/MIDTERM_REPORT_WRITING_GUIDE_2026-04-22.md"
+      ],
+      "claims": [
+        "데이터 흐름 설명"
+      ]
+    },
+    {
+      "chapter": "chapter3",
+      "type": "figure",
+      "name": "figure_clipboard_to_model_flow",
+      "title": "클립보드 입력에서 모델 추론까지의 준비 경로",
+      "description": "향후 로컬 앱 입력 경로 설명용 보조 도식이다.",
+      "png": "report_assets/2026-04-24/chapter3/figure_clipboard_to_model_flow.png",
+      "sources": [
+        "docs/CLIPBOARD_COMPATIBILITY_AUDIT.md",
+        "docs/AFFIX_SOURCE_STRATEGY.md"
+      ],
+      "claims": [
+        "향후 앱 입력 흐름 설명"
+      ]
+    },
+    {
+      "chapter": "chapter4",
+      "type": "table",
+      "name": "table_collector_configuration",
+      "title": "Collector 설정 요약",
+      "description": "리그 필터, resume 방식, retention 관련 설정을 한 표로 정리한다.",
+      "csv": "report_assets/2026-04-24/chapter4/table_collector_configuration.csv",
+      "md": "report_assets/2026-04-24/chapter4/table_collector_configuration.md",
+      "sources": [
+        "README.md",
+        "src/config/env.ts"
+      ],
+      "claims": [
+        "수집 파이프라인 설정 근거"
+      ]
+    },
+    {
+      "chapter": "chapter4",
+      "type": "figure",
+      "name": "figure_collector_sequence",
+      "title": "Collector 수집 순서도",
+      "description": "OAuth부터 state 갱신까지 collector 한 사이클의 순서를 시각화한다.",
+      "png": "report_assets/2026-04-24/chapter4/figure_collector_sequence.png",
+      "sources": [
+        "README.md"
+      ],
+      "claims": [
+        "수집 파이프라인 동작 설명"
+      ]
+    },
+    {
+      "chapter": "chapter4",
+      "type": "table",
+      "name": "table_ingestion_counts_daily",
+      "title": "일별 수집량 표",
+      "description": "ingestion_activity_summaries 기준 일자별 raw/normalized/exchange snapshot 수를 기록한다.",
+      "csv": "report_assets/2026-04-24/chapter4/table_ingestion_counts_daily.csv",
+      "md": "report_assets/2026-04-24/chapter4/table_ingestion_counts_daily.md",
+      "sources": [
+        "ingestion_activity_summaries"
+      ],
+      "claims": [
+        "지정 기간 동안 연속 수집이 진행되었음을 보여 주는 근거"
+      ]
+    },
+    {
+      "chapter": "chapter4",
+      "type": "table",
+      "name": "table_ingestion_counts_hourly",
+      "title": "시간대별 수집량 표",
+      "description": "최근 72시간 시간대별 raw/normalized/exchange snapshot 수를 기록한다.",
+      "csv": "report_assets/2026-04-24/chapter4/table_ingestion_counts_hourly.csv",
+      "md": "report_assets/2026-04-24/chapter4/table_ingestion_counts_hourly.md",
+      "sources": [
+        "ingestion_activity_summaries"
+      ],
+      "claims": [
+        "collector 지속 동작 근거"
+      ]
+    },
+    {
+      "chapter": "chapter4",
+      "type": "figure",
+      "name": "figure_ingestion_trend_daily",
+      "title": "일별 수집 추이",
+      "description": "raw, normalized, exchange snapshot 일별 수집량을 3개 축으로 나누어 표시한다.",
+      "png": "report_assets/2026-04-24/chapter4/figure_ingestion_trend_daily.png",
+      "sources": [
+        "report_assets daily summary tables"
+      ],
+      "claims": [
+        "연속 수집 근거 시각화"
+      ]
+    },
+    {
+      "chapter": "chapter4",
+      "type": "figure",
+      "name": "figure_ingestion_trend_hourly",
+      "title": "시간대별 수집 추이",
+      "description": "최근 72시간 raw, normalized, exchange snapshot 시간대별 수집량을 3개 축으로 나누어 표시한다.",
+      "png": "report_assets/2026-04-24/chapter4/figure_ingestion_trend_hourly.png",
+      "sources": [
+        "report_assets hourly summary tables"
+      ],
+      "claims": [
+        "collector 지속 동작 근거 시각화"
+      ]
+    },
+    {
+      "chapter": "chapter4",
+      "type": "table",
+      "name": "table_league_filtering_summary",
+      "title": "리그 필터링 요약",
+      "description": "collector의 exact match league filter 정책을 설명하기 위한 보조 표다.",
+      "csv": "report_assets/2026-04-24/chapter4/table_league_filtering_summary.csv",
+      "md": "report_assets/2026-04-24/chapter4/table_league_filtering_summary.md",
+      "sources": [
+        "docs/MODEL_SCOPE.md",
+        "README.md"
+      ],
+      "claims": [
+        "Mirage softcore 경제권만 수집 대상으로 삼는 이유 설명"
+      ]
+    },
+    {
+      "chapter": "chapter5",
+      "type": "table",
+      "name": "table_etl_row_counts",
+      "title": "ETL 단계별 row 수",
+      "description": "normalized부터 labeled까지 현재 누적 row 수를 비교한다.",
+      "csv": "report_assets/2026-04-24/chapter5/table_etl_row_counts.csv",
+      "md": "report_assets/2026-04-24/chapter5/table_etl_row_counts.md",
+      "sources": [
+        "normalized_priced_items",
+        "training_features_raw",
+        "training_features_clean",
+        "training_features_labeled"
+      ],
+      "claims": [
+        "정제 단계별 데이터량 변화 설명"
+      ]
+    },
+    {
+      "chapter": "chapter5",
+      "type": "figure",
+      "name": "figure_etl_funnel",
+      "title": "ETL 단계별 row 수 비교",
+      "description": "단계별 row 수 차이를 로그 스케일 막대로 표시한다.",
+      "png": "report_assets/2026-04-24/chapter5/figure_etl_funnel.png",
+      "sources": [
+        "table_etl_row_counts"
+      ],
+      "claims": [
+        "정제 단계별 row 감소 시각화"
+      ]
+    },
+    {
+      "chapter": "chapter5",
+      "type": "table",
+      "name": "table_clean_filter_reasons",
+      "title": "clean 단계 주요 판정 이유",
+      "description": "training_features_raw 기준 현재 clean 판정 결과를 reason 단위로 집계한다.",
+      "csv": "report_assets/2026-04-24/chapter5/table_clean_filter_reasons.csv",
+      "md": "report_assets/2026-04-24/chapter5/table_clean_filter_reasons.md",
+      "sources": [
+        "training_features_raw",
+        "training_features_clean",
+        "src/services/training-feature-cleaner.service.ts"
+      ],
+      "claims": [
+        "clean 단계 대상/비대상 분리 근거"
+      ]
+    },
+    {
+      "chapter": "chapter5",
+      "type": "table",
+      "name": "table_label_coverage",
+      "title": "label coverage 요약",
+      "description": "clean 대비 labeled 테이블 materialization 비율을 요약한다.",
+      "csv": "report_assets/2026-04-24/chapter5/table_label_coverage.csv",
+      "md": "report_assets/2026-04-24/chapter5/table_label_coverage.md",
+      "sources": [
+        "training_features_clean",
+        "training_features_labeled"
+      ],
+      "claims": [
+        "라벨 생성 범위와 누락 규모 설명"
+      ]
+    },
+    {
+      "chapter": "chapter5",
+      "type": "table",
+      "name": "table_feature_policy_summary",
+      "title": "feature policy 요약",
+      "description": "clipboard_safe_v1 정책의 active/derived/conditional/excluded 개수를 요약한다.",
+      "csv": "report_assets/2026-04-24/chapter5/table_feature_policy_summary.csv",
+      "md": "report_assets/2026-04-24/chapter5/table_feature_policy_summary.md",
+      "sources": [
+        "src/config/clipboard-safe-feature-policy.json"
+      ],
+      "claims": [
+        "문서상 모델 입력과 실제 코드상 입력 일치 확인"
+      ]
+    },
+    {
+      "chapter": "chapter5",
+      "type": "table",
+      "name": "table_current_training_features",
+      "title": "현재 실제 학습 입력 피처 목록",
+      "description": "현재 CatBoost 학습에 실제로 사용되는 피처만 기계적으로 덤프한다.",
+      "csv": "report_assets/2026-04-24/chapter5/table_current_training_features.csv",
+      "md": "report_assets/2026-04-24/chapter5/table_current_training_features.md",
+      "sources": [
+        "artifacts/training-staging/post_report_all_segments/manifest.json",
+        "src/config/clipboard-safe-feature-policy.json"
+      ],
+      "claims": [
+        "문서상 모델 입력과 실제 코드상 모델 입력 일치 확인"
+      ]
+    },
+    {
+      "chapter": "chapter5",
+      "type": "table",
+      "name": "table_clipboard_safe_feature_policy",
+      "title": "clipboard_safe_v1 세부 정책 표",
+      "description": "active, derived, conditional, excluded 구분을 행 단위로 기록한다.",
+      "csv": "report_assets/2026-04-24/chapter5/table_clipboard_safe_feature_policy.csv",
+      "md": "report_assets/2026-04-24/chapter5/table_clipboard_safe_feature_policy.md",
+      "sources": [
+        "src/config/clipboard-safe-feature-policy.json"
+      ],
+      "claims": [
+        "피처 정책 세부 근거 제공"
+      ]
+    },
+    {
+      "chapter": "chapter5",
+      "type": "table",
+      "name": "table_exchange_snapshot_status",
+      "title": "exchange snapshot 상태 표",
+      "description": "환율 스냅샷 테이블의 최근 관측 시각과 최근 divine snapshot 유입 규모를 요약한다.",
+      "csv": "report_assets/2026-04-24/chapter5/table_exchange_snapshot_status.csv",
+      "md": "report_assets/2026-04-24/chapter5/table_exchange_snapshot_status.md",
+      "sources": [
+        "exchange_rate_snapshots"
+      ],
+      "claims": [
+        "환율 참조 구조의 현재 상태 설명"
+      ]
+    },
+    {
+      "chapter": "chapter5",
+      "type": "table",
+      "name": "table_segment_distribution",
+      "title": "labeled 세그먼트 분포",
+      "description": "현재 labeled 데이터의 segment별 row 수를 요약한다.",
+      "csv": "report_assets/2026-04-24/chapter5/table_segment_distribution.csv",
+      "md": "report_assets/2026-04-24/chapter5/table_segment_distribution.md",
+      "sources": [
+        "training_features_labeled"
+      ],
+      "claims": [
+        "현재 학습 데이터 범위 설명"
+      ]
+    },
+    {
+      "chapter": "chapter5",
+      "type": "figure",
+      "name": "figure_segment_distribution",
+      "title": "labeled 세그먼트 분포",
+      "description": "rare_equipment, jewel, unique_equipment, skill_gem의 row 수를 막대로 비교한다.",
+      "png": "report_assets/2026-04-24/chapter5/figure_segment_distribution.png",
+      "sources": [
+        "table_segment_distribution"
+      ],
+      "claims": [
+        "현재 모델 범위의 데이터 분포 설명"
+      ]
+    },
+    {
+      "chapter": "chapter5",
+      "type": "figure",
+      "name": "figure_price_distribution_raw",
+      "title": "정제 단계 raw quoted price 분포",
+      "description": "training_features_clean의 target_price_amount 분포를 quoted currency별로 나누어 표시한다.",
+      "png": "report_assets/2026-04-24/chapter5/figure_price_distribution_raw.png",
+      "sources": [
+        "training_features_clean"
+      ],
+      "claims": [
+        "가격 분포의 긴 꼬리와 chaos/divine 혼재 설명"
+      ]
+    },
+    {
+      "chapter": "chapter5",
+      "type": "figure",
+      "name": "figure_price_distribution_labeled",
+      "title": "labeled 가격 분포",
+      "description": "target_price_chaos와 target_price_log1p 분포를 나란히 표시한다.",
+      "png": "report_assets/2026-04-24/chapter5/figure_price_distribution_labeled.png",
+      "sources": [
+        "training_features_labeled"
+      ],
+      "claims": [
+        "log1p 타깃 사용 배경 설명"
+      ]
+    },
+    {
+      "chapter": "chapter6",
+      "type": "table",
+      "name": "table_split_sizes_global",
+      "title": "글로벌 split 크기",
+      "description": "최근 7일 staged snapshot의 global train/valid/test row 수를 기록한다.",
+      "csv": "report_assets/2026-04-24/chapter6/table_split_sizes_global.csv",
+      "md": "report_assets/2026-04-24/chapter6/table_split_sizes_global.md",
+      "sources": [
+        "artifacts/training-staging/post_report_all_segments/manifest.json"
+      ],
+      "claims": [
+        "학습 데이터 규모 설명"
+      ]
+    },
+    {
+      "chapter": "chapter6",
+      "type": "table",
+      "name": "table_split_sizes_by_segment",
+      "title": "세그먼트별 split 크기",
+      "description": "각 model_segment의 train/valid/test row 수를 split spec 기준으로 기록한다.",
+      "csv": "report_assets/2026-04-24/chapter6/table_split_sizes_by_segment.csv",
+      "md": "report_assets/2026-04-24/chapter6/table_split_sizes_by_segment.md",
+      "sources": [
+        "artifacts/training-staging/post_report_all_segments/manifest.json"
+      ],
+      "claims": [
+        "세그먼트별 데이터 규모 설명"
+      ]
+    },
+    {
+      "chapter": "chapter6",
+      "type": "table",
+      "name": "table_model_comparison_summary",
+      "title": "글로벌 vs 세그먼트 비교 요약",
+      "description": "winner 규칙 보정 후 기준 실험의 주요 비교 지표를 정리한다.",
+      "csv": "report_assets/2026-04-24/chapter6/table_model_comparison_summary.csv",
+      "md": "report_assets/2026-04-24/chapter6/table_model_comparison_summary.md",
+      "sources": [
+        "ml/runs/comparison_post_report_300iter_d8_log1p_winner/comparison_summary.json"
+      ],
+      "claims": [
+        "현 단계 혼합 기준선의 핵심 근거"
+      ]
+    },
+    {
+      "chapter": "chapter6",
+      "type": "figure",
+      "name": "figure_model_comparison_rmse",
+      "title": "세그먼트별 global vs segment log1p RMSE",
+      "description": "각 세그먼트에서 global 모델과 segment 모델의 test log1p RMSE를 비교한다.",
+      "png": "report_assets/2026-04-24/chapter6/figure_model_comparison_rmse.png",
+      "sources": [
+        "table_model_comparison_summary"
+      ],
+      "claims": [
+        "어느 세그먼트가 분리 모델에 유리한지 시각화"
+      ]
+    },
+    {
+      "chapter": "chapter6",
+      "type": "figure",
+      "name": "figure_model_comparison_mae",
+      "title": "세그먼트별 global vs segment log1p MAE",
+      "description": "각 세그먼트에서 global 모델과 segment 모델의 test log1p MAE를 비교한다.",
+      "png": "report_assets/2026-04-24/chapter6/figure_model_comparison_mae.png",
+      "sources": [
+        "table_model_comparison_summary"
+      ],
+      "claims": [
+        "RMSE 외 보조 오차 지표 시각화"
+      ]
+    },
+    {
+      "chapter": "chapter6",
+      "type": "table",
+      "name": "table_skill_gem_followup",
+      "title": "skill_gem 추가 점검 결과",
+      "description": "global 기준선, 기존 segment 모델, 후속 tuning segment 모델을 비교한다.",
+      "csv": "report_assets/2026-04-24/chapter6/table_skill_gem_followup.csv",
+      "md": "report_assets/2026-04-24/chapter6/table_skill_gem_followup.md",
+      "sources": [
+        "ml/runs/comparison_post_report_300iter_d8_log1p_winner/comparison_summary.json",
+        "ml/runs/skill_gem_post_report_500iter_d6/metrics.json"
+      ],
+      "claims": [
+        "skill_gem을 글로벌 fallback으로 유지한 근거"
+      ]
+    },
+    {
+      "chapter": "chapter6",
+      "type": "table",
+      "name": "table_experiment_artifact_manifest",
+      "title": "실험 산출물 manifest",
+      "description": "보고서 본문에서는 설명용 이름만 쓰고, 실제 경로는 별도 표로 분리한다.",
+      "csv": "report_assets/2026-04-24/chapter6/table_experiment_artifact_manifest.csv",
+      "md": "report_assets/2026-04-24/chapter6/table_experiment_artifact_manifest.md",
+      "sources": [
+        "comparison run outputs",
+        "staged manifest",
+        "follow-up run outputs"
+      ],
+      "claims": [
+        "본문과 실제 산출물 경로 연결"
+      ]
+    },
+    {
+      "chapter": "chapter6",
+      "type": "table",
+      "name": "table_feature_importance_topn",
+      "title": "feature importance 상위 피처 표",
+      "description": "global과 segment 모델별 상위 중요 피처를 본문 인용용으로 정리한다.",
+      "csv": "report_assets/2026-04-24/chapter6/table_feature_importance_topn.csv",
+      "md": "report_assets/2026-04-24/chapter6/table_feature_importance_topn.md",
+      "sources": [
+        "feature_importance.csv files under comparison_post_report_300iter_d8_log1p_winner"
+      ],
+      "claims": [
+        "모델이 어떤 피처에 반응하는지 설명"
+      ]
+    },
+    {
+      "chapter": "chapter6",
+      "type": "figure",
+      "name": "figure_feature_importance_global",
+      "title": "글로벌 모델 feature importance",
+      "description": "global 모델의 상위 중요 피처를 가로 막대로 표시한다.",
+      "png": "report_assets/2026-04-24/chapter6/figure_feature_importance_global.png",
+      "sources": [
+        "ml/runs/comparison_post_report_300iter_d8_log1p_winner/global/feature_importance.csv"
+      ],
+      "claims": [
+        "global 모델 해석 보조"
+      ]
+    },
+    {
+      "chapter": "chapter6",
+      "type": "figure",
+      "name": "figure_feature_importance_by_segment",
+      "title": "세그먼트별 feature importance",
+      "description": "rare_equipment, jewel, unique_equipment, skill_gem의 상위 중요 피처를 2x2 서브플롯으로 비교한다.",
+      "png": "report_assets/2026-04-24/chapter6/figure_feature_importance_by_segment.png",
+      "sources": [
+        "feature_importance.csv files under comparison_post_report_300iter_d8_log1p_winner/segments"
+      ],
+      "claims": [
+        "세그먼트별 가격 형성 규칙 차이 설명"
+      ]
+    },
+    {
+      "chapter": "appendix",
+      "type": "table",
+      "name": "table_term_glossary",
+      "title": "용어 정리 표",
+      "description": "비전공 심사자를 위한 주요 구현 용어 정의다.",
+      "csv": "report_assets/2026-04-24/appendix/table_term_glossary.csv",
+      "md": "report_assets/2026-04-24/appendix/table_term_glossary.md",
+      "sources": [
+        "docs/REPORT_EVIDENCE_ASSET_INSTRUCTIONS_2026-04-24.md"
+      ],
+      "claims": [
+        "용어 혼란 완화"
+      ]
+    },
+    {
+      "chapter": "references",
+      "type": "table",
+      "name": "report_citation_map",
+      "title": "참고문헌 인용 매핑",
+      "description": "어느 장에서 어떤 참고문헌을 인용할지 초안 수준으로 정리한다.",
+      "csv": "report_assets/2026-04-24/references/report_citation_map.csv",
+      "md": "report_assets/2026-04-24/references/report_citation_map.md",
+      "sources": [
+        "docs/REPORT_EVIDENCE_ASSET_INSTRUCTIONS_2026-04-24.md"
+      ],
+      "claims": [
+        "최소 참고문헌 구조 마련"
+      ]
+    }
+  ]
+}

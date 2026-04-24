@@ -1,0 +1,5 @@
+metric,value,notes
+clean_total,19666030,label stage input row count
+labeled_total,19665861,rows materialized in training_features_labeled
+unlabeled_total,169,currently not materialized in labeled table
+labeled_ratio_percent,99.9991,clean to labeled coverage

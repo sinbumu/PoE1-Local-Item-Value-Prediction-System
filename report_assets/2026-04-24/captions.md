@@ -1,0 +1,40 @@
+# Captions
+
+- `chapter2/table_item_scope_summary`: 아이템 스코프 요약 - 모델 대상, 외부 시세 우선 대상, 현재 범위 제외 대상을 한 표에 정리한다.
+- `chapter2/figure_domain_scope_overview`: 도메인 스코프 개요 - 외부 시세 우선, 모델 예측 우선, 현재 범위 제외의 세 분류를 도식화한다.
+- `chapter3/table_execution_environment`: 실행 환경 요약 - 보고서 작성 시점의 로컬 실행 환경과 주요 런타임 버전을 기록한다.
+- `chapter3/table_component_roles`: 구성 요소별 역할 표 - collector부터 clipboard parser까지 현재 저장소의 핵심 구성요소 역할을 정리한다.
+- `chapter3/figure_system_architecture`: 시스템 아키텍처 개요 - 수집, 저장, ETL, staging, 학습, clipboard 입력 준비를 한 장에 배치한다.
+- `chapter3/figure_data_flow_pipeline`: 데이터 흐름 파이프라인 - public-stash-tabs부터 staged dataset과 학습 비교까지의 순차 흐름을 도식화한다.
+- `chapter3/figure_clipboard_to_model_flow`: 클립보드 입력에서 모델 추론까지의 준비 경로 - 향후 로컬 앱 입력 경로 설명용 보조 도식이다.
+- `chapter4/table_collector_configuration`: Collector 설정 요약 - 리그 필터, resume 방식, retention 관련 설정을 한 표로 정리한다.
+- `chapter4/figure_collector_sequence`: Collector 수집 순서도 - OAuth부터 state 갱신까지 collector 한 사이클의 순서를 시각화한다.
+- `chapter4/table_ingestion_counts_daily`: 일별 수집량 표 - ingestion_activity_summaries 기준 일자별 raw/normalized/exchange snapshot 수를 기록한다.
+- `chapter4/table_ingestion_counts_hourly`: 시간대별 수집량 표 - 최근 72시간 시간대별 raw/normalized/exchange snapshot 수를 기록한다.
+- `chapter4/figure_ingestion_trend_daily`: 일별 수집 추이 - raw, normalized, exchange snapshot 일별 수집량을 3개 축으로 나누어 표시한다.
+- `chapter4/figure_ingestion_trend_hourly`: 시간대별 수집 추이 - 최근 72시간 raw, normalized, exchange snapshot 시간대별 수집량을 3개 축으로 나누어 표시한다.
+- `chapter4/table_league_filtering_summary`: 리그 필터링 요약 - collector의 exact match league filter 정책을 설명하기 위한 보조 표다.
+- `chapter5/table_etl_row_counts`: ETL 단계별 row 수 - normalized부터 labeled까지 현재 누적 row 수를 비교한다.
+- `chapter5/figure_etl_funnel`: ETL 단계별 row 수 비교 - 단계별 row 수 차이를 로그 스케일 막대로 표시한다.
+- `chapter5/table_clean_filter_reasons`: clean 단계 주요 판정 이유 - training_features_raw 기준 현재 clean 판정 결과를 reason 단위로 집계한다.
+- `chapter5/table_label_coverage`: label coverage 요약 - clean 대비 labeled 테이블 materialization 비율을 요약한다.
+- `chapter5/table_feature_policy_summary`: feature policy 요약 - clipboard_safe_v1 정책의 active/derived/conditional/excluded 개수를 요약한다.
+- `chapter5/table_current_training_features`: 현재 실제 학습 입력 피처 목록 - 현재 CatBoost 학습에 실제로 사용되는 피처만 기계적으로 덤프한다.
+- `chapter5/table_clipboard_safe_feature_policy`: clipboard_safe_v1 세부 정책 표 - active, derived, conditional, excluded 구분을 행 단위로 기록한다.
+- `chapter5/table_exchange_snapshot_status`: exchange snapshot 상태 표 - 환율 스냅샷 테이블의 최근 관측 시각과 최근 divine snapshot 유입 규모를 요약한다.
+- `chapter5/table_segment_distribution`: labeled 세그먼트 분포 - 현재 labeled 데이터의 segment별 row 수를 요약한다.
+- `chapter5/figure_segment_distribution`: labeled 세그먼트 분포 - rare_equipment, jewel, unique_equipment, skill_gem의 row 수를 막대로 비교한다.
+- `chapter5/figure_price_distribution_raw`: 정제 단계 raw quoted price 분포 - training_features_clean의 target_price_amount 분포를 quoted currency별로 나누어 표시한다.
+- `chapter5/figure_price_distribution_labeled`: labeled 가격 분포 - target_price_chaos와 target_price_log1p 분포를 나란히 표시한다.
+- `chapter6/table_split_sizes_global`: 글로벌 split 크기 - 최근 7일 staged snapshot의 global train/valid/test row 수를 기록한다.
+- `chapter6/table_split_sizes_by_segment`: 세그먼트별 split 크기 - 각 model_segment의 train/valid/test row 수를 split spec 기준으로 기록한다.
+- `chapter6/table_model_comparison_summary`: 글로벌 vs 세그먼트 비교 요약 - winner 규칙 보정 후 기준 실험의 주요 비교 지표를 정리한다.
+- `chapter6/figure_model_comparison_rmse`: 세그먼트별 global vs segment log1p RMSE - 각 세그먼트에서 global 모델과 segment 모델의 test log1p RMSE를 비교한다.
+- `chapter6/figure_model_comparison_mae`: 세그먼트별 global vs segment log1p MAE - 각 세그먼트에서 global 모델과 segment 모델의 test log1p MAE를 비교한다.
+- `chapter6/table_skill_gem_followup`: skill_gem 추가 점검 결과 - global 기준선, 기존 segment 모델, 후속 tuning segment 모델을 비교한다.
+- `chapter6/table_experiment_artifact_manifest`: 실험 산출물 manifest - 보고서 본문에서는 설명용 이름만 쓰고, 실제 경로는 별도 표로 분리한다.
+- `chapter6/table_feature_importance_topn`: feature importance 상위 피처 표 - global과 segment 모델별 상위 중요 피처를 본문 인용용으로 정리한다.
+- `chapter6/figure_feature_importance_global`: 글로벌 모델 feature importance - global 모델의 상위 중요 피처를 가로 막대로 표시한다.
+- `chapter6/figure_feature_importance_by_segment`: 세그먼트별 feature importance - rare_equipment, jewel, unique_equipment, skill_gem의 상위 중요 피처를 2x2 서브플롯으로 비교한다.
+- `appendix/table_term_glossary`: 용어 정리 표 - 비전공 심사자를 위한 주요 구현 용어 정의다.
+- `references/report_citation_map`: 참고문헌 인용 매핑 - 어느 장에서 어떤 참고문헌을 인용할지 초안 수준으로 정리한다.

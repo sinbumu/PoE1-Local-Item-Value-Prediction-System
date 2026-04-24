@@ -1,0 +1,4 @@
+display_name,actual_path,generated_at,hyperparameters,used_in_report
+recent_7d_staged_snapshot,artifacts/training-staging/post_report_all_segments/manifest.json,2026-04-19T19:18:26.538Z,"days=7, feature_policy=clipboard_safe_v1",yes
+winner_rule_adjusted_comparison_run,ml/runs/comparison_post_report_300iter_d8_log1p_winner/comparison_summary.json,2026-04-23T21:26:45.899907+00:00,"iterations=300, depth=8, learning_rate=0.05, target=target_price_log1p",yes
+skill_gem_followup_run,ml/runs/skill_gem_post_report_500iter_d6/metrics.json,2026-04-22 follow-up run,"iterations=500, depth=6, learning_rate=0.05, segment=skill_gem",yes

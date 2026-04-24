@@ -1,0 +1,7 @@
+league_name,stored_in_db,reason
+Mirage,yes,current target league exact match
+Hardcore Mirage,no,"different economy, excluded by exact match"
+SSF Mirage,no,"different economy, excluded by exact match"
+Ruthless Mirage,no,"different economy, excluded by exact match"
+private leagues,no,distribution mismatch with target economy
+Standard / Hardcore,no,not part of current season target scope

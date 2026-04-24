@@ -1,0 +1,9 @@
+| component | value | notes |
+| --- | --- | --- |
+| OS | macOS-26.3.1-arm64-arm-64bit-Mach-O | local workstation |
+| Node.js | v24.11.0 | collector / ETL / maintenance |
+| Python | Python 3.13.1 | training / report assets |
+| CatBoost | 1.2.10 | tabular regression baseline |
+| PostgreSQL server | 16.13 (Debian 16.13-1.pgdg13+1) | primary data store |
+| psql client | psql (PostgreSQL) 14.17 (Homebrew) | SQL-based asset generation |
+| Docker | Docker version 27.5.1, build 9f9e405 | optional local PostgreSQL runtime |
