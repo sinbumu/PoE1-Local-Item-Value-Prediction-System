@@ -41,6 +41,12 @@ ml/.venv/bin/python ml/run_training_comparison.py \
 - 요약 CSV: `ml/runs/comparison_post_report_300iter_d8/comparison_summary.csv`
 - 상세 JSON: `ml/runs/comparison_post_report_300iter_d8/comparison_summary.json`
 
+추가로 `2026-04-23`에 같은 스냅샷과 같은 하이퍼파라미터로 `winner` 규칙만 새 기준에 맞춰 다시 생성한 정합성용 산출물은 아래 경로다.
+
+- 정합성용 비교 결과: `ml/runs/comparison_post_report_300iter_d8_log1p_winner`
+- 정합성용 CSV: `ml/runs/comparison_post_report_300iter_d8_log1p_winner/comparison_summary.csv`
+- 정합성용 JSON: `ml/runs/comparison_post_report_300iter_d8_log1p_winner/comparison_summary.json`
+
 ## 데이터 규모
 
 이번 전체 비교 런의 글로벌 split 기준 row 수:
@@ -110,6 +116,8 @@ ml/.venv/bin/python ml/run_training_comparison.py \
 3. 그래도 동률이면 `target_price_chaos_rmse`
 
 즉 앞으로 새로 생성되는 비교 결과에서는 `jewel`도 자동으로 `segment` 승자로 기록되는 것이 맞다.
+
+실제로 같은 스냅샷으로 다시 생성한 `ml/runs/comparison_post_report_300iter_d8_log1p_winner/comparison_summary.csv`에서는 `jewel`의 `winner`가 `segment`로 정리되었다.
 
 ## 세그먼트별 해석
 

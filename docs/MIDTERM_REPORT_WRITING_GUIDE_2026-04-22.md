@@ -108,7 +108,7 @@
 기준 실험:
 
 - staged snapshot: `artifacts/training-staging/post_report_all_segments`
-- 비교 런: `ml/runs/comparison_post_report_300iter_d8`
+- 비교 런: `ml/runs/comparison_post_report_300iter_d8_log1p_winner`
 - 타깃: `target_price_log1p`
 - 설정: `iterations=300`, `depth=8`, `learning_rate=0.05`
 
@@ -157,6 +157,8 @@
 3. 그래도 동률이면 `target_price_chaos_rmse`
 
 즉 앞으로는 프로젝트의 주 타깃과 자동 판정 기준이 일치한다.
+
+현재 저장소에서 이 규칙이 반영된 정합성용 비교 산출물은 `ml/runs/comparison_post_report_300iter_d8_log1p_winner`다.
 
 보고서에는 아래처럼 쓰면 된다.
 

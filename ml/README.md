@@ -147,31 +147,39 @@ python ml/run_training_comparison.py \
 - 세그먼트별 winner 판정
 - 학습 시간과 메모리 사용량
 
+현재 winner 판정 규칙:
+
+- 1순위: `target_price_log1p_rmse`
+- 동률 시: `target_price_log1p_mae`
+- 최종 동률 시: `target_price_chaos_rmse`
+
 ## 현재 기준선
 
-현재 저장소 기준 가장 최근 7일 전체 비교 런은 아래 결과를 남겼다.
+현재 저장소 기준 실질적인 운영 해석에 쓰는 최근 7일 전체 비교 런은 아래 결과다.
 
-- 스테이징 스냅샷: `artifacts/training-staging/last_7d_full_test_v2`
-- 비교 런: `ml/runs/comparison_last_7d_full_baseline_100iter_d8`
-- 설정: `target_price_log1p`, `iterations=100`, `depth=8`, `learning_rate=0.05`
+- 스테이징 스냅샷: `artifacts/training-staging/post_report_all_segments`
+- 비교 런: `ml/runs/comparison_post_report_300iter_d8_log1p_winner`
+- 설정: `target_price_log1p`, `iterations=300`, `depth=8`, `learning_rate=0.05`
 
 핵심 결과:
 
-- 글로벌 모델 test `target_price_log1p_rmse`: `1.8808`
-- 세그먼트 모델은 `jewel`, `rare_equipment`, `skill_gem`, `unique_equipment` 4개 모두에서 글로벌보다 낮은 RMSE를 기록
-- 따라서 현재 1차 기준선은 **글로벌 1개 모델보다 `model_segment` 라우팅 기반 4개 모델**로 보는 것이 적절하다
+- 글로벌 모델 전체 test `target_price_log1p_rmse`: `1.7061`
+- `rare_equipment`, `jewel`, `unique_equipment`는 세그먼트 모델이 더 낮은 RMSE를 기록
+- `skill_gem`은 글로벌 모델이 더 낮은 RMSE를 기록
+- 따라서 현재 1차 기준선은 **전 세그먼트 일괄 분리**보다 **혼합 운영 기준선**으로 보는 것이 적절하다
 
 세그먼트별 test `target_price_log1p_rmse`:
 
-- `jewel`: `1.9318 -> 1.8346`
-- `rare_equipment`: `1.8014 -> 1.7666`
-- `skill_gem`: `1.7292 -> 1.6902`
-- `unique_equipment`: `2.1276 -> 1.9380`
+- `jewel`: `1.7409 -> 1.6959`
+- `rare_equipment`: `1.6615 -> 1.6346`
+- `skill_gem`: `1.5986 -> 1.6145`
+- `unique_equipment`: `1.8573 -> 1.7203`
 
 운영 판단:
 
-- V1 로컬 유틸리티 앱은 `model_segment` 판별 후 해당 세그먼트 모델을 선택하는 구조를 기본안으로 삼는다.
-- 글로벌 모델은 비교 기준선과 fallback 실험용으로 유지한다.
+- V1 로컬 유틸리티 앱은 `model_segment` 판별 후 `rare_equipment`, `jewel`, `unique_equipment`는 세그먼트 모델을 우선 사용한다.
+- `skill_gem`은 현재 글로벌 모델 fallback을 기본안으로 둔다.
+- 글로벌 모델은 비교 기준선이자 일부 세그먼트 fallback 용도로 유지한다.
 
 ## 보고 이후 권장 실행 순서
 

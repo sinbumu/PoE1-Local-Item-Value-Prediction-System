@@ -219,10 +219,10 @@ kill <PID>
 
 ## 현재 기준 권장 작업 순서
 
-1. ETL 백필 계속 진행
-2. `training_features_labeled` export
-3. `CatBoost` 1차 학습 실행
-4. feature importance와 segment별 성능 점검
+1. 최근 7일 ETL 최신화 유지
+2. 새 staging snapshot 생성
+3. `CatBoost` 비교 런 갱신 및 `winner`/feature importance 점검
+4. 현재 혼합 기준선 문서화
 5. clipboard parity 이슈 재개
 6. affix dictionary / prefix-suffix 복원 도입 검토
 
@@ -233,4 +233,7 @@ kill <PID>
 - `docs/MODEL_SCOPE.md`
 - `docs/TRAINING_FEATURES.md`
 - `docs/STORAGE_POLICY.md`
+- `docs/TRAINING_BASELINE_REPORT_2026-04-19.md`
+- `docs/TRAINING_FEATURE_IMPORTANCE_SUMMARY_2026-04-23.md`
+- `docs/REPORT_WRITER_DOCUMENT_MAP_2026-04-23.md`
 - `ml/README.md`

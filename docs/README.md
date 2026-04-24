@@ -24,6 +24,10 @@
   - 최근 7일 전체 `300 iter` 학습 비교 중간정리와 현재 기준선 해석
 - `MIDTERM_REPORT_WRITING_GUIDE_2026-04-22.md`
   - 중간 보고서/발표 자료용 프로젝트 진행 상황과 설명 포인트 종합 정리
+- `TRAINING_FEATURE_IMPORTANCE_SUMMARY_2026-04-23.md`
+  - 세그먼트별 feature importance와 `skill_gem` 해석 요약
+- `REPORT_WRITER_DOCUMENT_MAP_2026-04-23.md`
+  - 리포트 작성 담당자에게 넘길 문서 세트와 용도 정리
 - `REPORT_HANDOFF.md`
   - 다른 작성자/AI에게 넘길 최신 요약
 
@@ -41,6 +45,10 @@
   - affix dictionary 이슈와 준비사항 정리
 - `MIDTERM_REPORT_WRITING_GUIDE_2026-04-22.md`
   - 보고서 장별 연결, 성과/한계, feature importance 해석용 보조 문서
+- `TRAINING_FEATURE_IMPORTANCE_SUMMARY_2026-04-23.md`
+  - 모델이 실제로 어떤 피처에 반응하는지 설명할 때 쓰는 보조 문서
+- `REPORT_WRITER_DOCUMENT_MAP_2026-04-23.md`
+  - 저장소 문서 중 무엇을 먼저 읽을지 정리한 인계용 문서
 
 ## Legacy 문서
 
@@ -62,6 +70,8 @@
 - `TRAINING_ETL_OVERVIEW.md`
 - `TRAINING_BASELINE_REPORT_2026-04-19.md`
 - `MIDTERM_REPORT_WRITING_GUIDE_2026-04-22.md`
+- `TRAINING_FEATURE_IMPORTANCE_SUMMARY_2026-04-23.md`
+- `REPORT_WRITER_DOCUMENT_MAP_2026-04-23.md`
 - `TRAINING_FEATURES.md`
 - `STORAGE_POLICY.md`
 - `REPORT_HANDOFF.md`
@@ -73,10 +83,12 @@
 1. `REPORT_HANDOFF.md`
 2. `TRAINING_BASELINE_REPORT_2026-04-19.md`
 3. `MIDTERM_REPORT_WRITING_GUIDE_2026-04-22.md`
-4. `TRAINING_ETL_OVERVIEW.md`
-5. `TRAINING_FEATURES.md`
-6. `STORAGE_POLICY.md`
-7. 필요 시 `MODEL_SCOPE.md`
+4. `TRAINING_FEATURE_IMPORTANCE_SUMMARY_2026-04-23.md`
+5. `REPORT_WRITER_DOCUMENT_MAP_2026-04-23.md`
+6. `TRAINING_ETL_OVERVIEW.md`
+7. `TRAINING_FEATURES.md`
+8. `STORAGE_POLICY.md`
+9. 필요 시 `MODEL_SCOPE.md`
 
 클립보드/추론 이슈를 볼 경우:
 

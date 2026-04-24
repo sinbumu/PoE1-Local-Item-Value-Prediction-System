@@ -174,14 +174,14 @@ Path of Exile 1의 `public-stash-tabs` 데이터를 로컬에서 지속 수집�
 2. 현재 병목은 수집이 아니라 ETL 진도와 학습 실험이다.
 3. labeled dataset 계층이 이미 실제로 누적되고 있다.
 4. clipboard compatibility는 별도 축으로 병행 준비 중이다.
-5. 다음 실제 milestone은 첫 `CatBoost` 학습 실행이다.
+5. 다음 실제 milestone은 혼합 기준선 정리와 이를 반영한 보고 문서 정합성 확보다.
 
 ## 바로 다음 작업
 
-1. ETL 백필 계속 진행
-2. `training_features_labeled` export
-3. `CatBoost` 1차 학습 실행
-4. feature importance / segment별 성능 점검
+1. 최근 7일 ETL 최신화 유지
+2. staging / comparison 산출물과 문서 기준선 정합성 맞추기
+3. feature importance / segment별 성능 해석 보강
+4. `skill_gem` 글로벌 fallback 판단 근거 유지
 5. affix dictionary 이슈는 별도 조사/정책 정리 후 재개
 
 ## 관련 기준 문서
@@ -190,6 +190,9 @@ Path of Exile 1의 `public-stash-tabs` 데이터를 로컬에서 지속 수집�
 - `docs/TRAINING_FEATURES.md`
 - `docs/STORAGE_POLICY.md`
 - `docs/MODEL_SCOPE.md`
+- `docs/TRAINING_BASELINE_REPORT_2026-04-19.md`
+- `docs/TRAINING_FEATURE_IMPORTANCE_SUMMARY_2026-04-23.md`
+- `docs/REPORT_WRITER_DOCUMENT_MAP_2026-04-23.md`
 - `docs/CLIPBOARD_COMPATIBILITY_AUDIT.md`
 - `docs/AFFIX_DICTIONARY_REQUIREMENTS.md`
 - `ml/README.md`

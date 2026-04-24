@@ -699,17 +699,22 @@ python ml/train_catboost.py --staged-manifest artifacts/training-staging/last_7d
 
 현재 기준선:
 
-- 최근 7일 전체 스냅샷 비교 런: `ml/runs/comparison_last_7d_full_baseline_100iter_d8`
-- 스테이징 기준 snapshot: `artifacts/training-staging/last_7d_full_test_v2`
-- 비교 결과, `jewel`, `rare_equipment`, `skill_gem`, `unique_equipment` 4개 세그먼트 모두에서 세그먼트 모델이 글로벌 모델보다 더 낮은 `target_price_log1p` test RMSE를 기록했습니다.
-- 따라서 현재 1차 운영 기준선은 **글로벌 1개 모델**보다 **`model_segment` 라우팅 기반 세그먼트 모델 묶음**입니다.
+- 최근 7일 전체 스냅샷 비교 런: `ml/runs/comparison_post_report_300iter_d8_log1p_winner`
+- 스테이징 기준 snapshot: `artifacts/training-staging/post_report_all_segments`
+- 비교 결과, `rare_equipment`, `jewel`, `unique_equipment`는 세그먼트 모델이 글로벌보다 더 낮은 `target_price_log1p` test RMSE를 기록했고, `skill_gem`만 글로벌 모델이 더 낮은 RMSE를 기록했습니다.
+- 따라서 현재 1차 운영 기준선은 **세그먼트 모델 일괄 적용**이 아니라 **`model_segment` 라우팅 + `skill_gem` 글로벌 fallback 혼합 구조**입니다.
 
 세그먼트별 test `target_price_log1p_rmse`:
 
-- `jewel`: 글로벌 `1.9318` -> 세그먼트 `1.8346`
-- `rare_equipment`: 글로벌 `1.8014` -> 세그먼트 `1.7666`
-- `skill_gem`: 글로벌 `1.7292` -> 세그먼트 `1.6902`
-- `unique_equipment`: 글로벌 `2.1276` -> 세그먼트 `1.9380`
+- `jewel`: 글로벌 `1.7409` -> 세그먼트 `1.6959`
+- `rare_equipment`: 글로벌 `1.6615` -> 세그먼트 `1.6346`
+- `skill_gem`: 글로벌 `1.5986` -> 세그먼트 `1.6145`
+- `unique_equipment`: 글로벌 `1.8573` -> 세그먼트 `1.7203`
+
+추가 확인:
+
+- `skill_gem` 단독 재점검 런 `ml/runs/skill_gem_post_report_500iter_d6`에서도 세그먼트 모델 test `target_price_log1p_rmse`는 `1.6180`으로 글로벌보다 낮아지지 않았습니다.
+- 즉 현재는 `skill_gem`을 별도 세그먼트 모델로 분리하기보다 글로벌 모델에 남겨 두는 편이 더 안전합니다.
 
 보고 이후 권장 실행 순서:
 
@@ -866,6 +871,8 @@ gunzip -c backup.sql.gz | psql "postgres://postgres:postgres@localhost:5432/poe_
 
 - 문서 인덱스 / 현재 기준선: `docs/README.md`
 - 중간 보고서 작성용 종합 정리: `docs/MIDTERM_REPORT_WRITING_GUIDE_2026-04-22.md`
+- feature importance 요약: `docs/TRAINING_FEATURE_IMPORTANCE_SUMMARY_2026-04-23.md`
+- 리포트 담당 문서 맵: `docs/REPORT_WRITER_DOCUMENT_MAP_2026-04-23.md`
 - 현재 학습/ETL 기준 문서: `docs/TRAINING_ETL_OVERVIEW.md`
 - 최신 handoff 요약: `docs/REPORT_HANDOFF.md`
 - 모델 스코프: `docs/MODEL_SCOPE.md`
