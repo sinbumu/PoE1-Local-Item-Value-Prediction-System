@@ -28,6 +28,9 @@
     "samples:clipboard:validate": "tsx src/scripts/validate-clipboard-samples.ts",
     "build:affix-dictionary": "tsx src/scripts/build-affix-dictionary.ts",
     "validate:affix-dictionary": "tsx src/scripts/validate-affix-dictionary.ts",
+    "audit:v2-mod-aware": "tsx src/scripts/audit-v2-mod-aware-dataset.ts",
+    "stage:v2-mod-aware": "tsx src/scripts/stage-v2-mod-aware-features.ts",
+    "v2:clipboard-features": "tsx src/scripts/build-v2-features-from-clipboard.ts",
     "report:charts": "bash reports_docs/render_report_charts.sh",
     "typecheck": "tsc --noEmit"
   },

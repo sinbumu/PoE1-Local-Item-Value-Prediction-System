@@ -1,0 +1,13 @@
+{
+  "name": "poe1-v2-local-item-value-app",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Electron MVP for PoE1 local item value triage.",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "^41.3.0"
+  }
+}

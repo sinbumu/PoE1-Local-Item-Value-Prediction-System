@@ -30,6 +30,12 @@
   - 리포트 작성 담당자에게 넘길 문서 세트와 용도 정리
 - `REPORT_HANDOFF.md`
   - 다른 작성자/AI에게 넘길 최신 요약
+- `V2_PHASE0_AUDIT_REPORT_2026-05-01.md`
+  - V2 mod-aware feature 가능성 확인용 Phase 0 audit 실행/산출물 가이드
+- `V2_MODEL_COMPARISON_REPORT_2026-05-01.md`
+  - `is_search_worthy` classifier의 V1/V2 비교 학습 실행 기준
+- `V2_ELECTRON_MVP_DEMO_GUIDE_2026-05-01.md`
+  - 최종 발표용 Electron 로컬 앱 MVP 실행/시연 절차
 
 ## 현재 활성 설계 문서
 
@@ -49,6 +55,12 @@
   - 모델이 실제로 어떤 피처에 반응하는지 설명할 때 쓰는 보조 문서
 - `REPORT_WRITER_DOCUMENT_MAP_2026-04-23.md`
   - 저장소 문서 중 무엇을 먼저 읽을지 정리한 인계용 문서
+- `V2_PHASE0_AUDIT_REPORT_2026-05-01.md`
+  - V2 audit 결과를 보고서에 연결할 때 쓰는 기준 문서
+- `V2_MODEL_COMPARISON_REPORT_2026-05-01.md`
+  - V2 classifier 학습/비교 결과를 해석할 때 쓰는 기준 문서
+- `V2_ELECTRON_MVP_DEMO_GUIDE_2026-05-01.md`
+  - 앱 MVP 시연 흐름과 fallback 설명용 문서
 
 ## Legacy 문서
 
@@ -89,12 +101,16 @@
 7. `TRAINING_FEATURES.md`
 8. `STORAGE_POLICY.md`
 9. 필요 시 `MODEL_SCOPE.md`
+10. V2 구현/발표 준비 시 `V2_PHASE0_AUDIT_REPORT_2026-05-01.md`
+11. V2 구현/발표 준비 시 `V2_MODEL_COMPARISON_REPORT_2026-05-01.md`
+12. V2 구현/발표 준비 시 `V2_ELECTRON_MVP_DEMO_GUIDE_2026-05-01.md`
 
 클립보드/추론 이슈를 볼 경우:
 
 1. `CLIPBOARD_COMPATIBILITY_AUDIT.md`
 2. `AFFIX_SOURCE_STRATEGY.md`
 3. `AFFIX_DICTIONARY_REQUIREMENTS.md`
+4. `V2_ELECTRON_MVP_DEMO_GUIDE_2026-05-01.md`
 
 과거 맥락이 필요할 경우:
 

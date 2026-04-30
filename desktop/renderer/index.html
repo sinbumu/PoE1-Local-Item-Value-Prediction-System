@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PoE1 Local Item Value MVP</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main>
+      <header>
+        <p class="eyebrow">PoE1 Local Utility MVP</p>
+        <h1>Item Value Triage</h1>
+        <p class="description">
+          Paste English Ctrl+C item text, then run the local parser, V2 feature builder,
+          and CatBoost classifier.
+        </p>
+      </header>
+
+      <section class="paths">
+        <label>
+          model.cbm
+          <input id="modelPath" placeholder="ml/runs/.../model.cbm" />
+        </label>
+        <label>
+          feature_schema.json
+          <input id="schemaPath" placeholder="ml/runs/.../feature_schema.json" />
+        </label>
+      </section>
+
+      <section>
+        <div class="toolbar">
+          <button id="readClipboard">Read Clipboard</button>
+          <button id="analyze">Analyze Item</button>
+        </div>
+        <textarea id="itemText" spellcheck="false" placeholder="Paste PoE1 English Ctrl+C item text here"></textarea>
+      </section>
+
+      <section class="result-card">
+        <h2>Prediction</h2>
+        <div id="status">Ready</div>
+        <pre id="prediction"></pre>
+      </section>
+
+      <section class="result-card">
+        <h2>Extracted Features</h2>
+        <pre id="features"></pre>
+      </section>
+    </main>
+    <script src="./renderer.js"></script>
+  </body>
+</html>
