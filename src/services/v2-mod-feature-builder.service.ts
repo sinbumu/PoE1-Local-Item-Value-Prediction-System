@@ -26,6 +26,11 @@ type AffixLineWithNumbers = ClipboardAffixAnalysisLine & {
 
 export type V2ModAwareFeatures = Record<string, string | number | null>;
 
+export type V2ModAwareFeatureAnalysis = {
+  features: V2ModAwareFeatures;
+  affixLines: ClipboardAffixAnalysisLine[];
+};
+
 export const V2_MOD_FAMILIES = [
   "life",
   "resistance",
@@ -315,21 +320,29 @@ function buildFeaturesFromAnalysis(
 }
 
 export function buildV2ModAwareFeatures(input: V2FeatureInput): V2ModAwareFeatures {
+  return buildV2ModAwareFeatureAnalysis(input).features;
+}
+
+export function buildV2ModAwareFeatureAnalysis(input: V2FeatureInput): V2ModAwareFeatureAnalysis {
   const item = input.itemJson;
   const parsedItem = buildParsedItemFromItemJson(input);
   parsedItem.explicitAffixLines = affixAnalyzer.extractExplicitCandidateLines(parsedItem);
   const uniqueName = input.modelSegment === "unique_equipment" ? asString(item.name) : null;
 
-  return buildFeaturesFromAnalysis(parsedItem.explicitAffixLines, {
-    itemClass: normalizeItemClassForDictionary(input),
-    baseType: input.baseType ?? asString(item.baseType) ?? asString(item.typeLine),
-    rarity: input.rarity,
-    modelSegment: input.modelSegment,
-    equipmentSlot: input.equipmentSlot ?? null,
-    uniqueName,
-    uniqueBaseType: uniqueName ? input.baseType ?? asString(item.typeLine) : null,
-    uniqueRollLineCount: input.modelSegment === "unique_equipment" ? collectLines(item, "explicitMods").length : 0,
-  });
+  return {
+    features: buildFeaturesFromAnalysis(parsedItem.explicitAffixLines, {
+      itemClass: normalizeItemClassForDictionary(input),
+      baseType: input.baseType ?? asString(item.baseType) ?? asString(item.typeLine),
+      rarity: input.rarity,
+      modelSegment: input.modelSegment,
+      equipmentSlot: input.equipmentSlot ?? null,
+      uniqueName,
+      uniqueBaseType: uniqueName ? input.baseType ?? asString(item.typeLine) : null,
+      uniqueRollLineCount:
+        input.modelSegment === "unique_equipment" ? collectLines(item, "explicitMods").length : 0,
+    }),
+    affixLines: parsedItem.explicitAffixLines,
+  };
 }
 
 export function analyzeV2AffixesFromItemJson(input: V2FeatureInput): ClipboardAffixAnalysisLine[] {

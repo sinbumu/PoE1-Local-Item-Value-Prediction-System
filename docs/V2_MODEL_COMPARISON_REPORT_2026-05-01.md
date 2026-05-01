@@ -59,6 +59,7 @@ ml/.venv/bin/python ml/run_v2_classifier_comparison.py \
 - feature set별 `model.cbm`
 - feature set별 `feature_schema.json`
 - feature importance CSV
+- 선택 실행 시 threshold 평가 결과 `threshold_summary.csv`, `threshold_summary.json`
 
 ## Winner 기준
 
@@ -69,6 +70,33 @@ ml/.venv/bin/python ml/run_v2_classifier_comparison.py \
 3. precision이 높은 모델
 
 즉 false positive가 조금 늘더라도 `search-worthy` 아이템을 `low listed value`로 놓치는 모델은 불리하게 본다.
+
+## Threshold 평가
+
+학습 후에는 모델을 다시 학습하지 않고 threshold만 바꿔 precision / recall / F1 / false negative 변화를 확인할 수 있다.
+
+```bash
+ml/.venv/bin/python ml/evaluate_v2_thresholds.py \
+  --staged-manifest artifacts/v2-mod-aware-staging/latest/manifest.json \
+  --model ml/runs/v2_classifier_latest/v2_mod_aware/global/model.cbm \
+  --feature-set v2_mod_aware \
+  --split test \
+  --thresholds 0.30,0.35,0.40,0.45,0.50,0.55,0.60,0.65,0.70 \
+  --output-dir ml/runs/v2_classifier_latest/v2_mod_aware/global/threshold_eval
+```
+
+`2026-05-01_full_7d` 실행에서는 `v2_mod_aware/global` 기준 `threshold=0.40`이 test split에서 가장 균형이 좋았다.
+
+```text
+threshold=0.40
+precision=0.7249
+recall=0.8927
+F1=0.8001
+false_negative=37,516
+high_value_miss_rate=0.0752
+```
+
+앱 MVP에서 search-worthy 아이템을 놓치지 않는 방향을 우선하면 `0.40`을 기본 threshold로 사용한다. 더 공격적으로 놓침을 줄이는 데모가 필요하면 `0.35` 또는 `0.30`도 비교할 수 있으나, false positive가 크게 증가한다.
 
 ## 앱 연결 모델
 

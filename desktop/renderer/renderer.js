@@ -1,6 +1,7 @@
 const itemText = document.querySelector("#itemText");
 const modelPath = document.querySelector("#modelPath");
 const schemaPath = document.querySelector("#schemaPath");
+const threshold = document.querySelector("#threshold");
 const statusEl = document.querySelector("#status");
 const predictionEl = document.querySelector("#prediction");
 const featuresEl = document.querySelector("#features");
@@ -32,6 +33,7 @@ analyzeButton.addEventListener("click", async () => {
       text: itemText.value,
       modelPath: modelPath.value,
       schemaPath: schemaPath.value,
+      threshold: threshold.value,
     });
     predictionEl.textContent = JSON.stringify(result.prediction, null, 2);
     featuresEl.textContent = JSON.stringify(

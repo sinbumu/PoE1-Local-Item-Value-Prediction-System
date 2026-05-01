@@ -59,6 +59,7 @@ ipcMain.handle("analyze-item", async (_event, payload) => {
   const text = String(payload?.text ?? "").trim();
   const modelPath = String(payload?.modelPath ?? "").trim();
   const schemaPath = String(payload?.schemaPath ?? "").trim();
+  const threshold = String(payload?.threshold ?? "").trim();
 
   if (!text) {
     throw new Error("아이템 텍스트가 비어 있습니다.");
@@ -83,7 +84,7 @@ ipcMain.handle("analyze-item", async (_event, payload) => {
     ]);
     await writeFile(featurePath, featureResult.stdout, "utf-8");
 
-    const predictionResult = await runCommand(resolvePython(), [
+    const predictionArgs = [
       "ml/predict_item_value.py",
       "--model",
       modelPath,
@@ -91,7 +92,11 @@ ipcMain.handle("analyze-item", async (_event, payload) => {
       schemaPath,
       "--input",
       featurePath,
-    ]);
+    ];
+    if (threshold) {
+      predictionArgs.push("--threshold", threshold);
+    }
+    const predictionResult = await runCommand(resolvePython(), predictionArgs);
 
     return {
       features: JSON.parse(featureResult.stdout),

@@ -52,6 +52,7 @@ ml/.venv/bin/python ml/run_v2_classifier_comparison.py \
 ```text
 model.cbm
 feature_schema.json
+decision threshold
 ```
 
 예시:
@@ -59,15 +60,19 @@ feature_schema.json
 ```text
 ml/runs/v2_classifier_latest/v2_mod_aware/global/model.cbm
 ml/runs/v2_classifier_latest/v2_mod_aware/global/feature_schema.json
+0.40
 ```
+
+`2026-05-01_full_7d` threshold 평가 기준으로 `0.40`은 V2 global 모델의 test split에서 F1과 recall 균형이 가장 좋았다. 발표 데모에서는 기본값 `0.40`을 사용하고, 더 보수적으로 high-value candidate를 줄이고 싶으면 `0.50` 이상을 비교한다.
 
 ## 데모 절차
 
 1. PoE1 영문 클라이언트에서 아이템에 마우스를 올리고 `Ctrl+C`
 2. 앱에서 `Read Clipboard` 클릭
 3. 모델/스키마 경로 확인
-4. `Analyze Item` 클릭
-5. 판단 결과, score, parser warning, 추출 feature를 보여준다
+4. threshold 값을 확인한다
+5. `Analyze Item` 클릭
+6. 판단 결과, score, parser warning, 추출 feature를 보여준다
 
 실제 클립보드 연동이 불안정하면 저장된 영문 샘플을 textarea에 paste해서 같은 흐름으로 시연한다.
 
@@ -82,4 +87,5 @@ ml/runs/v2_classifier_latest/v2_mod_aware/global/feature_schema.json
 - 영어 클라이언트 기준
 - 단일 모델 경로를 직접 지정하는 MVP 구조
 - high-value candidate는 binary classifier score band 기반 표시
+- threshold는 앱 UI에서 수동 지정
 - true trash detector가 아니라 low listed value와 search-worthy 분류 모델

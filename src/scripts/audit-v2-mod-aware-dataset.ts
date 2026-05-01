@@ -6,8 +6,7 @@ import type { PoolClient, QueryResult } from "pg";
 
 import { closePool, pool } from "../db/client";
 import {
-  analyzeV2AffixesFromItemJson,
-  buildV2ModAwareFeatures,
+  buildV2ModAwareFeatureAnalysis,
 } from "../services/v2-mod-feature-builder.service";
 import type { PublicItem } from "../types/poe.types";
 import { logger } from "../utils/logger";
@@ -337,7 +336,7 @@ async function main(): Promise<void> {
           slotMap[row.base_type ?? ""] ??
           slotMap[row.type_line ?? ""] ??
           inferEquipmentSlotFromItemClass(asString(item.itemClass));
-        const features = buildV2ModAwareFeatures({
+        const analysis = buildV2ModAwareFeatureAnalysis({
           itemJson: item,
           itemClass: row.item_class,
           baseType: row.base_type,
@@ -345,14 +344,8 @@ async function main(): Promise<void> {
           modelSegment: row.model_segment,
           equipmentSlot,
         });
-        const affixLines = analyzeV2AffixesFromItemJson({
-          itemJson: item,
-          itemClass: row.item_class,
-          baseType: row.base_type,
-          rarity: row.rarity,
-          modelSegment: row.model_segment,
-          equipmentSlot,
-        });
+        const features = analysis.features;
+        const affixLines = analysis.affixLines;
         const matched = Number(features.matched_explicit_mod_count ?? 0);
         const ambiguous = Number(features.ambiguous_explicit_mod_count ?? 0);
         const unmatched = Number(features.unmatched_explicit_mod_count ?? 0);
