@@ -1,0 +1,3 @@
+segment,rows,explicit_mod_preservation_rate,matched_rate,search_worthy_rows,high_value_rows
+rare_equipment,"4,774,575",0.9999,0.4949,"2,692,505","1,504,438"
+unique_equipment,"1,008,294",0.9945,0.2857,"620,557","382,588"

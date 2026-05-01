@@ -1,0 +1,8 @@
+{
+  "staging_rows": 5642555,
+  "source_window_days": 7,
+  "snapshot_now": "2026-05-01 15:33:31.2681+00",
+  "lower_bound": "2026-04-24 15:33:31.2681+00",
+  "search_worthy_threshold_chaos": 30,
+  "high_value_threshold_chaos": 311.7
+}

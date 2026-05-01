@@ -1,0 +1,4 @@
+scope,v1_precision,v1_recall,v1_f1,v2_precision,v2_recall,v2_f1,winner
+global,0.8067,0.7909,0.7987,0.7796,0.7969,0.7881,v2_mod_aware
+rare_equipment,0.7959,0.7888,0.7923,0.7758,0.7825,0.7791,v1_summary
+unique_equipment,0.8326,0.8652,0.8486,0.8072,0.8492,0.8277,v1_summary
