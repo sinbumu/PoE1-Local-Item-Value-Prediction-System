@@ -1,11 +1,23 @@
 const { app, BrowserWindow, clipboard, ipcMain } = require("electron");
 const { spawn } = require("node:child_process");
-const { mkdtemp, writeFile, rm } = require("node:fs/promises");
+const { mkdtemp, readFile, readdir, writeFile, rm } = require("node:fs/promises");
 const { existsSync } = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
 
 const repoRoot = path.resolve(__dirname, "..");
+const defaultThreshold = "0.40";
+const defaultModelPath = "ml/runs/v2_classifier_latest/v2_mod_aware/global/model.cbm";
+const defaultSchemaPath = "ml/runs/v2_classifier_latest/v2_mod_aware/global/feature_schema.json";
+const demoSampleDir = path.join(repoRoot, "samples", "clipboard", "en");
+const demoSampleIds = [
+  "rare-equipment-001",
+  "rare-equipment-002",
+  "rare-equipment-003",
+  "unique-equipment-001",
+  "unique-equipment-002",
+  "skill-gem-001",
+];
 
 function createWindow() {
   const mainWindow = new BrowserWindow({
@@ -23,6 +35,7 @@ function createWindow() {
 
 function runCommand(command, args, options = {}) {
   return new Promise((resolve, reject) => {
+    const startedAt = performance.now();
     const child = spawn(command, args, {
       cwd: repoRoot,
       env: { ...process.env, ...options.env },
@@ -40,7 +53,7 @@ function runCommand(command, args, options = {}) {
     child.on("error", reject);
     child.on("close", (code) => {
       if (code === 0) {
-        resolve({ stdout, stderr });
+        resolve({ stdout, stderr, elapsedMs: Math.round(performance.now() - startedAt) });
       } else {
         reject(new Error(`${command} exited with code ${code}\n${stderr}`));
       }
@@ -48,29 +61,152 @@ function runCommand(command, args, options = {}) {
   });
 }
 
+function resolveRepoPath(value) {
+  const normalized = String(value ?? "").trim();
+  if (!normalized) {
+    return "";
+  }
+  return path.isAbsolute(normalized) ? normalized : path.join(repoRoot, normalized);
+}
+
+function toRepoRelative(absolutePath) {
+  return path.relative(repoRoot, absolutePath).split(path.sep).join("/");
+}
+
+function fileStatus(relativePath) {
+  const absolutePath = resolveRepoPath(relativePath);
+  return {
+    path: relativePath,
+    exists: Boolean(relativePath) && existsSync(absolutePath),
+  };
+}
+
 function resolvePython() {
   const venvPython = path.join(repoRoot, "ml", ".venv", process.platform === "win32" ? "Scripts/python.exe" : "bin/python");
   return existsSync(venvPython) ? venvPython : "python3";
 }
 
+async function readJsonIfExists(filePath) {
+  if (!existsSync(filePath)) {
+    return null;
+  }
+  return JSON.parse(await readFile(filePath, "utf-8"));
+}
+
+async function listDemoSamples() {
+  if (!existsSync(demoSampleDir)) {
+    return [];
+  }
+  const entries = await readdir(demoSampleDir);
+  const txtIds = new Set(
+    entries.filter((entry) => entry.endsWith(".txt")).map((entry) => entry.replace(/\.txt$/, "")),
+  );
+  const ids = demoSampleIds.filter((id) => txtIds.has(id));
+  for (const id of [...txtIds].sort()) {
+    if (!ids.includes(id) && /^(rare-equipment|unique-equipment|skill-gem)-/.test(id)) {
+      ids.push(id);
+    }
+  }
+
+  return Promise.all(
+    ids.map(async (id) => {
+      const meta = await readJsonIfExists(path.join(demoSampleDir, `${id}.meta.json`));
+      return {
+        id,
+        label: `${id}${meta?.expected?.itemName ? ` - ${meta.expected.itemName}` : ""}`,
+        category: meta?.category ?? "unknown",
+        expected: meta?.expected ?? null,
+      };
+    }),
+  );
+}
+
+function classifySupport(featurePayload) {
+  const item = featurePayload?.item ?? {};
+  const rarity = String(item.rarity ?? "").toLowerCase();
+  const itemClass = String(item.itemClass ?? "").toLowerCase();
+  const isEnglish = !featurePayload?.item?.locale || featurePayload.item.locale === "en";
+  const supportedRarity = rarity === "rare" || rarity === "unique";
+  const unsupportedClass =
+    itemClass.includes("gem") || itemClass.includes("jewel") || itemClass.includes("map") || itemClass.includes("currency");
+
+  if (!isEnglish) {
+    return { supported: false, reason: "현재 MVP는 영문 Ctrl+C 텍스트를 우선 지원합니다." };
+  }
+  if (!supportedRarity || unsupportedClass) {
+    return {
+      supported: false,
+      reason: "현재 MVP 모델은 rare equipment와 unique equipment 중심입니다. 이 아이템은 직접 검색을 권장합니다.",
+    };
+  }
+  return { supported: true, reason: null };
+}
+
+function friendlyError(error) {
+  const message = error instanceof Error ? error.message : String(error);
+  if (message.includes("ENOENT") || message.includes("spawn")) {
+    return "필요한 실행 파일을 찾지 못했습니다. `npm install`, `desktop/npm install`, Python venv 상태를 확인하세요.";
+  }
+  if (message.includes("No such file") || message.includes("can't open file")) {
+    return "모델, 스키마 또는 입력 파일 경로를 찾지 못했습니다. 앱의 경로 입력값을 확인하세요.";
+  }
+  if (message.includes("CatBoost") || message.includes("feature_schema")) {
+    return "CatBoost 모델 또는 feature_schema.json을 읽는 중 오류가 발생했습니다. 서로 같은 학습 run의 파일인지 확인하세요.";
+  }
+  return message;
+}
+
+ipcMain.handle("get-app-config", async () => ({
+  repoRoot,
+  defaults: {
+    modelPath: defaultModelPath,
+    schemaPath: defaultSchemaPath,
+    threshold: defaultThreshold,
+    pythonPath: resolvePython(),
+  },
+  availability: {
+    model: fileStatus(defaultModelPath),
+    schema: fileStatus(defaultSchemaPath),
+    pythonVenv: existsSync(resolvePython()),
+  },
+  samples: await listDemoSamples(),
+}));
+
 ipcMain.handle("read-clipboard", () => clipboard.readText());
+
+ipcMain.handle("read-demo-sample", async (_event, sampleId) => {
+  const safeId = String(sampleId ?? "").trim();
+  if (!/^[a-z0-9-]+$/.test(safeId)) {
+    throw new Error("잘못된 샘플 ID입니다.");
+  }
+  const samplePath = path.join(demoSampleDir, `${safeId}.txt`);
+  if (!existsSync(samplePath)) {
+    throw new Error(`샘플 파일을 찾지 못했습니다: ${safeId}`);
+  }
+  return {
+    id: safeId,
+    text: await readFile(samplePath, "utf-8"),
+  };
+});
 
 ipcMain.handle("analyze-item", async (_event, payload) => {
   const text = String(payload?.text ?? "").trim();
-  const modelPath = String(payload?.modelPath ?? "").trim();
-  const schemaPath = String(payload?.schemaPath ?? "").trim();
-  const threshold = String(payload?.threshold ?? "").trim();
+  const modelPath = String(payload?.modelPath ?? defaultModelPath).trim();
+  const schemaPath = String(payload?.schemaPath ?? defaultSchemaPath).trim();
+  const threshold = String(payload?.threshold ?? defaultThreshold).trim() || defaultThreshold;
+  const thresholdNumber = Number(threshold);
 
   if (!text) {
     throw new Error("아이템 텍스트가 비어 있습니다.");
   }
-  if (!modelPath || !schemaPath) {
-    throw new Error("model.cbm 경로와 feature_schema.json 경로가 필요합니다.");
+  if (!Number.isFinite(thresholdNumber) || thresholdNumber <= 0 || thresholdNumber >= 1) {
+    throw new Error("decision threshold는 0과 1 사이의 숫자여야 합니다. 예: 0.40");
   }
 
   const tempDir = await mkdtemp(path.join(os.tmpdir(), "poe1-v2-item-"));
   const inputPath = path.join(tempDir, "item.txt");
   const featurePath = path.join(tempDir, "features.json");
+  const timings = {};
 
   try {
     await writeFile(inputPath, text, "utf-8");
@@ -82,14 +218,48 @@ ipcMain.handle("analyze-item", async (_event, payload) => {
       "--input",
       inputPath,
     ]);
+    timings.featureMs = featureResult.elapsedMs;
     await writeFile(featurePath, featureResult.stdout, "utf-8");
+    const features = JSON.parse(featureResult.stdout);
+    const support = classifySupport(features);
+
+    if (!support.supported) {
+      return {
+        features,
+        prediction: {
+          decision: "unsupported item type",
+          score: null,
+          threshold: thresholdNumber,
+          supported: false,
+          recommendation: "거래소 직접 검색을 권장합니다.",
+          reason: support.reason,
+          item: features.item,
+          warnings: features.warnings ?? [],
+          note: "Prediction skipped because this item is outside the current MVP model scope.",
+        },
+        timings,
+        stderr: featureResult.stderr,
+      };
+    }
+
+    const resolvedModelPath = resolveRepoPath(modelPath);
+    const resolvedSchemaPath = resolveRepoPath(schemaPath);
+    if (!modelPath || !schemaPath) {
+      throw new Error("model.cbm 경로와 feature_schema.json 경로가 필요합니다.");
+    }
+    if (!existsSync(resolvedModelPath)) {
+      throw new Error(`model.cbm 파일을 찾지 못했습니다: ${modelPath}`);
+    }
+    if (!existsSync(resolvedSchemaPath)) {
+      throw new Error(`feature_schema.json 파일을 찾지 못했습니다: ${schemaPath}`);
+    }
 
     const predictionArgs = [
       "ml/predict_item_value.py",
       "--model",
-      modelPath,
+      toRepoRelative(resolvedModelPath),
       "--schema",
-      schemaPath,
+      toRepoRelative(resolvedSchemaPath),
       "--input",
       featurePath,
     ];
@@ -97,12 +267,16 @@ ipcMain.handle("analyze-item", async (_event, payload) => {
       predictionArgs.push("--threshold", threshold);
     }
     const predictionResult = await runCommand(resolvePython(), predictionArgs);
+    timings.predictMs = predictionResult.elapsedMs;
 
     return {
-      features: JSON.parse(featureResult.stdout),
+      features,
       prediction: JSON.parse(predictionResult.stdout),
+      timings,
       stderr: [featureResult.stderr, predictionResult.stderr].filter(Boolean).join("\n"),
     };
+  } catch (error) {
+    throw new Error(friendlyError(error));
   } finally {
     await rm(tempDir, { recursive: true, force: true });
   }

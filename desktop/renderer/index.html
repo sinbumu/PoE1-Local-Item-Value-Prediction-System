@@ -31,24 +31,66 @@
           <input id="threshold" value="0.40" placeholder="0.40" />
         </label>
       </section>
+      <div id="configStatus" class="notice">Loading app configuration...</div>
+
+      <section class="demo-card">
+        <div>
+          <h2>Demo Samples</h2>
+          <p class="muted">Use stored English Ctrl+C samples when the game client or clipboard is unavailable.</p>
+        </div>
+        <div class="sample-controls">
+          <select id="sampleSelect">
+            <option value="">Select a demo sample</option>
+          </select>
+          <button id="loadSample" type="button">Load Sample</button>
+        </div>
+      </section>
 
       <section>
         <div class="toolbar">
-          <button id="readClipboard">Read Clipboard</button>
-          <button id="analyze">Analyze Item</button>
+          <button id="readClipboard" type="button">Read Clipboard</button>
+          <button id="analyze" type="button">Analyze Item</button>
         </div>
         <textarea id="itemText" spellcheck="false" placeholder="Paste PoE1 English Ctrl+C item text here"></textarea>
       </section>
 
-      <section class="result-card">
-        <h2>Prediction</h2>
+      <section class="result-card decision-card">
+        <div class="section-title">
+          <h2>Decision</h2>
+          <span id="latency"></span>
+        </div>
         <div id="status">Ready</div>
-        <pre id="prediction"></pre>
+        <div id="decisionBadge" class="decision-badge neutral">No result yet</div>
+        <div class="metrics">
+          <div>
+            <span class="metric-label">Score</span>
+            <strong id="scoreValue">-</strong>
+          </div>
+          <div>
+            <span class="metric-label">Threshold</span>
+            <strong id="thresholdValue">0.40</strong>
+          </div>
+          <div>
+            <span class="metric-label">Recommendation</span>
+            <strong id="recommendationValue">Paste or load an item.</strong>
+          </div>
+        </div>
       </section>
 
       <section class="result-card">
-        <h2>Extracted Features</h2>
-        <pre id="features"></pre>
+        <h2>Item Summary</h2>
+        <div id="itemSummary" class="summary-grid"></div>
+        <div id="warnings" class="warnings"></div>
+      </section>
+
+      <section class="result-card">
+        <details>
+          <summary>Technical Details</summary>
+          <h3>Prediction JSON</h3>
+          <pre id="prediction"></pre>
+          <h3>Extracted Features</h3>
+          <pre id="features"></pre>
+        </details>
       </section>
     </main>
     <script src="./renderer.js"></script>
