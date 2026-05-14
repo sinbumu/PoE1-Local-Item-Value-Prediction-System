@@ -7,8 +7,8 @@ const path = require("node:path");
 
 const repoRoot = path.resolve(__dirname, "..");
 const defaultThreshold = "0.40";
-const defaultModelPath = "ml/runs/v2_classifier_latest/v2_mod_aware/global/model.cbm";
-const defaultSchemaPath = "ml/runs/v2_classifier_latest/v2_mod_aware/global/feature_schema.json";
+const defaultModelPath = "desktop/models/v2_mvp/model.cbm";
+const defaultSchemaPath = "desktop/models/v2_mvp/feature_schema.json";
 const demoSampleDir = path.join(repoRoot, "samples", "clipboard", "en");
 const demoSampleIds = [
   "rare-equipment-001",

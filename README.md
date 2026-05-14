@@ -2,7 +2,7 @@
 
 Path of Exile 1 `public-stash-tabs` 데이터를 로컬에서 수집하고, 정규화/ETL/학습용 export를 거쳐 로컬 가격 예측 실험까지 이어가기 위한 프로젝트입니다.
 
-현재 기준선은 `collector + ETL + CatBoost 1차 학습 시도 + English clipboard affix dictionary V1`까지 포함합니다. UI와 배포는 아직 범위 밖입니다.
+현재 기준선은 `collector + ETL + CatBoost 학습 파이프라인 + English clipboard affix dictionary V1 + Electron MVP 앱`까지 포함합니다. Electron 앱의 상세 실행 가이드는 `desktop/README.md`를 기준으로 봅니다.
 
 ## 현재까지 확인된 전제
 
@@ -773,6 +773,35 @@ npm run etl:training -- --reset-cursors --since-hours=168 --prune-before-run --l
 
 로그 마지막에 `rawReachedEnd`, `cleanReachedEnd`, `labeledReachedEnd`가 모두 `true`이고 종료 코드가 `0`이면, 그 실행은 오류가 아니라 **현재 7일 범위 백필을 끝까지 처리하고 정상 종료한 것**입니다. 이 상태면 `stage:training-dataset` 후 바로 1차 CatBoost 학습/비교를 시도해도 됩니다.
 
+## Electron MVP 앱
+
+최종 발표/시연용 로컬 앱은 `desktop/` 아래에 있습니다. 앱 전용 실행 방법, 기본 모델 위치, Windows 테스트 절차는 `desktop/README.md`를 기준으로 관리합니다.
+
+현재 앱의 기본 모델 파일 위치:
+
+```text
+desktop/models/v2_mvp/model.cbm
+desktop/models/v2_mvp/feature_schema.json
+desktop/models/v2_mvp/run_info.json
+```
+
+앱은 영문 PoE1 `Ctrl+C` 텍스트를 입력으로 받아 TypeScript clipboard parser와 V2 feature builder를 실행한 뒤, Python CatBoost predictor로 `low listed value`, `search-worthy`, `high-value candidate` 판단을 표시합니다.
+
+간단 실행:
+
+```bash
+npm install
+cd desktop
+npm install
+npm start
+```
+
+주의:
+
+- 앱은 현재 Python CatBoost predictor subprocess를 호출하므로 Windows 테스트 환경에도 Python ML 의존성이 필요합니다.
+- 자동 클릭, 자동 판매, OCR, 게임 입력 자동화는 MVP 범위에 포함하지 않습니다.
+- desktop 앱 관련 상세 내용은 루트 README가 아니라 `desktop/README.md`를 우선 확인합니다.
+
 ## Clipboard Affix Dictionary 상태
 
 현재 `Ctrl+C` 추론 경로용 affix dictionary는 English V1 기준으로 구현되어 있습니다.
@@ -862,10 +891,10 @@ gunzip -c backup.sql.gz | psql "postgres://postgres:postgres@localhost:5432/poe_
 ## 현재 범위 밖
 
 - 최종 운영형 ML 학습 파이프라인
-- overlay/UI
 - AWS 배포
 - 모든 가격 메모 edge case 대응
-- 고급 mod 정규화/환율 타깃 파이프라인
+- 상용 수준 overlay/installer/auto-update
+- 한국어 클라이언트 완전 지원
 
 ## 관련 문서
 
@@ -881,6 +910,8 @@ gunzip -c backup.sql.gz | psql "postgres://postgres:postgres@localhost:5432/poe_
 - 현재 저장 정책 문서: `docs/STORAGE_POLICY.md`
 - 클립보드 호환 감사: `docs/CLIPBOARD_COMPATIBILITY_AUDIT.md`
 - affix source / build 전략: `docs/AFFIX_SOURCE_STRATEGY.md`
+- Electron MVP 앱 실행 가이드: `desktop/README.md`
+- Electron MVP 데모 가이드: `docs/V2_ELECTRON_MVP_DEMO_GUIDE_2026-05-01.md`
 - affix dictionary 준비사항: `docs/AFFIX_DICTIONARY_REQUIREMENTS.md`
 - legacy 구현 메모: `docs/IMPLEMENTATION_NOTES.md`
 - legacy 초기 계획: `docs/PLAN.md`

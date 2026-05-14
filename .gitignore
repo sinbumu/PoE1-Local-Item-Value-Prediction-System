@@ -9,3 +9,6 @@ dist
 artifacts/
 ml/.venv/
 ml/runs/
+catboost_info/
+__pycache__/
+*.pyc

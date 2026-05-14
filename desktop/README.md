@@ -1,6 +1,6 @@
 # PoE1 V2 Local Item Value App
 
-Electron MVP for the V2 final demo.
+Electron MVP for the V2 final demo. This app is a local utility that reads English PoE1 `Ctrl+C` item text and shows whether the item is likely worth searching or selling.
 
 ## Current MVP Flow
 
@@ -12,6 +12,14 @@ The app demonstrates the final local utility flow:
 4. Show a user-facing decision card and keep technical JSON details in a collapsible section.
 
 ## Run
+
+From the repository root, install the main Node dependencies first:
+
+```bash
+npm install
+```
+
+Then install and run the Electron app:
 
 ```bash
 cd desktop
@@ -27,12 +35,34 @@ The app calls the repository tools from the project root:
 Default paths are prefilled:
 
 ```text
-ml/runs/v2_classifier_latest/v2_mod_aware/global/model.cbm
-ml/runs/v2_classifier_latest/v2_mod_aware/global/feature_schema.json
+desktop/models/v2_mvp/model.cbm
+desktop/models/v2_mvp/feature_schema.json
 threshold = 0.40
 ```
 
+The current Git-tracked MVP model files are expected at:
+
+```text
+desktop/models/v2_mvp/model.cbm
+desktop/models/v2_mvp/feature_schema.json
+desktop/models/v2_mvp/run_info.json
+```
+
 If these files are missing, the app shows a warning and you can enter another trained run path manually.
+
+## Windows Test Checklist
+
+On the Windows desktop machine:
+
+1. Pull the repository.
+2. Install Node.js 20+.
+3. Install Python and create/install the project ML environment if it is not already available.
+4. Run `npm install` from the repository root.
+5. Run `cd desktop && npm install && npm start`.
+6. Confirm the top status says the default model and schema are found.
+7. Test `Demo Samples` first, then test live PoE1 English `Ctrl+C` text with `Read Clipboard` and `Analyze Item`.
+
+The app still uses the Python CatBoost predictor subprocess, so Python dependencies such as `catboost` and `pandas` must be available on the Windows machine.
 
 ## Demo Samples
 
@@ -53,6 +83,14 @@ This is the fallback demo path when PoE, Windows clipboard behavior, or the live
 - Friendly unsupported item, parser failure, and inference failure messages
 - Primary model scope: rare equipment and unique equipment
 - No overlay, auto-clicking, automation, or game control
+
+## Out of Scope
+
+- Korean client support
+- OCR or screen reading
+- Game input automation
+- Installer or auto-update
+- Guaranteed sale price prediction
 
 ## Worker Decision
 
