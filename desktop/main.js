@@ -61,6 +61,25 @@ function runCommand(command, args, options = {}) {
   });
 }
 
+async function runCommandCheck(command, args, options = {}) {
+  try {
+    const result = await runCommand(command, args, options);
+    return {
+      ok: true,
+      command,
+      elapsedMs: result.elapsedMs,
+      stdout: result.stdout.trim(),
+      stderr: result.stderr.trim(),
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      command,
+      error: error instanceof Error ? error.message : String(error),
+    };
+  }
+}
+
 function resolveNpm() {
   return process.platform === "win32" ? "npm.cmd" : "npm";
 }
@@ -166,6 +185,72 @@ function friendlyError(error) {
   return message;
 }
 
+async function buildEnvironmentDiagnostics() {
+  const pythonPath = resolvePython();
+  const model = fileStatus(defaultModelPath);
+  const schema = fileStatus(defaultSchemaPath);
+  const npmVersion = await runCommandCheck(resolveNpm(), ["--version"]);
+  const pythonVersion = await runCommandCheck(pythonPath, ["--version"]);
+  const pythonPackages = await runCommandCheck(pythonPath, [
+    "-c",
+    "import catboost, pandas; print('catboost/pandas import OK')",
+  ]);
+  const featureBuilder = await runCommandCheck(resolveNpm(), [
+    "run",
+    "--silent",
+    "v2:clipboard-features",
+    "--",
+    "--input",
+    "samples/clipboard/en/rare-equipment-001.txt",
+  ]);
+
+  return {
+    repoRoot,
+    platform: process.platform,
+    defaults: {
+      modelPath: defaultModelPath,
+      schemaPath: defaultSchemaPath,
+      threshold: defaultThreshold,
+      pythonPath,
+      npmPath: resolveNpm(),
+    },
+    checks: {
+      model: {
+        ok: model.exists,
+        label: "MVP model.cbm",
+        detail: model.exists ? model.path : `missing: ${model.path}`,
+      },
+      schema: {
+        ok: schema.exists,
+        label: "MVP feature_schema.json",
+        detail: schema.exists ? schema.path : `missing: ${schema.path}`,
+      },
+      npm: {
+        ok: npmVersion.ok,
+        label: "npm",
+        detail: npmVersion.ok ? npmVersion.stdout : npmVersion.error,
+      },
+      python: {
+        ok: pythonVersion.ok,
+        label: "Python executable",
+        detail: pythonVersion.ok ? `${pythonPath} (${pythonVersion.stdout})` : pythonVersion.error,
+      },
+      pythonPackages: {
+        ok: pythonPackages.ok,
+        label: "Python catboost/pandas",
+        detail: pythonPackages.ok ? pythonPackages.stdout : pythonPackages.error,
+      },
+      featureBuilder: {
+        ok: featureBuilder.ok,
+        label: "TypeScript feature builder",
+        detail: featureBuilder.ok
+          ? `sample feature generation OK (${featureBuilder.elapsedMs}ms)`
+          : featureBuilder.error,
+      },
+    },
+  };
+}
+
 ipcMain.handle("get-app-config", async () => ({
   repoRoot,
   defaults: {
@@ -181,6 +266,8 @@ ipcMain.handle("get-app-config", async () => ({
   },
   samples: await listDemoSamples(),
 }));
+
+ipcMain.handle("run-environment-check", async () => buildEnvironmentDiagnostics());
 
 ipcMain.handle("read-clipboard", () => clipboard.readText());
 

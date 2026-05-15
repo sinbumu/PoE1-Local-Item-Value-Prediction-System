@@ -57,15 +57,33 @@ On the Windows desktop machine:
 1. Pull the repository.
 2. Install Node.js 20+.
 3. Install Python and create/install the project ML environment if it is not already available.
-4. Run `npm install` from the repository root.
-5. Install Python ML dependencies.
-6. Run `cd desktop && npm install && npm start`.
-7. Confirm the top status says the default model and schema are found.
-8. Test `Demo Samples` first, then test live PoE1 English `Ctrl+C` text with `Read Clipboard` and `Analyze Item`.
+4. Run the setup script from the repository root.
+5. Start the app and click `Run Check`.
+6. Confirm every environment check is `OK`.
+7. Test `Demo Samples` first, then test live PoE1 English `Ctrl+C` text with `Read Clipboard` and `Analyze Item`.
 
 The app still uses the Python CatBoost predictor subprocess, so Python dependencies such as `catboost` and `pandas` must be available on the Windows machine.
 
-Example PowerShell setup from the repository root:
+Recommended PowerShell setup from the repository root:
+
+```powershell
+.\desktop\scripts\setup-windows.ps1
+cd desktop
+npm start
+```
+
+The setup script checks model files, installs root and desktop npm dependencies, creates `ml\.venv`, installs Python ML dependencies, and verifies a sample prediction.
+
+If PowerShell blocks local scripts, run:
+
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.\desktop\scripts\setup-windows.ps1
+```
+
+If you do not use `ml\.venv`, make sure `python` is available on `PATH`, or set `POE_VALUE_APP_PYTHON` to the Python executable path before starting the app.
+
+Manual equivalent:
 
 ```powershell
 npm install
@@ -76,7 +94,18 @@ npm install
 npm start
 ```
 
-If you do not use `ml\.venv`, make sure `python` is available on `PATH`, or set `POE_VALUE_APP_PYTHON` to the Python executable path before starting the app.
+## Environment Check
+
+The app has a `Run Check` button. Use it before `Analyze Item`, especially on Windows.
+
+It verifies:
+
+- `desktop/models/v2_mvp/model.cbm`
+- `desktop/models/v2_mvp/feature_schema.json`
+- `npm`
+- Python executable
+- Python `catboost` / `pandas`
+- TypeScript clipboard feature builder
 
 ## Demo Samples
 

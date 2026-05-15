@@ -243,6 +243,35 @@ button:disabled {
   font-size: 14px;
 }
 
+.check-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.check-item {
+  display: grid;
+  gap: 4px;
+  border: 1px solid #334155;
+  border-radius: 12px;
+  background: #111827;
+  padding: 12px;
+}
+
+.check-item.ok {
+  border-color: #166534;
+}
+
+.check-item.error {
+  border-color: #991b1b;
+}
+
+.check-item span {
+  color: #cbd5e1;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
 details summary {
   cursor: pointer;
   color: #93c5fd;

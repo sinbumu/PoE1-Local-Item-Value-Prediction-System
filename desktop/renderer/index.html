@@ -33,6 +33,18 @@
       </section>
       <div id="configStatus" class="notice">Loading app configuration...</div>
 
+      <section class="result-card environment-card">
+        <div class="section-title">
+          <h2>Environment Check</h2>
+          <button id="runEnvCheck" type="button">Run Check</button>
+        </div>
+        <p class="muted">
+          Run this first on Windows. Analyze Item requires root npm dependencies, Python, catboost/pandas,
+          and the MVP model files.
+        </p>
+        <div id="envChecks" class="check-list"></div>
+      </section>
+
       <section class="demo-card">
         <div>
           <h2>Demo Samples</h2>

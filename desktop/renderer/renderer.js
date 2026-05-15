@@ -3,6 +3,8 @@ const modelPath = document.querySelector("#modelPath");
 const schemaPath = document.querySelector("#schemaPath");
 const threshold = document.querySelector("#threshold");
 const configStatus = document.querySelector("#configStatus");
+const envChecks = document.querySelector("#envChecks");
+const runEnvCheckButton = document.querySelector("#runEnvCheck");
 const sampleSelect = document.querySelector("#sampleSelect");
 const loadSampleButton = document.querySelector("#loadSample");
 const statusEl = document.querySelector("#status");
@@ -21,6 +23,21 @@ const analyzeButton = document.querySelector("#analyze");
 function setStatus(message, isError = false) {
   statusEl.textContent = message;
   statusEl.className = isError ? "error" : "";
+}
+
+function renderEnvironmentChecks(diagnostics) {
+  envChecks.innerHTML = "";
+  const checks = diagnostics?.checks ?? {};
+  for (const check of Object.values(checks)) {
+    const row = document.createElement("div");
+    row.className = check.ok ? "check-item ok" : "check-item error";
+    const title = document.createElement("strong");
+    title.textContent = `${check.ok ? "OK" : "FAIL"} - ${check.label}`;
+    const detail = document.createElement("span");
+    detail.textContent = check.detail ?? "";
+    row.append(title, detail);
+    envChecks.append(row);
+  }
 }
 
 function formatScore(score) {
@@ -105,6 +122,7 @@ function setBusy(isBusy) {
   analyzeButton.disabled = isBusy;
   readClipboardButton.disabled = isBusy;
   loadSampleButton.disabled = isBusy;
+  runEnvCheckButton.disabled = isBusy;
 }
 
 async function initializeApp() {
@@ -132,6 +150,21 @@ async function initializeApp() {
     configStatus.className = "notice error";
   }
 }
+
+runEnvCheckButton.addEventListener("click", async () => {
+  setStatus("Running environment check...");
+  setBusy(true);
+  try {
+    const diagnostics = await window.poeValueApp.runEnvironmentCheck();
+    renderEnvironmentChecks(diagnostics);
+    const failed = Object.values(diagnostics.checks).filter((check) => !check.ok);
+    setStatus(failed.length === 0 ? "Environment check passed." : `Environment check failed: ${failed.length} issue(s).`, failed.length > 0);
+  } catch (error) {
+    setStatus(error.message ?? String(error), true);
+  } finally {
+    setBusy(false);
+  }
+});
 
 readClipboardButton.addEventListener("click", async () => {
   try {

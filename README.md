@@ -796,6 +796,12 @@ npm install
 npm start
 ```
 
+Windows에서는 `desktop/scripts/setup-windows.ps1`로 Node/Python 의존성 설치와 샘플 예측 검증을 먼저 수행할 수 있습니다.
+
+```powershell
+.\desktop\scripts\setup-windows.ps1
+```
+
 주의:
 
 - 앱은 현재 Python CatBoost predictor subprocess를 호출하므로 Windows 테스트 환경에도 Python ML 의존성이 필요합니다.
