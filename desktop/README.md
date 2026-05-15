@@ -58,11 +58,25 @@ On the Windows desktop machine:
 2. Install Node.js 20+.
 3. Install Python and create/install the project ML environment if it is not already available.
 4. Run `npm install` from the repository root.
-5. Run `cd desktop && npm install && npm start`.
-6. Confirm the top status says the default model and schema are found.
-7. Test `Demo Samples` first, then test live PoE1 English `Ctrl+C` text with `Read Clipboard` and `Analyze Item`.
+5. Install Python ML dependencies.
+6. Run `cd desktop && npm install && npm start`.
+7. Confirm the top status says the default model and schema are found.
+8. Test `Demo Samples` first, then test live PoE1 English `Ctrl+C` text with `Read Clipboard` and `Analyze Item`.
 
 The app still uses the Python CatBoost predictor subprocess, so Python dependencies such as `catboost` and `pandas` must be available on the Windows machine.
+
+Example PowerShell setup from the repository root:
+
+```powershell
+npm install
+py -3 -m venv ml\.venv
+.\ml\.venv\Scripts\python.exe -m pip install -r ml\requirements.txt
+cd desktop
+npm install
+npm start
+```
+
+If you do not use `ml\.venv`, make sure `python` is available on `PATH`, or set `POE_VALUE_APP_PYTHON` to the Python executable path before starting the app.
 
 ## Demo Samples
 

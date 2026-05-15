@@ -39,7 +39,7 @@ function runCommand(command, args, options = {}) {
     const child = spawn(command, args, {
       cwd: repoRoot,
       env: { ...process.env, ...options.env },
-      shell: process.platform === "win32",
+      shell: false,
     });
     let stdout = "";
     let stderr = "";
@@ -59,6 +59,10 @@ function runCommand(command, args, options = {}) {
       }
     });
   });
+}
+
+function resolveNpm() {
+  return process.platform === "win32" ? "npm.cmd" : "npm";
 }
 
 function resolveRepoPath(value) {
@@ -82,8 +86,14 @@ function fileStatus(relativePath) {
 }
 
 function resolvePython() {
+  if (process.env.POE_VALUE_APP_PYTHON) {
+    return process.env.POE_VALUE_APP_PYTHON;
+  }
   const venvPython = path.join(repoRoot, "ml", ".venv", process.platform === "win32" ? "Scripts/python.exe" : "bin/python");
-  return existsSync(venvPython) ? venvPython : "python3";
+  if (existsSync(venvPython)) {
+    return venvPython;
+  }
+  return process.platform === "win32" ? "python" : "python3";
 }
 
 async function readJsonIfExists(filePath) {
@@ -210,7 +220,7 @@ ipcMain.handle("analyze-item", async (_event, payload) => {
 
   try {
     await writeFile(inputPath, text, "utf-8");
-    const featureResult = await runCommand("npm", [
+    const featureResult = await runCommand(resolveNpm(), [
       "run",
       "--silent",
       "v2:clipboard-features",

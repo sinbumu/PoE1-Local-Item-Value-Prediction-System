@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import sys
 from pathlib import Path
 from typing import Any
@@ -36,7 +37,14 @@ def build_frame(features: dict[str, Any], schema: dict[str, Any]) -> pd.DataFram
     feature_columns = schema.get("feature_columns")
     if not isinstance(feature_columns, list) or not feature_columns:
         raise ValueError("feature_schema.json must contain feature_columns")
-    row = {column: features.get(column) for column in feature_columns}
+    categorical_columns = set(schema.get("categorical_columns", []))
+    row = {}
+    for column in feature_columns:
+        value = features.get(column)
+        if value is None:
+            row[column] = "" if column in categorical_columns else math.nan
+        else:
+            row[column] = str(value) if column in categorical_columns else value
     return pd.DataFrame([row], columns=feature_columns)
 
 
