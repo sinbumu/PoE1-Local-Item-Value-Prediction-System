@@ -36,10 +36,11 @@ function createWindow() {
 function runCommand(command, args, options = {}) {
   return new Promise((resolve, reject) => {
     const startedAt = performance.now();
+    const useShell = process.platform === "win32" && /\.(cmd|bat)$/i.test(command);
     const child = spawn(command, args, {
       cwd: repoRoot,
       env: { ...process.env, ...options.env },
-      shell: false,
+      shell: useShell,
     });
     let stdout = "";
     let stderr = "";
@@ -373,6 +374,7 @@ ipcMain.handle("analyze-item", async (_event, payload) => {
       stderr: [featureResult.stderr, predictionResult.stderr].filter(Boolean).join("\n"),
     };
   } catch (error) {
+    console.error("Analyze item failed:", error);
     throw new Error(friendlyError(error));
   } finally {
     await rm(tempDir, { recursive: true, force: true });
