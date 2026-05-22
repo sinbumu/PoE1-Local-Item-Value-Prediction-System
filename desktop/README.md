@@ -82,7 +82,7 @@ npm run prepare:desktop-models -- --days=7
 
 This command stages V2 rare/unique data, stages V1 jewel/skill_gem data, trains the CatBoost models, copies artifacts into `desktop/models/v2_mvp/`, and writes a fresh `model_manifest.json`.
 
-## Windows Test Checklist
+## Windows Development Test
 
 For development-mode testing on the Windows desktop machine:
 
@@ -92,9 +92,11 @@ For development-mode testing on the Windows desktop machine:
 4. Run the setup script from the repository root.
 5. Start the app and click `Run Check`.
 6. Confirm every environment check is `OK`.
-7. Test `Demo Samples` first, then test live PoE1 English `Ctrl+C` text with `Read Clipboard` and `Analyze Item`.
+7. Test `Demo Samples` first.
+8. Test live PoE1 English `Ctrl+C` text with `Read Clipboard`, `Analyze Item`, and `Auto Watch Clipboard`.
+9. Confirm the floating result card appears above the game and can be moved/hidden.
 
-The app still uses the Python CatBoost predictor subprocess, so Python dependencies such as `catboost` and `pandas` must be available on the Windows machine.
+In development mode, the app still uses the Python CatBoost predictor subprocess from the repository, so Python dependencies such as `catboost` and `pandas` must be available on the Windows machine.
 
 Recommended PowerShell setup from the repository root:
 
@@ -159,6 +161,18 @@ npm install
 npm start
 ```
 
+Development-mode Windows smoke test checklist:
+
+- `Run Check` passes.
+- `rare-equipment-001` returns a classifier decision.
+- `normal-jewel-001` returns a jewel regressor decision.
+- `skill-gem-001` returns a skill gem regressor decision.
+- `currency-001`, `map-001`, and `divination-card-001` return external price lookup guidance.
+- `parse-failure-001` returns parse failed.
+- Auto Watch detects a copied sample from Notepad.
+- Auto Watch detects a copied item from the live PoE1 client.
+- Floating card remains above the game window, can be moved, and remembers opacity/visibility settings.
+
 ## Environment Check
 
 The app has a `Run Check` button. Use it before `Analyze Item`, especially on Windows.
@@ -172,6 +186,8 @@ It verifies:
 - Python executable
 - Python `catboost` / `pandas`
 - TypeScript desktop feature builder
+
+In packaged installer mode, `npm` is not required at runtime. The app validates bundled resources under Electron `resources/` instead.
 
 ## Demo Samples
 
