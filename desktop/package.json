@@ -5,7 +5,8 @@
   "description": "Electron MVP for PoE1 local item value triage.",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "prepare:desktop-models": "npm --prefix .. run prepare:desktop-models --"
   },
   "devDependencies": {
     "electron": "^41.3.0"
