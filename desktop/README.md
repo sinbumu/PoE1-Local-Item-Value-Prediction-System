@@ -14,6 +14,8 @@ The app demonstrates the final local utility flow:
 
 `Auto Watch Clipboard` is enabled by default. It polls the clipboard every `700ms`, ignores ordinary text through a PoE item signature gate, and avoids duplicate analysis with clipboard hashing, debounce, cooldown, and an in-flight guard. The manual paste, `Read Clipboard`, and `Analyze Item` flow remains available as the demo fallback.
 
+When an analysis completes, the app also shows a small always-on-top floating result card. It summarizes the decision, score or predicted chaos value, item name, and recommendation, then hides automatically after a few seconds.
+
 ## Run
 
 From the repository root, install the main Node dependencies first:
@@ -145,6 +147,7 @@ This is the fallback demo path when PoE, Windows clipboard behavior, or the live
 
 - English PoE1 Ctrl+C item text
 - Polling-based clipboard auto watch with ON/OFF toggle
+- Always-on-top floating result card
 - Clipboard read button and manual paste
 - Stored demo sample loading
 - Local parser, desktop feature builder, and CatBoost classifier/regressor subprocess

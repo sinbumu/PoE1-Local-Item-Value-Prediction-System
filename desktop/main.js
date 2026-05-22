@@ -23,6 +23,8 @@ const demoSampleIds = [
   "vaal-gem-001",
   "awakened-gem-001",
 ];
+let floatingWindow = null;
+let floatingHideTimer = null;
 
 function createWindow() {
   const mainWindow = new BrowserWindow({
@@ -36,6 +38,65 @@ function createWindow() {
   });
 
   mainWindow.loadFile(path.join(__dirname, "renderer", "index.html"));
+}
+
+function createFloatingWindow() {
+  floatingWindow = new BrowserWindow({
+    width: 420,
+    height: 210,
+    show: false,
+    frame: false,
+    resizable: false,
+    alwaysOnTop: true,
+    skipTaskbar: true,
+    transparent: false,
+    webPreferences: {
+      preload: path.join(__dirname, "preload.js"),
+      contextIsolation: true,
+      nodeIntegration: false,
+    },
+  });
+
+  floatingWindow.loadFile(path.join(__dirname, "floating", "index.html"));
+  floatingWindow.on("closed", () => {
+    floatingWindow = null;
+    if (floatingHideTimer) {
+      clearTimeout(floatingHideTimer);
+      floatingHideTimer = null;
+    }
+  });
+}
+
+function ensureFloatingWindow() {
+  if (!floatingWindow || floatingWindow.isDestroyed()) {
+    createFloatingWindow();
+  }
+  return floatingWindow;
+}
+
+function showFloatingResult(result) {
+  const targetWindow = ensureFloatingWindow();
+  if (!targetWindow) {
+    return;
+  }
+
+  if (floatingHideTimer) {
+    clearTimeout(floatingHideTimer);
+    floatingHideTimer = null;
+  }
+
+  targetWindow.webContents.send("floating-result", result);
+  targetWindow.setAlwaysOnTop(true, "floating");
+  targetWindow.showInactive();
+
+  if (!result?.pinned) {
+    floatingHideTimer = setTimeout(() => {
+      if (floatingWindow && !floatingWindow.isDestroyed()) {
+        floatingWindow.hide();
+      }
+      floatingHideTimer = null;
+    }, Number(result?.autoHideMs ?? 7000));
+  }
 }
 
 function runCommand(command, args, options = {}) {
@@ -265,6 +326,22 @@ ipcMain.handle("run-environment-check", async () => buildEnvironmentDiagnostics(
 
 ipcMain.handle("read-clipboard", () => clipboard.readText());
 
+ipcMain.handle("show-floating-result", (_event, result) => {
+  showFloatingResult(result);
+  return { ok: true };
+});
+
+ipcMain.handle("hide-floating-result", () => {
+  if (floatingHideTimer) {
+    clearTimeout(floatingHideTimer);
+    floatingHideTimer = null;
+  }
+  if (floatingWindow && !floatingWindow.isDestroyed()) {
+    floatingWindow.hide();
+  }
+  return { ok: true };
+});
+
 ipcMain.handle("read-demo-sample", async (_event, sampleId) => {
   const safeId = String(sampleId ?? "").trim();
   if (!/^[a-z0-9-]+$/.test(safeId)) {
@@ -348,6 +425,7 @@ ipcMain.handle("analyze-item", async (_event, payload) => {
 
 app.whenReady().then(() => {
   createWindow();
+  createFloatingWindow();
   app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();

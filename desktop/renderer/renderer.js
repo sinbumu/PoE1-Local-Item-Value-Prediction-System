@@ -218,6 +218,22 @@ function renderAnalysisResult(result) {
   lastDecision.textContent = prediction.decision ?? "-";
 }
 
+function buildFloatingResult(result, source) {
+  const prediction = result.prediction ?? {};
+  const item = result.features?.item ?? prediction.item ?? {};
+  return {
+    source,
+    decision: prediction.decision,
+    score: prediction.score,
+    predictedChaos: prediction.predictedChaos,
+    modelSegment: prediction.modelSegment ?? result.features?.routing?.modelSegment,
+    modelId: prediction.modelId,
+    recommendation: recommendationFor(prediction),
+    item,
+    autoHideMs: source === "auto" ? 7000 : 5500,
+  };
+}
+
 async function analyzeText(text, source) {
   if (analysisInFlight) {
     if (source === "auto") {
@@ -240,6 +256,7 @@ async function analyzeText(text, source) {
       threshold: threshold.value,
     });
     renderAnalysisResult(result);
+    void window.poeValueApp.showFloatingResult(buildFloatingResult(result, source));
     setStatus(`Decision ready: ${result.prediction.decision}`);
 
     if (source === "auto") {

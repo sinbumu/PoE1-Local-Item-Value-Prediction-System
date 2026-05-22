@@ -6,4 +6,11 @@ contextBridge.exposeInMainWorld("poeValueApp", {
   readClipboard: () => ipcRenderer.invoke("read-clipboard"),
   readDemoSample: (sampleId) => ipcRenderer.invoke("read-demo-sample", sampleId),
   analyzeItem: (payload) => ipcRenderer.invoke("analyze-item", payload),
+  showFloatingResult: (result) => ipcRenderer.invoke("show-floating-result", result),
+  hideFloatingResult: () => ipcRenderer.invoke("hide-floating-result"),
+  onFloatingResult: (callback) => {
+    const listener = (_event, result) => callback(result);
+    ipcRenderer.on("floating-result", listener);
+    return () => ipcRenderer.removeListener("floating-result", listener);
+  },
 });
