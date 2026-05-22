@@ -1,0 +1,14 @@
+{
+  "id": "divination-card-001",
+  "locale": "en",
+  "category": "external_price_lookup",
+  "notes": [
+    "Divination card item for external price lookup routing demo."
+  ],
+  "expected": {
+    "rarity": "Divination Card",
+    "itemName": "The Nurse",
+    "baseType": "The Nurse",
+    "decision": "external price lookup recommended"
+  }
+}

@@ -22,6 +22,10 @@ const demoSampleIds = [
   "skill-gem-001",
   "vaal-gem-001",
   "awakened-gem-001",
+  "currency-001",
+  "map-001",
+  "divination-card-001",
+  "parse-failure-001",
 ];
 let floatingWindow = null;
 let floatingHideTimer = null;
@@ -286,7 +290,12 @@ async function listDemoSamples() {
   );
   const ids = demoSampleIds.filter((id) => txtIds.has(id));
   for (const id of [...txtIds].sort()) {
-    if (!ids.includes(id) && /^(rare-equipment|unique-equipment|normal-jewel|cluster-jewel|skill-gem|vaal-gem|awakened-gem)-/.test(id)) {
+    if (
+      !ids.includes(id) &&
+      /^(rare-equipment|unique-equipment|normal-jewel|cluster-jewel|skill-gem|vaal-gem|awakened-gem|currency|map|divination-card|parse-failure)-/.test(
+        id,
+      )
+    ) {
       ids.push(id);
     }
   }

@@ -1,0 +1,14 @@
+{
+  "id": "currency-001",
+  "locale": "en",
+  "category": "external_price_lookup",
+  "notes": [
+    "Commodity-like item for external price lookup routing demo."
+  ],
+  "expected": {
+    "rarity": "Currency",
+    "itemName": "Divine Orb",
+    "baseType": "Divine Orb",
+    "decision": "external price lookup recommended"
+  }
+}

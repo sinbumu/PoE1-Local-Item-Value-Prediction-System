@@ -1,0 +1,11 @@
+{
+  "id": "parse-failure-001",
+  "locale": "en",
+  "category": "parse_failure",
+  "notes": [
+    "Malformed PoE-like text for parser/fallback demo."
+  ],
+  "expected": {
+    "decision": "parse failed"
+  }
+}

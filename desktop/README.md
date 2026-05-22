@@ -150,6 +150,17 @@ samples/clipboard/en/
 
 This is the fallback demo path when PoE, Windows clipboard behavior, or the live client environment is unstable.
 
+Recommended presentation samples:
+
+- `rare-equipment-001`: rare equipment classifier route.
+- `unique-equipment-001`: unique equipment classifier route.
+- `normal-jewel-001`: jewel regressor route.
+- `skill-gem-001`: skill gem regressor route.
+- `currency-001`: external price lookup route.
+- `map-001`: external price lookup route.
+- `divination-card-001`: external price lookup route.
+- `parse-failure-001`: parse failed fallback route.
+
 ## Scope
 
 - English PoE1 Ctrl+C item text
@@ -184,6 +195,9 @@ npm run --silent desktop:clipboard-features -- --input samples/clipboard/en/rare
 npm run --silent desktop:clipboard-features -- --input samples/clipboard/en/skill-gem-001.txt
 npm run --silent desktop:clipboard-features -- --input samples/clipboard/en/rare-equipment-001.txt | node scripts/run-python.js ml/predict_desktop_item_value.py --manifest desktop/models/v2_mvp/model_manifest.json --classifier-search-threshold 0.70
 npm run --silent desktop:clipboard-features -- --input samples/clipboard/en/skill-gem-001.txt | node scripts/run-python.js ml/predict_desktop_item_value.py --manifest desktop/models/v2_mvp/model_manifest.json --classifier-search-threshold 0.70
+npm run --silent desktop:clipboard-features -- --input samples/clipboard/en/currency-001.txt | node scripts/run-python.js ml/predict_desktop_item_value.py --manifest desktop/models/v2_mvp/model_manifest.json --classifier-search-threshold 0.70
+npm run --silent desktop:clipboard-features -- --input samples/clipboard/en/map-001.txt | node scripts/run-python.js ml/predict_desktop_item_value.py --manifest desktop/models/v2_mvp/model_manifest.json --classifier-search-threshold 0.70
+npm run --silent desktop:clipboard-features -- --input samples/clipboard/en/parse-failure-001.txt | node scripts/run-python.js ml/predict_desktop_item_value.py --manifest desktop/models/v2_mvp/model_manifest.json --classifier-search-threshold 0.70
 ```
 
 ## Out of Scope

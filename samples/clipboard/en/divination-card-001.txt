@@ -1,0 +1,7 @@
+Item Class: Divination Cards
+Rarity: Divination Card
+The Nurse
+--------
+Stack Size: 1/8
+--------
+Healer, nurse, and apothecary.

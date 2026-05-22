@@ -94,6 +94,17 @@ End-to-end routed checks:
 ```bash
 npm run --silent desktop:clipboard-features -- --input samples/clipboard/en/rare-equipment-001.txt | node scripts/run-python.js ml/predict_desktop_item_value.py --manifest desktop/models/v2_mvp/model_manifest.json --classifier-search-threshold 0.70
 npm run --silent desktop:clipboard-features -- --input samples/clipboard/en/skill-gem-001.txt | node scripts/run-python.js ml/predict_desktop_item_value.py --manifest desktop/models/v2_mvp/model_manifest.json --classifier-search-threshold 0.70
+npm run --silent desktop:clipboard-features -- --input samples/clipboard/en/currency-001.txt | node scripts/run-python.js ml/predict_desktop_item_value.py --manifest desktop/models/v2_mvp/model_manifest.json --classifier-search-threshold 0.70
+npm run --silent desktop:clipboard-features -- --input samples/clipboard/en/map-001.txt | node scripts/run-python.js ml/predict_desktop_item_value.py --manifest desktop/models/v2_mvp/model_manifest.json --classifier-search-threshold 0.70
+npm run --silent desktop:clipboard-features -- --input samples/clipboard/en/parse-failure-001.txt | node scripts/run-python.js ml/predict_desktop_item_value.py --manifest desktop/models/v2_mvp/model_manifest.json --classifier-search-threshold 0.70
 ```
 
-With the current checked-in bundle, rare/unique items should run through the classifier. Jewel/skill gem samples may return `direct search recommended` until the corresponding regressor artifacts are generated and copied by `prepare:desktop-models`.
+Expected presentation sample behavior:
+
+- `rare-equipment-001`: classifier route.
+- `normal-jewel-001`: jewel regressor route when prepared desktop models are present.
+- `skill-gem-001`: skill gem regressor route when prepared desktop models are present.
+- `currency-001`, `map-001`, `divination-card-001`: `external price lookup recommended`.
+- `parse-failure-001`: `parse failed`.
+
+With only the legacy checked-in bundle, jewel/skill gem samples may return `direct search recommended` until the corresponding regressor artifacts are generated and copied by `prepare:desktop-models`.

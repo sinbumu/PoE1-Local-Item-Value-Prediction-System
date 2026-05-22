@@ -1,0 +1,5 @@
+Rarity:
+--------
+This is intentionally malformed PoE-like clipboard text.
+--------
+Item Level:

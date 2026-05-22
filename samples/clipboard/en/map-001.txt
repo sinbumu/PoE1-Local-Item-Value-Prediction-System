@@ -1,0 +1,12 @@
+Item Class: Maps
+Rarity: Normal
+Cemetery Map
+--------
+Map Tier: 16
+Item Quantity: +0% (augmented)
+Item Rarity: +0% (augmented)
+Monster Pack Size: +0% (augmented)
+--------
+Item Level: 83
+--------
+Travel to this Map by using it in a personal Map Device.
