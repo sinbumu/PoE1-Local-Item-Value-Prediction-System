@@ -94,6 +94,47 @@ textarea {
   color: #fecaca;
 }
 
+.watch-card {
+  display: grid;
+  grid-template-columns: minmax(240px, 1fr) auto;
+  gap: 16px;
+  margin-bottom: 20px;
+  border: 1px solid #1f2937;
+  border-radius: 14px;
+  background: #0b1220;
+  padding: 18px;
+}
+
+.watch-card h2 {
+  margin-bottom: 4px;
+}
+
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: end;
+  gap: 10px;
+  font-weight: 700;
+}
+
+.toggle-row input {
+  width: auto;
+}
+
+.watch-grid {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.watch-grid > div {
+  border: 1px solid #1f2937;
+  border-radius: 12px;
+  background: #111827;
+  padding: 12px;
+}
+
 .demo-card {
   display: flex;
   align-items: end;
@@ -298,6 +339,8 @@ pre {
   .paths,
   .metrics,
   .summary-grid,
+  .watch-card,
+  .watch-grid,
   .demo-card,
   .sample-controls {
     display: grid;

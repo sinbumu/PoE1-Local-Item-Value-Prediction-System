@@ -6,6 +6,10 @@ const threshold = document.querySelector("#threshold");
 const configStatus = document.querySelector("#configStatus");
 const envChecks = document.querySelector("#envChecks");
 const runEnvCheckButton = document.querySelector("#runEnvCheck");
+const autoWatchToggle = document.querySelector("#autoWatchToggle");
+const watchState = document.querySelector("#watchState");
+const lastAnalyzedAt = document.querySelector("#lastAnalyzedAt");
+const lastDecision = document.querySelector("#lastDecision");
 const sampleSelect = document.querySelector("#sampleSelect");
 const loadSampleButton = document.querySelector("#loadSample");
 const statusEl = document.querySelector("#status");
@@ -20,10 +24,45 @@ const predictionEl = document.querySelector("#prediction");
 const featuresEl = document.querySelector("#features");
 const readClipboardButton = document.querySelector("#readClipboard");
 const analyzeButton = document.querySelector("#analyze");
+const POLL_INTERVAL_MS = 700;
+const DEBOUNCE_MS = 250;
+const SAME_ITEM_COOLDOWN_MS = 2000;
+
+let watchTimer = null;
+let debounceTimer = null;
+let analysisInFlight = false;
+let pendingAutoText = null;
+let lastSeenClipboardHash = "";
+let lastAnalyzedHash = "";
+let lastAnalyzedTimestamp = 0;
 
 function setStatus(message, isError = false) {
   statusEl.textContent = message;
   statusEl.className = isError ? "error" : "";
+}
+
+function setWatchState(message) {
+  watchState.textContent = message;
+}
+
+function formatTime(timestamp) {
+  return timestamp ? new Date(timestamp).toLocaleTimeString() : "-";
+}
+
+function hashText(text) {
+  let hash = 5381;
+  for (let index = 0; index < text.length; index += 1) {
+    hash = (hash * 33) ^ text.charCodeAt(index);
+  }
+  return (hash >>> 0).toString(16);
+}
+
+function looksLikePoeItemText(text) {
+  return (
+    text.includes("Rarity:") &&
+    text.includes("--------") &&
+    (text.includes("Item Level:") || text.includes("Item Class:") || text.includes("Quality:"))
+  );
 }
 
 function renderEnvironmentChecks(diagnostics) {
@@ -118,7 +157,7 @@ function clearResult() {
   decisionBadge.textContent = "No result yet";
   decisionBadge.className = "decision-badge neutral";
   scoreValue.textContent = "-";
-  thresholdValue.textContent = threshold.value || "0.40";
+  thresholdValue.textContent = threshold.value || "0.70";
   recommendationValue.textContent = "Paste or load an item.";
   itemSummary.innerHTML = "";
   warningsEl.textContent = "";
@@ -126,10 +165,183 @@ function clearResult() {
 }
 
 function setBusy(isBusy) {
+  analysisInFlight = isBusy;
   analyzeButton.disabled = isBusy;
   readClipboardButton.disabled = isBusy;
   loadSampleButton.disabled = isBusy;
   runEnvCheckButton.disabled = isBusy;
+  if (!isBusy && pendingAutoText && autoWatchToggle.checked) {
+    window.setTimeout(processPendingAutoText, DEBOUNCE_MS);
+  }
+}
+
+function renderAnalysisResult(result) {
+  const prediction = result.prediction;
+  const item = result.features.item ?? prediction.item ?? {};
+
+  decisionBadge.textContent = prediction.decision;
+  decisionBadge.className = decisionClass(prediction.decision);
+  scoreValue.textContent =
+    typeof prediction.predictedChaos === "number" ? `${prediction.predictedChaos.toFixed(1)} chaos` : formatScore(prediction.score);
+  thresholdValue.textContent = prediction.threshold ?? threshold.value;
+  recommendationValue.textContent = recommendationFor(prediction);
+  latencyEl.textContent = result.timings
+    ? `feature ${result.timings.featureMs ?? "-"}ms / predict ${result.timings.predictMs ?? "skipped"}ms`
+    : "";
+  renderKeyValues(itemSummary, [
+    ["Rarity", item.rarity],
+    ["Item", item.itemName],
+    ["Base", item.baseType],
+    ["Class", item.itemClass],
+    ["Slot", item.equipmentSlot],
+    ["Segment", prediction.modelSegment ?? result.features.routing?.modelSegment],
+    ["Model", prediction.modelId],
+    ["Locale", item.locale],
+  ]);
+  renderWarnings([...(result.features.warnings ?? []), prediction.reason].filter(Boolean));
+  predictionEl.textContent = JSON.stringify(result.prediction, null, 2);
+  featuresEl.textContent = JSON.stringify(
+    {
+      item: result.features.item,
+      routing: result.features.routing,
+      warnings: result.features.warnings,
+      featureSets: result.features.featureSets,
+      features: result.features.features,
+      affixLines: result.features.affixLines,
+    },
+    null,
+    2,
+  );
+
+  const analyzedAt = Date.now();
+  lastAnalyzedAt.textContent = formatTime(analyzedAt);
+  lastDecision.textContent = prediction.decision ?? "-";
+}
+
+async function analyzeText(text, source) {
+  if (analysisInFlight) {
+    if (source === "auto") {
+      pendingAutoText = text;
+      setWatchState("Analysis running; queued latest clipboard item.");
+    }
+    return;
+  }
+
+  setStatus(source === "auto" ? "Auto analyzing clipboard item..." : "Running local parser and model...");
+  clearResult();
+  setBusy(true);
+
+  try {
+    const result = await window.poeValueApp.analyzeItem({
+      text,
+      manifestPath: manifestPath.value,
+      modelPath: modelPath.value,
+      schemaPath: schemaPath.value,
+      threshold: threshold.value,
+    });
+    renderAnalysisResult(result);
+    setStatus(`Decision ready: ${result.prediction.decision}`);
+
+    if (source === "auto") {
+      const analyzedHash = hashText(text);
+      lastAnalyzedHash = analyzedHash;
+      lastAnalyzedTimestamp = Date.now();
+      setWatchState("Watching clipboard");
+    }
+  } catch (error) {
+    setStatus(error.message ?? String(error), true);
+    if (source === "auto") {
+      setWatchState("Auto analysis failed; still watching.");
+    }
+  } finally {
+    setBusy(false);
+    if (source === "auto" && pendingAutoText) {
+      window.setTimeout(processPendingAutoText, DEBOUNCE_MS);
+    }
+  }
+}
+
+function shouldSkipAutoText(text) {
+  const trimmed = text.trim();
+  if (!trimmed) {
+    return true;
+  }
+  if (!looksLikePoeItemText(trimmed)) {
+    return true;
+  }
+
+  const hash = hashText(trimmed);
+  const now = Date.now();
+  return hash === lastAnalyzedHash && now - lastAnalyzedTimestamp < SAME_ITEM_COOLDOWN_MS;
+}
+
+function queueAutoText(text) {
+  const trimmed = text.trim();
+  if (shouldSkipAutoText(trimmed)) {
+    return;
+  }
+
+  pendingAutoText = trimmed;
+  window.clearTimeout(debounceTimer);
+  debounceTimer = window.setTimeout(processPendingAutoText, DEBOUNCE_MS);
+  setWatchState(analysisInFlight ? "Analysis running; queued latest clipboard item." : "Clipboard item detected.");
+}
+
+function processPendingAutoText() {
+  if (!autoWatchToggle.checked || !pendingAutoText) {
+    return;
+  }
+  if (analysisInFlight) {
+    setWatchState("Analysis running; queued latest clipboard item.");
+    return;
+  }
+
+  const text = pendingAutoText;
+  pendingAutoText = null;
+  if (shouldSkipAutoText(text)) {
+    return;
+  }
+
+  itemText.value = text;
+  void analyzeText(text, "auto");
+}
+
+async function pollClipboard() {
+  if (!autoWatchToggle.checked) {
+    setWatchState("Auto watch paused");
+    return;
+  }
+
+  try {
+    const text = await window.poeValueApp.readClipboard();
+    const trimmed = String(text ?? "").trim();
+    const hash = hashText(trimmed);
+    if (!trimmed || hash === lastSeenClipboardHash) {
+      setWatchState(analysisInFlight ? "Analyzing clipboard item..." : "Watching clipboard");
+      return;
+    }
+
+    lastSeenClipboardHash = hash;
+    if (!looksLikePoeItemText(trimmed)) {
+      setWatchState("Watching clipboard");
+      return;
+    }
+
+    queueAutoText(trimmed);
+  } catch (error) {
+    setWatchState("Clipboard read failed");
+  }
+}
+
+function startClipboardWatcher() {
+  if (watchTimer) {
+    window.clearInterval(watchTimer);
+  }
+  setWatchState(autoWatchToggle.checked ? "Watching clipboard" : "Auto watch paused");
+  watchTimer = window.setInterval(() => {
+    void pollClipboard();
+  }, POLL_INTERVAL_MS);
+  void pollClipboard();
 }
 
 async function initializeApp() {
@@ -200,60 +412,15 @@ loadSampleButton.addEventListener("click", async () => {
 });
 
 analyzeButton.addEventListener("click", async () => {
-  setStatus("Running local parser and model...");
-  clearResult();
-  setBusy(true);
-
-  try {
-    const result = await window.poeValueApp.analyzeItem({
-      text: itemText.value,
-      manifestPath: manifestPath.value,
-      modelPath: modelPath.value,
-      schemaPath: schemaPath.value,
-      threshold: threshold.value,
-    });
-    const prediction = result.prediction;
-    const item = result.features.item ?? prediction.item ?? {};
-
-    decisionBadge.textContent = prediction.decision;
-    decisionBadge.className = decisionClass(prediction.decision);
-    scoreValue.textContent =
-      typeof prediction.predictedChaos === "number" ? `${prediction.predictedChaos.toFixed(1)} chaos` : formatScore(prediction.score);
-    thresholdValue.textContent = prediction.threshold ?? threshold.value;
-    recommendationValue.textContent = recommendationFor(prediction);
-    latencyEl.textContent = result.timings
-      ? `feature ${result.timings.featureMs ?? "-"}ms / predict ${result.timings.predictMs ?? "skipped"}ms`
-      : "";
-    renderKeyValues(itemSummary, [
-      ["Rarity", item.rarity],
-      ["Item", item.itemName],
-      ["Base", item.baseType],
-      ["Class", item.itemClass],
-      ["Slot", item.equipmentSlot],
-      ["Segment", prediction.modelSegment ?? result.features.routing?.modelSegment],
-      ["Model", prediction.modelId],
-      ["Locale", item.locale],
-    ]);
-    renderWarnings([...(result.features.warnings ?? []), prediction.reason].filter(Boolean));
-    predictionEl.textContent = JSON.stringify(result.prediction, null, 2);
-    featuresEl.textContent = JSON.stringify(
-      {
-        item: result.features.item,
-        routing: result.features.routing,
-        warnings: result.features.warnings,
-        featureSets: result.features.featureSets,
-        features: result.features.features,
-        affixLines: result.features.affixLines,
-      },
-      null,
-      2,
-    );
-    setStatus(`Decision ready: ${prediction.decision}`);
-  } catch (error) {
-    setStatus(error.message ?? String(error), true);
-  } finally {
-    setBusy(false);
-  }
+  await analyzeText(itemText.value, "manual");
 });
 
-initializeApp();
+autoWatchToggle.addEventListener("change", () => {
+  pendingAutoText = null;
+  window.clearTimeout(debounceTimer);
+  setWatchState(autoWatchToggle.checked ? "Watching clipboard" : "Auto watch paused");
+});
+
+initializeApp().finally(() => {
+  startClipboardWatcher();
+});
