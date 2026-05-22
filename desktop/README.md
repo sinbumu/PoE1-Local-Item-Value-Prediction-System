@@ -1,15 +1,16 @@
-# PoE1 V2 Local Item Value App
+# PoE1 Desktop Local Item Value App
 
-Electron MVP for the V2 final demo. This app is a local utility that reads English PoE1 `Ctrl+C` item text and shows whether the item is likely worth searching or selling.
+Electron MVP for the final demo. This app is a local utility that reads English PoE1 `Ctrl+C` item text and routes the item to the local classifier, local regressor, or a direct-search fallback.
 
 ## Current MVP Flow
 
 The app demonstrates the final local utility flow:
 
 1. Read English PoE1 `Ctrl+C` item text from clipboard, manual paste, or a demo sample.
-2. Run the TypeScript clipboard parser and V2 mod-aware feature builder.
-3. Run the local Python CatBoost classifier subprocess.
-4. Show a user-facing decision card and keep technical JSON details in a collapsible section.
+2. Run the TypeScript clipboard parser and desktop feature builder.
+3. Route by item type through `desktop/models/v2_mvp/model_manifest.json`.
+4. Run the local Python CatBoost classifier/regressor subprocess when a model is available.
+5. Show a user-facing decision card and keep technical JSON details in a collapsible section.
 
 ## Run
 
@@ -29,26 +30,46 @@ npm start
 
 The app calls the repository tools from the project root:
 
-1. `npm run v2:clipboard-features`
-2. `ml/predict_item_value.py`
+1. `npm run desktop:clipboard-features`
+2. `ml/predict_desktop_item_value.py`
 
 Default paths are prefilled:
 
 ```text
+desktop/models/v2_mvp/model_manifest.json
 desktop/models/v2_mvp/model.cbm
 desktop/models/v2_mvp/feature_schema.json
-threshold = 0.40
+classifier search threshold = 0.70
 ```
 
 The current Git-tracked MVP model files are expected at:
 
 ```text
+desktop/models/v2_mvp/model_manifest.json
 desktop/models/v2_mvp/model.cbm
 desktop/models/v2_mvp/feature_schema.json
 desktop/models/v2_mvp/run_info.json
 ```
 
-If these files are missing, the app shows a warning and you can enter another trained run path manually.
+The checked-in bundle keeps the existing rare/unique classifier available. After running `npm run prepare:desktop-models`, the desktop bundle can also include:
+
+```text
+desktop/models/v2_mvp/rare_unique_classifier/
+desktop/models/v2_mvp/jewel_regressor/
+desktop/models/v2_mvp/skill_gem_regressor/
+```
+
+If a routed model file is missing, the app returns `direct search recommended` instead of making an unsupported prediction.
+
+## Prepare Desktop Models
+
+After ETL has been refreshed, run this from the repository root to stage, train, and copy the app model bundle:
+
+```bash
+npm run prepare:desktop-models -- --days=7
+```
+
+This command stages V2 rare/unique data, stages V1 jewel/skill_gem data, trains the CatBoost models, copies artifacts into `desktop/models/v2_mvp/`, and writes a fresh `model_manifest.json`.
 
 ## Windows Test Checklist
 
@@ -100,12 +121,13 @@ The app has a `Run Check` button. Use it before `Analyze Item`, especially on Wi
 
 It verifies:
 
+- `desktop/models/v2_mvp/model_manifest.json`
 - `desktop/models/v2_mvp/model.cbm`
 - `desktop/models/v2_mvp/feature_schema.json`
 - `npm`
 - Python executable
 - Python `catboost` / `pandas`
-- TypeScript clipboard feature builder
+- TypeScript desktop feature builder
 
 ## Demo Samples
 
@@ -122,10 +144,34 @@ This is the fallback demo path when PoE, Windows clipboard behavior, or the live
 - English PoE1 Ctrl+C item text
 - Clipboard read button and manual paste
 - Stored demo sample loading
-- Local parser, V2 feature builder, and CatBoost classifier subprocess
-- Friendly unsupported item, parser failure, and inference failure messages
-- Primary model scope: rare equipment and unique equipment
+- Local parser, desktop feature builder, and CatBoost classifier/regressor subprocess
+- Primary classifier scope: rare equipment and unique equipment
+- Regression routing scope: jewel and skill gem when model artifacts are available
+- Fallback scope: direct search or external price lookup recommendations for unsupported model classes
 - No overlay, auto-clicking, automation, or game control
+
+## Routing And Decision Policy
+
+- `rare_equipment`, `unique_equipment`: V2 mod-aware classifier.
+- `jewel`, `skill_gem`: V1 summary regressor when the corresponding model exists.
+- Currency, maps, fragments, cards, and similar commodity items: external price lookup recommendation.
+- Missing model artifacts: direct trade search recommendation.
+
+Classifier decisions use conservative thresholds: `<0.50 low listed value`, `0.50-0.70 manual check`, `0.70-0.88 search-worthy`, `>=0.88 high-value candidate`.
+
+Regressor decisions use chaos estimates: `<5 low listed value`, `5-30 manual check`, `30-300 search-worthy`, `>=300 high-value candidate`.
+
+## End-To-End CLI Checks
+
+Run these from the repository root:
+
+```bash
+npm run typecheck
+npm run --silent desktop:clipboard-features -- --input samples/clipboard/en/rare-equipment-001.txt
+npm run --silent desktop:clipboard-features -- --input samples/clipboard/en/skill-gem-001.txt
+npm run --silent desktop:clipboard-features -- --input samples/clipboard/en/rare-equipment-001.txt | node scripts/run-python.js ml/predict_desktop_item_value.py --manifest desktop/models/v2_mvp/model_manifest.json --classifier-search-threshold 0.70
+npm run --silent desktop:clipboard-features -- --input samples/clipboard/en/skill-gem-001.txt | node scripts/run-python.js ml/predict_desktop_item_value.py --manifest desktop/models/v2_mvp/model_manifest.json --classifier-search-threshold 0.70
+```
 
 ## Out of Scope
 

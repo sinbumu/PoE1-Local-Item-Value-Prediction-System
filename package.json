@@ -31,6 +31,8 @@
     "audit:v2-mod-aware": "tsx src/scripts/audit-v2-mod-aware-dataset.ts",
     "stage:v2-mod-aware": "tsx src/scripts/stage-v2-mod-aware-features.ts",
     "v2:clipboard-features": "tsx src/scripts/build-v2-features-from-clipboard.ts",
+    "desktop:clipboard-features": "tsx src/scripts/build-desktop-features-from-clipboard.ts",
+    "prepare:desktop-models": "node scripts/run-python.js ml/prepare_desktop_models.py",
     "report:charts": "bash reports_docs/render_report_charts.sh",
     "typecheck": "tsc --noEmit"
   },

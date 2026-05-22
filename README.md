@@ -780,12 +780,13 @@ npm run etl:training -- --reset-cursors --since-hours=168 --prune-before-run --l
 현재 앱의 기본 모델 파일 위치:
 
 ```text
+desktop/models/v2_mvp/model_manifest.json
 desktop/models/v2_mvp/model.cbm
 desktop/models/v2_mvp/feature_schema.json
 desktop/models/v2_mvp/run_info.json
 ```
 
-앱은 영문 PoE1 `Ctrl+C` 텍스트를 입력으로 받아 TypeScript clipboard parser와 V2 feature builder를 실행한 뒤, Python CatBoost predictor로 `low listed value`, `search-worthy`, `high-value candidate` 판단을 표시합니다.
+앱은 영문 PoE1 `Ctrl+C` 텍스트를 입력으로 받아 TypeScript desktop feature builder를 실행한 뒤, `model_manifest.json` 기준으로 rare/unique classifier, jewel/skill_gem regressor, direct-search fallback 중 하나로 라우팅합니다. 표시 판단은 `low listed value`, `manual check`, `search-worthy`, `high-value candidate`를 기본으로 합니다.
 
 간단 실행:
 
@@ -801,6 +802,14 @@ Windows에서는 `desktop/scripts/setup-windows.ps1`로 Node/Python 의존성 �
 ```powershell
 .\desktop\scripts\setup-windows.ps1
 ```
+
+ETL 최신화 이후 desktop 모델 번들을 다시 만들 때는 루트에서 다음 명령을 실행합니다.
+
+```bash
+npm run prepare:desktop-models -- --days=7
+```
+
+이 명령은 V2 rare/unique classifier와 V1 jewel/skill_gem regressor를 학습한 뒤 `desktop/models/v2_mvp/`에 복사하고 manifest를 갱신합니다. 현재 체크인된 기본 manifest는 기존 rare/unique 모델을 유지하며, jewel/skill_gem 모델 파일이 아직 없을 때는 앱이 `direct search recommended`로 fallback합니다.
 
 주의:
 

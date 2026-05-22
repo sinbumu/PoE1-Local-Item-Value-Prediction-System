@@ -6,7 +6,8 @@ const os = require("node:os");
 const path = require("node:path");
 
 const repoRoot = path.resolve(__dirname, "..");
-const defaultThreshold = "0.40";
+const defaultThreshold = "0.70";
+const defaultManifestPath = "desktop/models/v2_mvp/model_manifest.json";
 const defaultModelPath = "desktop/models/v2_mvp/model.cbm";
 const defaultSchemaPath = "desktop/models/v2_mvp/feature_schema.json";
 const demoSampleDir = path.join(repoRoot, "samples", "clipboard", "en");
@@ -16,7 +17,11 @@ const demoSampleIds = [
   "rare-equipment-003",
   "unique-equipment-001",
   "unique-equipment-002",
+  "normal-jewel-001",
+  "cluster-jewel-001",
   "skill-gem-001",
+  "vaal-gem-001",
+  "awakened-gem-001",
 ];
 
 function createWindow() {
@@ -133,7 +138,7 @@ async function listDemoSamples() {
   );
   const ids = demoSampleIds.filter((id) => txtIds.has(id));
   for (const id of [...txtIds].sort()) {
-    if (!ids.includes(id) && /^(rare-equipment|unique-equipment|skill-gem)-/.test(id)) {
+    if (!ids.includes(id) && /^(rare-equipment|unique-equipment|normal-jewel|cluster-jewel|skill-gem|vaal-gem|awakened-gem)-/.test(id)) {
       ids.push(id);
     }
   }
@@ -151,27 +156,6 @@ async function listDemoSamples() {
   );
 }
 
-function classifySupport(featurePayload) {
-  const item = featurePayload?.item ?? {};
-  const rarity = String(item.rarity ?? "").toLowerCase();
-  const itemClass = String(item.itemClass ?? "").toLowerCase();
-  const isEnglish = !featurePayload?.item?.locale || featurePayload.item.locale === "en";
-  const supportedRarity = rarity === "rare" || rarity === "unique";
-  const unsupportedClass =
-    itemClass.includes("gem") || itemClass.includes("jewel") || itemClass.includes("map") || itemClass.includes("currency");
-
-  if (!isEnglish) {
-    return { supported: false, reason: "현재 MVP는 영문 Ctrl+C 텍스트를 우선 지원합니다." };
-  }
-  if (!supportedRarity || unsupportedClass) {
-    return {
-      supported: false,
-      reason: "현재 MVP 모델은 rare equipment와 unique equipment 중심입니다. 이 아이템은 직접 검색을 권장합니다.",
-    };
-  }
-  return { supported: true, reason: null };
-}
-
 function friendlyError(error) {
   const message = error instanceof Error ? error.message : String(error);
   if (message.includes("ENOENT") || message.includes("spawn")) {
@@ -180,14 +164,15 @@ function friendlyError(error) {
   if (message.includes("No such file") || message.includes("can't open file")) {
     return "모델, 스키마 또는 입력 파일 경로를 찾지 못했습니다. 앱의 경로 입력값을 확인하세요.";
   }
-  if (message.includes("CatBoost") || message.includes("feature_schema")) {
-    return "CatBoost 모델 또는 feature_schema.json을 읽는 중 오류가 발생했습니다. 서로 같은 학습 run의 파일인지 확인하세요.";
+  if (message.includes("CatBoost") || message.includes("feature_schema") || message.includes("model_manifest")) {
+    return "CatBoost 모델, feature_schema.json 또는 model_manifest.json을 읽는 중 오류가 발생했습니다. 서로 같은 desktop 모델 번들의 파일인지 확인하세요.";
   }
   return message;
 }
 
 async function buildEnvironmentDiagnostics() {
   const pythonPath = resolvePython();
+  const manifest = fileStatus(defaultManifestPath);
   const model = fileStatus(defaultModelPath);
   const schema = fileStatus(defaultSchemaPath);
   const npmVersion = await runCommandCheck(resolveNpm(), ["--version"]);
@@ -199,7 +184,7 @@ async function buildEnvironmentDiagnostics() {
   const featureBuilder = await runCommandCheck(resolveNpm(), [
     "run",
     "--silent",
-    "v2:clipboard-features",
+    "desktop:clipboard-features",
     "--",
     "--input",
     "samples/clipboard/en/rare-equipment-001.txt",
@@ -211,14 +196,20 @@ async function buildEnvironmentDiagnostics() {
     defaults: {
       modelPath: defaultModelPath,
       schemaPath: defaultSchemaPath,
+      manifestPath: defaultManifestPath,
       threshold: defaultThreshold,
       pythonPath,
       npmPath: resolveNpm(),
     },
     checks: {
+      manifest: {
+        ok: manifest.exists,
+        label: "Desktop model_manifest.json",
+        detail: manifest.exists ? manifest.path : `missing: ${manifest.path}`,
+      },
       model: {
         ok: model.exists,
-        label: "MVP model.cbm",
+        label: "Legacy rare/unique model.cbm",
         detail: model.exists ? model.path : `missing: ${model.path}`,
       },
       schema: {
@@ -243,7 +234,7 @@ async function buildEnvironmentDiagnostics() {
       },
       featureBuilder: {
         ok: featureBuilder.ok,
-        label: "TypeScript feature builder",
+        label: "TypeScript desktop feature builder",
         detail: featureBuilder.ok
           ? `sample feature generation OK (${featureBuilder.elapsedMs}ms)`
           : featureBuilder.error,
@@ -257,10 +248,12 @@ ipcMain.handle("get-app-config", async () => ({
   defaults: {
     modelPath: defaultModelPath,
     schemaPath: defaultSchemaPath,
+    manifestPath: defaultManifestPath,
     threshold: defaultThreshold,
     pythonPath: resolvePython(),
   },
   availability: {
+    manifest: fileStatus(defaultManifestPath),
     model: fileStatus(defaultModelPath),
     schema: fileStatus(defaultSchemaPath),
     pythonVenv: existsSync(resolvePython()),
@@ -289,8 +282,7 @@ ipcMain.handle("read-demo-sample", async (_event, sampleId) => {
 
 ipcMain.handle("analyze-item", async (_event, payload) => {
   const text = String(payload?.text ?? "").trim();
-  const modelPath = String(payload?.modelPath ?? defaultModelPath).trim();
-  const schemaPath = String(payload?.schemaPath ?? defaultSchemaPath).trim();
+  const manifestPath = String(payload?.manifestPath ?? defaultManifestPath).trim();
   const threshold = String(payload?.threshold ?? defaultThreshold).trim() || defaultThreshold;
   const thresholdNumber = Number(threshold);
 
@@ -298,7 +290,7 @@ ipcMain.handle("analyze-item", async (_event, payload) => {
     throw new Error("아이템 텍스트가 비어 있습니다.");
   }
   if (!Number.isFinite(thresholdNumber) || thresholdNumber <= 0 || thresholdNumber >= 1) {
-    throw new Error("decision threshold는 0과 1 사이의 숫자여야 합니다. 예: 0.40");
+    throw new Error("classifier search threshold는 0과 1 사이의 숫자여야 합니다. 예: 0.70");
   }
 
   const tempDir = await mkdtemp(path.join(os.tmpdir(), "poe1-v2-item-"));
@@ -311,7 +303,7 @@ ipcMain.handle("analyze-item", async (_event, payload) => {
     const featureResult = await runCommand(resolveNpm(), [
       "run",
       "--silent",
-      "v2:clipboard-features",
+      "desktop:clipboard-features",
       "--",
       "--input",
       inputPath,
@@ -319,50 +311,23 @@ ipcMain.handle("analyze-item", async (_event, payload) => {
     timings.featureMs = featureResult.elapsedMs;
     await writeFile(featurePath, featureResult.stdout, "utf-8");
     const features = JSON.parse(featureResult.stdout);
-    const support = classifySupport(features);
-
-    if (!support.supported) {
-      return {
-        features,
-        prediction: {
-          decision: "unsupported item type",
-          score: null,
-          threshold: thresholdNumber,
-          supported: false,
-          recommendation: "거래소 직접 검색을 권장합니다.",
-          reason: support.reason,
-          item: features.item,
-          warnings: features.warnings ?? [],
-          note: "Prediction skipped because this item is outside the current MVP model scope.",
-        },
-        timings,
-        stderr: featureResult.stderr,
-      };
+    const resolvedManifestPath = resolveRepoPath(manifestPath);
+    if (!manifestPath) {
+      throw new Error("model_manifest.json 경로가 필요합니다.");
     }
-
-    const resolvedModelPath = resolveRepoPath(modelPath);
-    const resolvedSchemaPath = resolveRepoPath(schemaPath);
-    if (!modelPath || !schemaPath) {
-      throw new Error("model.cbm 경로와 feature_schema.json 경로가 필요합니다.");
-    }
-    if (!existsSync(resolvedModelPath)) {
-      throw new Error(`model.cbm 파일을 찾지 못했습니다: ${modelPath}`);
-    }
-    if (!existsSync(resolvedSchemaPath)) {
-      throw new Error(`feature_schema.json 파일을 찾지 못했습니다: ${schemaPath}`);
+    if (!existsSync(resolvedManifestPath)) {
+      throw new Error(`model_manifest.json 파일을 찾지 못했습니다: ${manifestPath}`);
     }
 
     const predictionArgs = [
-      "ml/predict_item_value.py",
-      "--model",
-      toRepoRelative(resolvedModelPath),
-      "--schema",
-      toRepoRelative(resolvedSchemaPath),
+      "ml/predict_desktop_item_value.py",
+      "--manifest",
+      toRepoRelative(resolvedManifestPath),
       "--input",
       featurePath,
     ];
     if (threshold) {
-      predictionArgs.push("--threshold", threshold);
+      predictionArgs.push("--classifier-search-threshold", threshold);
     }
     const predictionResult = await runCommand(resolvePython(), predictionArgs);
     timings.predictMs = predictionResult.elapsedMs;

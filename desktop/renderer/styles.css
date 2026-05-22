@@ -36,7 +36,7 @@ h2 {
 
 .paths {
   display: grid;
-  grid-template-columns: 1fr 1fr 160px;
+  grid-template-columns: 1fr 1fr 1fr 170px;
   gap: 16px;
   margin-bottom: 20px;
 }
@@ -203,6 +203,10 @@ button:disabled {
 
 .decision-badge.low {
   background: #166534;
+}
+
+.decision-badge.manual {
+  background: #854d0e;
 }
 
 .decision-badge.unsupported {

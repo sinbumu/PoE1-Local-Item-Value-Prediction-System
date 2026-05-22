@@ -1,4 +1,5 @@
 const itemText = document.querySelector("#itemText");
+const manifestPath = document.querySelector("#manifestPath");
 const modelPath = document.querySelector("#modelPath");
 const schemaPath = document.querySelector("#schemaPath");
 const threshold = document.querySelector("#threshold");
@@ -54,7 +55,10 @@ function decisionClass(decision) {
   if (decision === "low listed value") {
     return "decision-badge low";
   }
-  if (decision === "unsupported item type") {
+  if (decision === "manual check") {
+    return "decision-badge manual";
+  }
+  if (decision === "unsupported item type" || decision === "direct search recommended" || decision === "external price lookup recommended" || decision === "parse failed") {
     return "decision-badge unsupported";
   }
   return "decision-badge neutral";
@@ -72,6 +76,9 @@ function recommendationFor(prediction) {
   }
   if (prediction.decision === "low listed value") {
     return "검색 우선순위는 낮습니다. 특수 빌드용 아이템이면 직접 확인하세요.";
+  }
+  if (prediction.decision === "manual check") {
+    return "자동 판단만으로 버리기 애매합니다. 거래소 가격을 한 번 확인하세요.";
   }
   return "지원 범위 또는 모델 상태를 확인하세요.";
 }
@@ -128,16 +135,18 @@ function setBusy(isBusy) {
 async function initializeApp() {
   try {
     const config = await window.poeValueApp.getAppConfig();
+    manifestPath.value = config.defaults.manifestPath;
     modelPath.value = config.defaults.modelPath;
     schemaPath.value = config.defaults.schemaPath;
     threshold.value = config.defaults.threshold;
     thresholdValue.textContent = config.defaults.threshold;
 
-    const modelLabel = config.availability.model.exists ? "model found" : "model missing";
+    const manifestLabel = config.availability.manifest.exists ? "manifest found" : "manifest missing";
+    const modelLabel = config.availability.model.exists ? "legacy model found" : "legacy model missing";
     const schemaLabel = config.availability.schema.exists ? "schema found" : "schema missing";
-    configStatus.textContent = `Default run: ${modelLabel}, ${schemaLabel}. Python: ${config.defaults.pythonPath}`;
+    configStatus.textContent = `Default bundle: ${manifestLabel}, ${modelLabel}, ${schemaLabel}. Python: ${config.defaults.pythonPath}`;
     configStatus.className =
-      config.availability.model.exists && config.availability.schema.exists ? "notice ok" : "notice warning";
+      config.availability.manifest.exists && config.availability.model.exists && config.availability.schema.exists ? "notice ok" : "notice warning";
 
     for (const sample of config.samples) {
       const option = document.createElement("option");
@@ -198,6 +207,7 @@ analyzeButton.addEventListener("click", async () => {
   try {
     const result = await window.poeValueApp.analyzeItem({
       text: itemText.value,
+      manifestPath: manifestPath.value,
       modelPath: modelPath.value,
       schemaPath: schemaPath.value,
       threshold: threshold.value,
@@ -207,7 +217,8 @@ analyzeButton.addEventListener("click", async () => {
 
     decisionBadge.textContent = prediction.decision;
     decisionBadge.className = decisionClass(prediction.decision);
-    scoreValue.textContent = formatScore(prediction.score);
+    scoreValue.textContent =
+      typeof prediction.predictedChaos === "number" ? `${prediction.predictedChaos.toFixed(1)} chaos` : formatScore(prediction.score);
     thresholdValue.textContent = prediction.threshold ?? threshold.value;
     recommendationValue.textContent = recommendationFor(prediction);
     latencyEl.textContent = result.timings
@@ -219,6 +230,8 @@ analyzeButton.addEventListener("click", async () => {
       ["Base", item.baseType],
       ["Class", item.itemClass],
       ["Slot", item.equipmentSlot],
+      ["Segment", prediction.modelSegment ?? result.features.routing?.modelSegment],
+      ["Model", prediction.modelId],
       ["Locale", item.locale],
     ]);
     renderWarnings([...(result.features.warnings ?? []), prediction.reason].filter(Boolean));
@@ -226,7 +239,9 @@ analyzeButton.addEventListener("click", async () => {
     featuresEl.textContent = JSON.stringify(
       {
         item: result.features.item,
+        routing: result.features.routing,
         warnings: result.features.warnings,
+        featureSets: result.features.featureSets,
         features: result.features.features,
         affixLines: result.features.affixLines,
       },

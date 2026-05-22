@@ -1,0 +1,65 @@
+{
+  "generatedAt": "2026-05-22T00:00:00+00:00",
+  "version": 1,
+  "description": "Electron desktop MVP model routing manifest. This checked-in manifest keeps the existing rare/unique classifier working; run npm run prepare:desktop-models to replace it with the full routed bundle.",
+  "decisionPolicy": {
+    "classifier": {
+      "lowMaxScore": 0.5,
+      "manualCheckMaxScore": 0.7,
+      "searchWorthyMaxScore": 0.88
+    },
+    "regressor": {
+      "lowMaxChaos": 5,
+      "manualCheckMaxChaos": 30,
+      "highValueMinChaos": 300
+    }
+  },
+  "routes": {
+    "rare_equipment": "rare_unique_classifier",
+    "unique_equipment": "rare_unique_classifier",
+    "jewel": "jewel_regressor",
+    "skill_gem": "skill_gem_regressor"
+  },
+  "externalPriceLookupItemClasses": [
+    "Currency",
+    "Stackable Currency",
+    "Maps",
+    "Map Fragments",
+    "Divination Cards",
+    "Incubators",
+    "Heist Target"
+  ],
+  "models": {
+    "rare_unique_classifier": {
+      "modelType": "classifier",
+      "featureSet": "v2_mod_aware",
+      "segments": [
+        "rare_equipment",
+        "unique_equipment"
+      ],
+      "modelPath": "desktop/models/v2_mvp/model.cbm",
+      "schemaPath": "desktop/models/v2_mvp/feature_schema.json",
+      "runInfoPath": "desktop/models/v2_mvp/run_info.json"
+    },
+    "jewel_regressor": {
+      "modelType": "regressor",
+      "featureSet": "v1_summary",
+      "segments": [
+        "jewel"
+      ],
+      "modelPath": "desktop/models/v2_mvp/jewel_regressor/model.cbm",
+      "schemaPath": "desktop/models/v2_mvp/jewel_regressor/feature_schema.json",
+      "runInfoPath": "desktop/models/v2_mvp/jewel_regressor/run_info.json"
+    },
+    "skill_gem_regressor": {
+      "modelType": "regressor",
+      "featureSet": "v1_summary",
+      "segments": [
+        "skill_gem"
+      ],
+      "modelPath": "desktop/models/v2_mvp/skill_gem_regressor/model.cbm",
+      "schemaPath": "desktop/models/v2_mvp/skill_gem_regressor/feature_schema.json",
+      "runInfoPath": "desktop/models/v2_mvp/skill_gem_regressor/run_info.json"
+    }
+  }
+}

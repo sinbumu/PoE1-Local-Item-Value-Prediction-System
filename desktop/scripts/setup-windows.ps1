@@ -10,6 +10,7 @@ $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $DesktopDir = Split-Path -Parent $ScriptDir
 $RepoRoot = Split-Path -Parent $DesktopDir
 $VenvPython = Join-Path $RepoRoot "ml\.venv\Scripts\python.exe"
+$ManifestPath = Join-Path $RepoRoot "desktop\models\v2_mvp\model_manifest.json"
 $ModelPath = Join-Path $RepoRoot "desktop\models\v2_mvp\model.cbm"
 $SchemaPath = Join-Path $RepoRoot "desktop\models\v2_mvp\feature_schema.json"
 
@@ -21,6 +22,9 @@ function Write-Step($Message) {
 Set-Location $RepoRoot
 
 Write-Step "Checking required files"
+if (-not (Test-Path $ManifestPath)) {
+  throw "Missing manifest file: $ManifestPath. Pull the latest repository or run npm run prepare:desktop-models."
+}
 if (-not (Test-Path $ModelPath)) {
   throw "Missing model file: $ModelPath. Pull the latest repository or copy desktop/models/v2_mvp/model.cbm."
 }
@@ -52,10 +56,10 @@ Write-Step "Verifying Python predictor dependencies"
 & $VenvPython -c "import catboost, pandas; print('catboost/pandas import OK')"
 
 Write-Step "Verifying TypeScript feature builder"
-npm run --silent v2:clipboard-features -- --input "samples\clipboard\en\rare-equipment-001.txt" | Out-Null
+npm run --silent desktop:clipboard-features -- --input "samples\clipboard\en\rare-equipment-001.txt" | Out-Null
 
-Write-Step "Verifying CatBoost prediction"
-npm run --silent v2:clipboard-features -- --input "samples\clipboard\en\rare-equipment-001.txt" | & $VenvPython "ml\predict_item_value.py" --model "desktop\models\v2_mvp\model.cbm" --schema "desktop\models\v2_mvp\feature_schema.json" --threshold 0.40
+Write-Step "Verifying routed CatBoost prediction"
+npm run --silent desktop:clipboard-features -- --input "samples\clipboard\en\rare-equipment-001.txt" | & $VenvPython "ml\predict_desktop_item_value.py" --manifest "desktop\models\v2_mvp\model_manifest.json" --classifier-search-threshold 0.70
 
 Write-Host ""
 Write-Host "Windows Electron MVP setup completed." -ForegroundColor Green

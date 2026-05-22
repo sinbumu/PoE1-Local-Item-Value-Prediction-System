@@ -12,23 +12,27 @@
         <p class="eyebrow">PoE1 Local Utility MVP</p>
         <h1>Item Value Triage</h1>
         <p class="description">
-          Paste English Ctrl+C item text, then run the local parser, V2 feature builder,
-          and CatBoost classifier.
+          Paste English Ctrl+C item text, then run local parsing, routed feature building,
+          and the desktop CatBoost model bundle.
         </p>
       </header>
 
       <section class="paths">
         <label>
-          model.cbm
+          model_manifest.json
+          <input id="manifestPath" placeholder="desktop/models/v2_mvp/model_manifest.json" />
+        </label>
+        <label>
+          legacy model.cbm
           <input id="modelPath" placeholder="ml/runs/.../model.cbm" />
         </label>
         <label>
-          feature_schema.json
+          legacy feature_schema.json
           <input id="schemaPath" placeholder="ml/runs/.../feature_schema.json" />
         </label>
         <label>
-          decision threshold
-          <input id="threshold" value="0.40" placeholder="0.40" />
+          classifier search threshold
+          <input id="threshold" value="0.70" placeholder="0.70" />
         </label>
       </section>
       <div id="configStatus" class="notice">Loading app configuration...</div>
@@ -40,7 +44,7 @@
         </div>
         <p class="muted">
           Run this first on Windows. Analyze Item requires root npm dependencies, Python, catboost/pandas,
-          and the MVP model files.
+          and the desktop model manifest/files.
         </p>
         <div id="envChecks" class="check-list"></div>
       </section>
@@ -75,7 +79,7 @@
         <div id="decisionBadge" class="decision-badge neutral">No result yet</div>
         <div class="metrics">
           <div>
-            <span class="metric-label">Score</span>
+            <span class="metric-label">Score / Chaos</span>
             <strong id="scoreValue">-</strong>
           </div>
           <div>

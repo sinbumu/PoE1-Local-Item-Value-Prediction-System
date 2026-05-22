@@ -38,6 +38,8 @@
   - 최종 발표용 Electron 로컬 앱 MVP 실행/시연 절차
 - `ELECTRON_MVP_CURRENT_STATUS_2026-05-20.md`
   - 최근 Electron MVP 앱 개발 상태, 테스트 이슈, 발표 방향 논의용 현황 정리
+- `DESKTOP_MODEL_ROUTING_IMPLEMENTATION_2026-05-22.md`
+  - desktop 앱용 모델 라우팅, 자동 배치 명령, decision policy, 검증 명령 정리
 
 ## 현재 활성 설계 문서
 
@@ -65,6 +67,8 @@
   - 앱 MVP 시연 흐름과 fallback 설명용 문서
 - `ELECTRON_MVP_CURRENT_STATUS_2026-05-20.md`
   - 최종 리포트/발표용 Electron 앱 현재 상태와 남은 의사결정 정리
+- `DESKTOP_MODEL_ROUTING_IMPLEMENTATION_2026-05-22.md`
+  - rare/unique classifier와 jewel/skill_gem regressor 라우팅 구현 기준
 
 ## Legacy 문서
 
@@ -109,6 +113,7 @@
 11. V2 구현/발표 준비 시 `V2_MODEL_COMPARISON_REPORT_2026-05-01.md`
 12. V2 구현/발표 준비 시 `V2_ELECTRON_MVP_DEMO_GUIDE_2026-05-01.md`
 13. Electron 앱 최종 발표 방향 논의 시 `ELECTRON_MVP_CURRENT_STATUS_2026-05-20.md`
+14. desktop 모델 라우팅/배치 구조 확인 시 `DESKTOP_MODEL_ROUTING_IMPLEMENTATION_2026-05-22.md`
 
 클립보드/추론 이슈를 볼 경우:
 
@@ -117,6 +122,7 @@
 3. `AFFIX_DICTIONARY_REQUIREMENTS.md`
 4. `V2_ELECTRON_MVP_DEMO_GUIDE_2026-05-01.md`
 5. `ELECTRON_MVP_CURRENT_STATUS_2026-05-20.md`
+6. `DESKTOP_MODEL_ROUTING_IMPLEMENTATION_2026-05-22.md`
 
 과거 맥락이 필요할 경우:
 
