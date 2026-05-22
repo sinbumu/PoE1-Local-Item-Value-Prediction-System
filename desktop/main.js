@@ -25,6 +25,45 @@ const demoSampleIds = [
 ];
 let floatingWindow = null;
 let floatingHideTimer = null;
+let latestFloatingResult = null;
+let floatingPreferences = {
+  displayMode: "autoHide",
+  opacity: 0.95,
+  bounds: null,
+};
+
+function floatingPreferencesPath() {
+  return path.join(app.getPath("userData"), "floating-preferences.json");
+}
+
+async function loadFloatingPreferences() {
+  try {
+    const loaded = JSON.parse(await readFile(floatingPreferencesPath(), "utf-8"));
+    floatingPreferences = {
+      displayMode: loaded.displayMode === "keepVisible" ? "keepVisible" : "autoHide",
+      opacity: clampOpacity(loaded.opacity),
+      bounds: loaded.bounds ?? null,
+    };
+  } catch {
+    // First run or invalid preference file: keep safe defaults.
+  }
+}
+
+async function saveFloatingPreferences() {
+  try {
+    await writeFile(floatingPreferencesPath(), `${JSON.stringify(floatingPreferences, null, 2)}\n`, "utf-8");
+  } catch (error) {
+    console.warn("Failed to save floating preferences:", error);
+  }
+}
+
+function clampOpacity(value) {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) {
+    return 0.95;
+  }
+  return Math.min(1, Math.max(0.25, numeric));
+}
 
 function createWindow() {
   const mainWindow = new BrowserWindow({
@@ -41,9 +80,12 @@ function createWindow() {
 }
 
 function createFloatingWindow() {
+  const savedBounds = floatingPreferences.bounds;
   floatingWindow = new BrowserWindow({
     width: 420,
-    height: 210,
+    height: 250,
+    x: Number.isFinite(savedBounds?.x) ? savedBounds.x : undefined,
+    y: Number.isFinite(savedBounds?.y) ? savedBounds.y : undefined,
     show: false,
     frame: false,
     resizable: false,
@@ -57,7 +99,24 @@ function createFloatingWindow() {
     },
   });
 
+  floatingWindow.setOpacity(floatingPreferences.opacity);
   floatingWindow.loadFile(path.join(__dirname, "floating", "index.html"));
+  floatingWindow.on("ready-to-show", () => {
+    floatingWindow.webContents.send("floating-preferences", floatingPreferences);
+    if (latestFloatingResult) {
+      floatingWindow.webContents.send("floating-result", {
+        ...latestFloatingResult,
+        preferences: floatingPreferences,
+      });
+    }
+    if (floatingPreferences.displayMode === "keepVisible") {
+      floatingWindow.showInactive();
+    }
+  });
+  floatingWindow.on("moved", () => {
+    floatingPreferences.bounds = floatingWindow.getBounds();
+    void saveFloatingPreferences();
+  });
   floatingWindow.on("closed", () => {
     floatingWindow = null;
     if (floatingHideTimer) {
@@ -79,17 +138,22 @@ function showFloatingResult(result) {
   if (!targetWindow) {
     return;
   }
+  latestFloatingResult = result;
 
   if (floatingHideTimer) {
     clearTimeout(floatingHideTimer);
     floatingHideTimer = null;
   }
 
-  targetWindow.webContents.send("floating-result", result);
+  targetWindow.setOpacity(floatingPreferences.opacity);
+  targetWindow.webContents.send("floating-result", {
+    ...result,
+    preferences: floatingPreferences,
+  });
   targetWindow.setAlwaysOnTop(true, "floating");
   targetWindow.showInactive();
 
-  if (!result?.pinned) {
+  if (floatingPreferences.displayMode !== "keepVisible") {
     floatingHideTimer = setTimeout(() => {
       if (floatingWindow && !floatingWindow.isDestroyed()) {
         floatingWindow.hide();
@@ -97,6 +161,29 @@ function showFloatingResult(result) {
       floatingHideTimer = null;
     }, Number(result?.autoHideMs ?? 7000));
   }
+}
+
+function applyFloatingPreferences(patch = {}) {
+  floatingPreferences = {
+    ...floatingPreferences,
+    displayMode: patch.displayMode === "keepVisible" ? "keepVisible" : "autoHide",
+    opacity: clampOpacity(patch.opacity ?? floatingPreferences.opacity),
+  };
+  if (floatingWindow && !floatingWindow.isDestroyed()) {
+    floatingWindow.setOpacity(floatingPreferences.opacity);
+    floatingWindow.webContents.send("floating-preferences", floatingPreferences);
+    if (floatingPreferences.displayMode === "keepVisible") {
+      if (floatingHideTimer) {
+        clearTimeout(floatingHideTimer);
+        floatingHideTimer = null;
+      }
+      floatingWindow.showInactive();
+    } else if (!latestFloatingResult) {
+      floatingWindow.hide();
+    }
+  }
+  void saveFloatingPreferences();
+  return floatingPreferences;
 }
 
 function runCommand(command, args, options = {}) {
@@ -331,6 +418,10 @@ ipcMain.handle("show-floating-result", (_event, result) => {
   return { ok: true };
 });
 
+ipcMain.handle("get-floating-preferences", () => floatingPreferences);
+
+ipcMain.handle("set-floating-preferences", (_event, preferences) => applyFloatingPreferences(preferences));
+
 ipcMain.handle("hide-floating-result", () => {
   if (floatingHideTimer) {
     clearTimeout(floatingHideTimer);
@@ -339,6 +430,7 @@ ipcMain.handle("hide-floating-result", () => {
   if (floatingWindow && !floatingWindow.isDestroyed()) {
     floatingWindow.hide();
   }
+  latestFloatingResult = null;
   return { ok: true };
 });
 
@@ -423,7 +515,8 @@ ipcMain.handle("analyze-item", async (_event, payload) => {
   }
 });
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
+  await loadFloatingPreferences();
   createWindow();
   createFloatingWindow();
   app.on("activate", () => {

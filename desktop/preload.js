@@ -8,6 +8,13 @@ contextBridge.exposeInMainWorld("poeValueApp", {
   analyzeItem: (payload) => ipcRenderer.invoke("analyze-item", payload),
   showFloatingResult: (result) => ipcRenderer.invoke("show-floating-result", result),
   hideFloatingResult: () => ipcRenderer.invoke("hide-floating-result"),
+  getFloatingPreferences: () => ipcRenderer.invoke("get-floating-preferences"),
+  setFloatingPreferences: (preferences) => ipcRenderer.invoke("set-floating-preferences", preferences),
+  onFloatingPreferences: (callback) => {
+    const listener = (_event, preferences) => callback(preferences);
+    ipcRenderer.on("floating-preferences", listener);
+    return () => ipcRenderer.removeListener("floating-preferences", listener);
+  },
   onFloatingResult: (callback) => {
     const listener = (_event, result) => callback(result);
     ipcRenderer.on("floating-result", listener);

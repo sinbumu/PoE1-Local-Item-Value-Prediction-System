@@ -8,9 +8,10 @@
   </head>
   <body>
     <main id="card" class="card neutral">
-      <div class="top-row">
+      <div class="top-row drag-region">
         <span id="source" class="source">Clipboard</span>
-        <button id="hideButton" type="button">Hide</button>
+        <span class="drag-hint">Drag to move</span>
+        <button id="hideButton" class="no-drag" type="button">Hide</button>
       </div>
       <div id="decision" class="decision">Waiting</div>
       <div id="itemName" class="item-name">No item analyzed yet</div>
@@ -19,6 +20,20 @@
         <span id="segment">-</span>
       </div>
       <p id="recommendation">Copy an English PoE1 item while Auto Watch is enabled.</p>
+      <div class="controls no-drag">
+        <label>
+          <span>Mode</span>
+          <select id="displayMode">
+            <option value="autoHide">Auto hide</option>
+            <option value="keepVisible">Keep visible</option>
+          </select>
+        </label>
+        <label>
+          <span>Opacity</span>
+          <input id="opacitySlider" type="range" min="25" max="100" value="95" />
+        </label>
+        <strong id="opacityValue">95%</strong>
+      </div>
     </main>
     <script src="./renderer.js"></script>
   </body>

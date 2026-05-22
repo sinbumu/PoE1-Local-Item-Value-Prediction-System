@@ -60,6 +60,20 @@
             <strong id="lastDecision">-</strong>
           </div>
         </div>
+        <div class="floating-controls">
+          <label>
+            Floating card visibility
+            <select id="floatingMode">
+              <option value="autoHide">Show on result, then hide</option>
+              <option value="keepVisible">Keep visible while app is open</option>
+            </select>
+          </label>
+          <label>
+            Floating opacity
+            <input id="floatingOpacity" type="range" min="25" max="100" value="95" />
+          </label>
+          <strong id="floatingOpacityValue">95%</strong>
+        </div>
       </section>
 
       <section class="result-card environment-card">

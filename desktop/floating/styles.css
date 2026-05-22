@@ -18,6 +18,17 @@ body {
   padding: 16px;
 }
 
+.drag-region {
+  -webkit-app-region: drag;
+}
+
+.no-drag,
+button,
+select,
+input {
+  -webkit-app-region: no-drag;
+}
+
 .card.search {
   border-color: #2563eb;
 }
@@ -47,14 +58,21 @@ body {
 }
 
 .source,
-.meta-row {
+.meta-row,
+.drag-hint {
   color: #9ca3af;
   font-size: 12px;
   font-weight: 700;
   text-transform: uppercase;
 }
 
-button {
+.drag-hint {
+  flex: 1;
+  text-align: center;
+}
+
+button,
+select {
   border: 1px solid #475569;
   border-radius: 999px;
   background: #111827;
@@ -64,6 +82,11 @@ button {
   font-size: 12px;
   font-weight: 700;
   cursor: pointer;
+}
+
+select {
+  min-width: 110px;
+  padding: 5px 8px;
 }
 
 .decision {
@@ -96,4 +119,38 @@ p {
   line-height: 1.35;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
+}
+
+.controls {
+  display: grid;
+  grid-template-columns: minmax(120px, 1fr) minmax(120px, 1fr) 48px;
+  gap: 8px;
+  align-items: end;
+  margin-top: 12px;
+}
+
+.controls label {
+  display: grid;
+  gap: 4px;
+}
+
+.controls span {
+  color: #9ca3af;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.controls input {
+  width: 100%;
+}
+
+.controls strong {
+  border: 1px solid #334155;
+  border-radius: 999px;
+  background: #111827;
+  padding: 6px 8px;
+  color: #cbd5e1;
+  font-size: 12px;
+  text-align: center;
 }

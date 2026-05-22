@@ -10,6 +10,9 @@ const autoWatchToggle = document.querySelector("#autoWatchToggle");
 const watchState = document.querySelector("#watchState");
 const lastAnalyzedAt = document.querySelector("#lastAnalyzedAt");
 const lastDecision = document.querySelector("#lastDecision");
+const floatingMode = document.querySelector("#floatingMode");
+const floatingOpacity = document.querySelector("#floatingOpacity");
+const floatingOpacityValue = document.querySelector("#floatingOpacityValue");
 const sampleSelect = document.querySelector("#sampleSelect");
 const loadSampleButton = document.querySelector("#loadSample");
 const statusEl = document.querySelector("#status");
@@ -35,6 +38,10 @@ let pendingAutoText = null;
 let lastSeenClipboardHash = "";
 let lastAnalyzedHash = "";
 let lastAnalyzedTimestamp = 0;
+let floatingPreferences = {
+  displayMode: "autoHide",
+  opacity: 0.95,
+};
 
 function setStatus(message, isError = false) {
   statusEl.textContent = message;
@@ -47,6 +54,25 @@ function setWatchState(message) {
 
 function formatTime(timestamp) {
   return timestamp ? new Date(timestamp).toLocaleTimeString() : "-";
+}
+
+function renderFloatingPreferences(preferences) {
+  floatingPreferences = {
+    displayMode: preferences?.displayMode === "keepVisible" ? "keepVisible" : "autoHide",
+    opacity: typeof preferences?.opacity === "number" ? preferences.opacity : 0.95,
+  };
+  floatingMode.value = floatingPreferences.displayMode;
+  floatingOpacity.value = String(Math.round(floatingPreferences.opacity * 100));
+  floatingOpacityValue.textContent = `${floatingOpacity.value}%`;
+}
+
+async function syncFloatingPreferences() {
+  const nextPreferences = {
+    displayMode: floatingMode.value,
+    opacity: Number(floatingOpacity.value) / 100,
+  };
+  const saved = await window.poeValueApp.setFloatingPreferences(nextPreferences);
+  renderFloatingPreferences(saved);
 }
 
 function hashText(text) {
@@ -231,6 +257,7 @@ function buildFloatingResult(result, source) {
     recommendation: recommendationFor(prediction),
     item,
     autoHideMs: source === "auto" ? 7000 : 5500,
+    preferences: floatingPreferences,
   };
 }
 
@@ -383,6 +410,7 @@ async function initializeApp() {
       option.textContent = `[${sample.category}] ${sample.label}`;
       sampleSelect.append(option);
     }
+    renderFloatingPreferences(await window.poeValueApp.getFloatingPreferences());
   } catch (error) {
     configStatus.textContent = error.message ?? String(error);
     configStatus.className = "notice error";
@@ -437,6 +465,17 @@ autoWatchToggle.addEventListener("change", () => {
   window.clearTimeout(debounceTimer);
   setWatchState(autoWatchToggle.checked ? "Watching clipboard" : "Auto watch paused");
 });
+
+floatingMode.addEventListener("change", () => {
+  void syncFloatingPreferences();
+});
+
+floatingOpacity.addEventListener("input", () => {
+  floatingOpacityValue.textContent = `${floatingOpacity.value}%`;
+  void syncFloatingPreferences();
+});
+
+window.poeValueApp.onFloatingPreferences(renderFloatingPreferences);
 
 initializeApp().finally(() => {
   startClipboardWatcher();

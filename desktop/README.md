@@ -16,6 +16,13 @@ The app demonstrates the final local utility flow:
 
 When an analysis completes, the app also shows a small always-on-top floating result card. It summarizes the decision, score or predicted chaos value, item name, and recommendation, then hides automatically after a few seconds.
 
+The floating card can be configured from the main window or from the card itself:
+
+- `Auto hide`: show only when a result is ready, then hide after a few seconds.
+- `Keep visible`: keep the card visible while the app is open.
+- `Opacity`: adjust the card transparency with the slider.
+- Drag the card's top bar to move it; the app remembers the position for the next show/restart.
+
 ## Run
 
 From the repository root, install the main Node dependencies first:

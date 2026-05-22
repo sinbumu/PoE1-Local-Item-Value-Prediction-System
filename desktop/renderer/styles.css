@@ -135,6 +135,22 @@ textarea {
   padding: 12px;
 }
 
+.floating-controls {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: minmax(240px, 1fr) minmax(220px, 1fr) 64px;
+  gap: 12px;
+  align-items: end;
+}
+
+.floating-controls strong {
+  border: 1px solid #1f2937;
+  border-radius: 12px;
+  background: #111827;
+  padding: 11px 12px;
+  text-align: center;
+}
+
 .demo-card {
   display: flex;
   align-items: end;
@@ -341,6 +357,7 @@ pre {
   .summary-grid,
   .watch-card,
   .watch-grid,
+  .floating-controls,
   .demo-card,
   .sample-controls {
     display: grid;

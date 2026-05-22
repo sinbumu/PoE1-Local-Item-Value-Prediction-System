@@ -6,6 +6,13 @@ const valueEl = document.querySelector("#value");
 const segmentEl = document.querySelector("#segment");
 const recommendationEl = document.querySelector("#recommendation");
 const hideButton = document.querySelector("#hideButton");
+const displayMode = document.querySelector("#displayMode");
+const opacitySlider = document.querySelector("#opacitySlider");
+const opacityValue = document.querySelector("#opacityValue");
+let preferences = {
+  displayMode: "autoHide",
+  opacity: 0.95,
+};
 
 function decisionClass(decision) {
   if (decision === "high-value candidate") {
@@ -38,6 +45,9 @@ function formatValue(result) {
 
 function render(result) {
   const item = result.item ?? {};
+  if (result.preferences) {
+    renderPreferences(result.preferences);
+  }
   card.className = decisionClass(result.decision);
   sourceEl.textContent = result.source === "auto" ? "Auto Watch" : "Manual";
   decisionEl.textContent = result.decision ?? "No decision";
@@ -47,8 +57,40 @@ function render(result) {
   recommendationEl.textContent = result.recommendation ?? "거래소 직접 검색으로 최종 가격을 확인하세요.";
 }
 
+function renderPreferences(nextPreferences) {
+  preferences = {
+    displayMode: nextPreferences?.displayMode === "keepVisible" ? "keepVisible" : "autoHide",
+    opacity: typeof nextPreferences?.opacity === "number" ? nextPreferences.opacity : 0.95,
+  };
+  displayMode.value = preferences.displayMode;
+  opacitySlider.value = String(Math.round(preferences.opacity * 100));
+  opacityValue.textContent = `${opacitySlider.value}%`;
+}
+
+async function syncPreferences() {
+  const saved = await window.poeValueApp.setFloatingPreferences({
+    displayMode: displayMode.value,
+    opacity: Number(opacitySlider.value) / 100,
+  });
+  renderPreferences(saved);
+}
+
 hideButton.addEventListener("click", () => {
   void window.poeValueApp.hideFloatingResult();
 });
 
+displayMode.addEventListener("change", () => {
+  void syncPreferences();
+});
+
+opacitySlider.addEventListener("input", () => {
+  opacityValue.textContent = `${opacitySlider.value}%`;
+  void syncPreferences();
+});
+
 window.poeValueApp.onFloatingResult(render);
+window.poeValueApp.onFloatingPreferences(renderPreferences);
+
+window.poeValueApp.getFloatingPreferences().then(renderPreferences).catch(() => {
+  renderPreferences(preferences);
+});
