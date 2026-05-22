@@ -6,9 +6,61 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "prepare:desktop-models": "npm --prefix .. run prepare:desktop-models --"
+    "prepare:desktop-models": "npm --prefix .. run prepare:desktop-models --",
+    "prepare:embedded-python": "powershell -ExecutionPolicy Bypass -File scripts/prepare-embedded-python.ps1",
+    "verify:package-prereqs": "node scripts/verify-packaging-prereqs.js",
+    "pack:win": "npm --prefix .. run build && npm run verify:package-prereqs && electron-builder --win dir",
+    "dist:win": "npm --prefix .. run build && npm run verify:package-prereqs && electron-builder --win nsis"
+  },
+  "build": {
+    "appId": "local.poe1.item-value-triage",
+    "productName": "PoE1 Item Value Triage",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "package.json",
+      "renderer/**/*",
+      "floating/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "../dist",
+        "to": "dist"
+      },
+      {
+        "from": "../ml/predict_desktop_item_value.py",
+        "to": "ml/predict_desktop_item_value.py"
+      },
+      {
+        "from": "models/v2_mvp",
+        "to": "models/v2_mvp"
+      },
+      {
+        "from": "../samples/clipboard/en",
+        "to": "samples/clipboard/en"
+      },
+      {
+        "from": "vendor/python-win",
+        "to": "python"
+      }
+    ],
+    "win": {
+      "target": [
+        "nsis"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    }
   },
   "devDependencies": {
-    "electron": "^41.3.0"
+    "electron": "^41.3.0",
+    "electron-builder": "^26.8.1"
   }
 }

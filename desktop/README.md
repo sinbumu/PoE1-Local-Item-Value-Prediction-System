@@ -84,7 +84,7 @@ This command stages V2 rare/unique data, stages V1 jewel/skill_gem data, trains 
 
 ## Windows Test Checklist
 
-On the Windows desktop machine:
+For development-mode testing on the Windows desktop machine:
 
 1. Pull the repository.
 2. Install Node.js 20+.
@@ -103,6 +103,39 @@ Recommended PowerShell setup from the repository root:
 cd desktop
 npm start
 ```
+
+## Windows Installer Build
+
+The final submission target is a Windows installer that includes the Electron app, prepared desktop model bundle, compiled feature builder, prediction script, demo samples, and an embedded Python runtime.
+
+Build prerequisites on a Windows build machine:
+
+```powershell
+npm install
+cd desktop
+npm install
+cd ..
+npm run prepare:desktop-models -- --days=7
+npm run build
+powershell -ExecutionPolicy Bypass -File .\desktop\scripts\prepare-embedded-python.ps1
+cd desktop
+npm run verify:package-prereqs
+npm run dist:win
+```
+
+Outputs are written under:
+
+```text
+desktop/release/
+```
+
+Packaging notes:
+
+- `desktop/vendor/python-win/` is generated locally and ignored by Git.
+- The installer bundles `desktop/vendor/python-win/` as `resources/python/`.
+- The installer bundles `desktop/models/v2_mvp/` as `resources/models/v2_mvp/`.
+- The installer bundles root `dist/` so the app can build clipboard features without `npm` or `tsx`.
+- In packaged mode, `Run Check` treats `npm` as not required and validates embedded resources instead.
 
 The setup script checks model files, installs root and desktop npm dependencies, creates `ml\.venv`, installs Python ML dependencies, and verifies a sample prediction.
 

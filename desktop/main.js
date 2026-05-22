@@ -7,10 +7,6 @@ const path = require("node:path");
 
 const repoRoot = path.resolve(__dirname, "..");
 const defaultThreshold = "0.70";
-const defaultManifestPath = "desktop/models/v2_mvp/model_manifest.json";
-const defaultModelPath = "desktop/models/v2_mvp/model.cbm";
-const defaultSchemaPath = "desktop/models/v2_mvp/feature_schema.json";
-const demoSampleDir = path.join(repoRoot, "samples", "clipboard", "en");
 const demoSampleIds = [
   "rare-equipment-001",
   "rare-equipment-002",
@@ -67,6 +63,29 @@ function clampOpacity(value) {
     return 0.95;
   }
   return Math.min(1, Math.max(0.25, numeric));
+}
+
+function appRoot() {
+  return app.isPackaged ? process.resourcesPath : repoRoot;
+}
+
+function defaultPaths() {
+  if (app.isPackaged) {
+    return {
+      manifestPath: "models/v2_mvp/model_manifest.json",
+      modelPath: "models/v2_mvp/model.cbm",
+      schemaPath: "models/v2_mvp/feature_schema.json",
+    };
+  }
+  return {
+    manifestPath: "desktop/models/v2_mvp/model_manifest.json",
+    modelPath: "desktop/models/v2_mvp/model.cbm",
+    schemaPath: "desktop/models/v2_mvp/feature_schema.json",
+  };
+}
+
+function demoSampleDir() {
+  return path.join(appRoot(), "samples", "clipboard", "en");
 }
 
 function createWindow() {
@@ -195,7 +214,7 @@ function runCommand(command, args, options = {}) {
     const startedAt = performance.now();
     const useShell = process.platform === "win32" && /\.(cmd|bat)$/i.test(command);
     const child = spawn(command, args, {
-      cwd: repoRoot,
+      cwd: options.cwd ?? appRoot(),
       env: { ...process.env, ...options.env },
       shell: useShell,
     });
@@ -247,10 +266,13 @@ function resolveRepoPath(value) {
   if (!normalized) {
     return "";
   }
-  return path.isAbsolute(normalized) ? normalized : path.join(repoRoot, normalized);
+  return path.isAbsolute(normalized) ? normalized : path.join(appRoot(), normalized);
 }
 
 function toRepoRelative(absolutePath) {
+  if (app.isPackaged) {
+    return absolutePath;
+  }
   return path.relative(repoRoot, absolutePath).split(path.sep).join("/");
 }
 
@@ -266,6 +288,22 @@ function resolvePython() {
   if (process.env.POE_VALUE_APP_PYTHON) {
     return process.env.POE_VALUE_APP_PYTHON;
   }
+  const embeddedPython = path.join(
+    appRoot(),
+    "python",
+    process.platform === "win32" ? "python.exe" : "bin/python",
+  );
+  if (existsSync(embeddedPython)) {
+    return embeddedPython;
+  }
+  const embeddedVenvPython = path.join(
+    appRoot(),
+    "python",
+    process.platform === "win32" ? "Scripts/python.exe" : "bin/python",
+  );
+  if (existsSync(embeddedVenvPython)) {
+    return embeddedVenvPython;
+  }
   const venvPython = path.join(repoRoot, "ml", ".venv", process.platform === "win32" ? "Scripts/python.exe" : "bin/python");
   if (existsSync(venvPython)) {
     return venvPython;
@@ -280,11 +318,55 @@ async function readJsonIfExists(filePath) {
   return JSON.parse(await readFile(filePath, "utf-8"));
 }
 
+function loadDesktopFeatureBuilder() {
+  const candidates = [
+    path.join(appRoot(), "dist", "services", "desktop-feature-payload.service.js"),
+    path.join(repoRoot, "dist", "services", "desktop-feature-payload.service.js"),
+  ];
+  for (const candidate of candidates) {
+    if (existsSync(candidate)) {
+      return require(candidate);
+    }
+  }
+  return null;
+}
+
+async function buildDesktopFeaturesFromText(text, inputPath) {
+  const startedAt = performance.now();
+  const builder = loadDesktopFeatureBuilder();
+  if (builder?.buildDesktopFeaturePayloadFromClipboardText) {
+    const payload = builder.buildDesktopFeaturePayloadFromClipboardText(text);
+    return {
+      stdout: `${JSON.stringify(payload, null, 2)}\n`,
+      stderr: "",
+      elapsedMs: Math.round(performance.now() - startedAt),
+    };
+  }
+
+  if (app.isPackaged) {
+    throw new Error("Packaged desktop feature builder not found. Run npm run build before packaging.");
+  }
+
+  return runCommand(
+    resolveNpm(),
+    [
+      "run",
+      "--silent",
+      "desktop:clipboard-features",
+      "--",
+      "--input",
+      inputPath,
+    ],
+    { cwd: repoRoot },
+  );
+}
+
 async function listDemoSamples() {
-  if (!existsSync(demoSampleDir)) {
+  const sampleDir = demoSampleDir();
+  if (!existsSync(sampleDir)) {
     return [];
   }
-  const entries = await readdir(demoSampleDir);
+  const entries = await readdir(sampleDir);
   const txtIds = new Set(
     entries.filter((entry) => entry.endsWith(".txt")).map((entry) => entry.replace(/\.txt$/, "")),
   );
@@ -302,7 +384,7 @@ async function listDemoSamples() {
 
   return Promise.all(
     ids.map(async (id) => {
-      const meta = await readJsonIfExists(path.join(demoSampleDir, `${id}.meta.json`));
+      const meta = await readJsonIfExists(path.join(sampleDir, `${id}.meta.json`));
       return {
         id,
         label: `${id}${meta?.expected?.itemName ? ` - ${meta.expected.itemName}` : ""}`,
@@ -328,32 +410,55 @@ function friendlyError(error) {
 }
 
 async function buildEnvironmentDiagnostics() {
+  const defaults = defaultPaths();
   const pythonPath = resolvePython();
-  const manifest = fileStatus(defaultManifestPath);
-  const model = fileStatus(defaultModelPath);
-  const schema = fileStatus(defaultSchemaPath);
-  const npmVersion = await runCommandCheck(resolveNpm(), ["--version"]);
+  const manifest = fileStatus(defaults.manifestPath);
+  const model = fileStatus(defaults.modelPath);
+  const schema = fileStatus(defaults.schemaPath);
+  const npmVersion = app.isPackaged
+    ? { ok: true, stdout: "not required in packaged app" }
+    : await runCommandCheck(resolveNpm(), ["--version"]);
   const pythonVersion = await runCommandCheck(pythonPath, ["--version"]);
   const pythonPackages = await runCommandCheck(pythonPath, [
     "-c",
     "import catboost, pandas; print('catboost/pandas import OK')",
   ]);
-  const featureBuilder = await runCommandCheck(resolveNpm(), [
-    "run",
-    "--silent",
-    "desktop:clipboard-features",
-    "--",
-    "--input",
-    "samples/clipboard/en/rare-equipment-001.txt",
-  ]);
+  const samplePath = path.join(demoSampleDir(), "rare-equipment-001.txt");
+  const sampleText = existsSync(samplePath) ? await readFile(samplePath, "utf-8") : "";
+  const featureBuilder = sampleText
+    ? await (async () => {
+        try {
+          const result = await buildDesktopFeaturesFromText(sampleText, samplePath);
+          return {
+            ok: true,
+            command: app.isPackaged ? "embedded desktop feature builder" : "desktop feature builder",
+            elapsedMs: result.elapsedMs,
+            stdout: "desktop feature generation OK",
+            stderr: result.stderr,
+          };
+        } catch (error) {
+          return {
+            ok: false,
+            command: "desktop feature builder",
+            error: error instanceof Error ? error.message : String(error),
+          };
+        }
+      })()
+    : {
+        ok: false,
+        command: "desktop feature builder",
+        error: `missing sample: ${samplePath}`,
+      };
 
   return {
     repoRoot,
+    appRoot: appRoot(),
+    isPackaged: app.isPackaged,
     platform: process.platform,
     defaults: {
-      modelPath: defaultModelPath,
-      schemaPath: defaultSchemaPath,
-      manifestPath: defaultManifestPath,
+      modelPath: defaults.modelPath,
+      schemaPath: defaults.schemaPath,
+      manifestPath: defaults.manifestPath,
       threshold: defaultThreshold,
       pythonPath,
       npmPath: resolveNpm(),
@@ -376,7 +481,7 @@ async function buildEnvironmentDiagnostics() {
       },
       npm: {
         ok: npmVersion.ok,
-        label: "npm",
+        label: app.isPackaged ? "npm (packaged)" : "npm",
         detail: npmVersion.ok ? npmVersion.stdout : npmVersion.error,
       },
       python: {
@@ -400,23 +505,28 @@ async function buildEnvironmentDiagnostics() {
   };
 }
 
-ipcMain.handle("get-app-config", async () => ({
-  repoRoot,
-  defaults: {
-    modelPath: defaultModelPath,
-    schemaPath: defaultSchemaPath,
-    manifestPath: defaultManifestPath,
-    threshold: defaultThreshold,
-    pythonPath: resolvePython(),
-  },
-  availability: {
-    manifest: fileStatus(defaultManifestPath),
-    model: fileStatus(defaultModelPath),
-    schema: fileStatus(defaultSchemaPath),
-    pythonVenv: existsSync(resolvePython()),
-  },
-  samples: await listDemoSamples(),
-}));
+ipcMain.handle("get-app-config", async () => {
+  const defaults = defaultPaths();
+  return {
+    repoRoot,
+    appRoot: appRoot(),
+    isPackaged: app.isPackaged,
+    defaults: {
+      modelPath: defaults.modelPath,
+      schemaPath: defaults.schemaPath,
+      manifestPath: defaults.manifestPath,
+      threshold: defaultThreshold,
+      pythonPath: resolvePython(),
+    },
+    availability: {
+      manifest: fileStatus(defaults.manifestPath),
+      model: fileStatus(defaults.modelPath),
+      schema: fileStatus(defaults.schemaPath),
+      pythonVenv: existsSync(resolvePython()),
+    },
+    samples: await listDemoSamples(),
+  };
+});
 
 ipcMain.handle("run-environment-check", async () => buildEnvironmentDiagnostics());
 
@@ -448,7 +558,7 @@ ipcMain.handle("read-demo-sample", async (_event, sampleId) => {
   if (!/^[a-z0-9-]+$/.test(safeId)) {
     throw new Error("잘못된 샘플 ID입니다.");
   }
-  const samplePath = path.join(demoSampleDir, `${safeId}.txt`);
+  const samplePath = path.join(demoSampleDir(), `${safeId}.txt`);
   if (!existsSync(samplePath)) {
     throw new Error(`샘플 파일을 찾지 못했습니다: ${safeId}`);
   }
@@ -460,7 +570,7 @@ ipcMain.handle("read-demo-sample", async (_event, sampleId) => {
 
 ipcMain.handle("analyze-item", async (_event, payload) => {
   const text = String(payload?.text ?? "").trim();
-  const manifestPath = String(payload?.manifestPath ?? defaultManifestPath).trim();
+  const manifestPath = String(payload?.manifestPath ?? defaultPaths().manifestPath).trim();
   const threshold = String(payload?.threshold ?? defaultThreshold).trim() || defaultThreshold;
   const thresholdNumber = Number(threshold);
 
@@ -478,14 +588,7 @@ ipcMain.handle("analyze-item", async (_event, payload) => {
 
   try {
     await writeFile(inputPath, text, "utf-8");
-    const featureResult = await runCommand(resolveNpm(), [
-      "run",
-      "--silent",
-      "desktop:clipboard-features",
-      "--",
-      "--input",
-      inputPath,
-    ]);
+    const featureResult = await buildDesktopFeaturesFromText(text, inputPath);
     timings.featureMs = featureResult.elapsedMs;
     await writeFile(featurePath, featureResult.stdout, "utf-8");
     const features = JSON.parse(featureResult.stdout);
