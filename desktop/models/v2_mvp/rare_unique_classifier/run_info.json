@@ -1,0 +1,90 @@
+{
+  "generated_at": "2026-05-22T15:51:50.154698+00:00",
+  "manifest_path": "/Users/blockoxyz/Documents/GitHub/PoE1-Local-Item-Value-Prediction-System/artifacts/v2-mod-aware-staging/desktop_latest/manifest.json",
+  "feature_set": "v2_mod_aware",
+  "segment": null,
+  "model_path": "/Users/blockoxyz/Documents/GitHub/PoE1-Local-Item-Value-Prediction-System/ml/runs/desktop_v2_classifier_latest/v2_mod_aware/global/model.cbm",
+  "feature_schema_path": "/Users/blockoxyz/Documents/GitHub/PoE1-Local-Item-Value-Prediction-System/ml/runs/desktop_v2_classifier_latest/v2_mod_aware/global/feature_schema.json",
+  "metrics": {
+    "train": {
+      "row_count": 2724973,
+      "positive_rows": 1576801,
+      "negative_rows": 1148172,
+      "threshold": 0.5,
+      "precision": 0.7533519121563587,
+      "recall": 0.7731933198926181,
+      "f1": 0.7631436707915887,
+      "search_worthy_miss_rate": 0.22680668010738197,
+      "valuable_as_low_rate": 0.13124130037251744,
+      "high_value_miss_rate": 0.16776523741948604,
+      "confusion_matrix": {
+        "true_positive": 1219172,
+        "false_positive": 399158,
+        "true_negative": 749014,
+        "false_negative": 357629
+      },
+      "mean_score": 0.5779356561821798,
+      "model_segments": {
+        "rare_equipment": 2259914,
+        "unique_equipment": 465059
+      }
+    },
+    "valid": {
+      "row_count": 340621,
+      "positive_rows": 209408,
+      "negative_rows": 131213,
+      "threshold": 0.5,
+      "precision": 0.7711144192356976,
+      "recall": 0.7816606815403423,
+      "f1": 0.7763517359134888,
+      "search_worthy_miss_rate": 0.2183393184596577,
+      "valuable_as_low_rate": 0.13423130106481984,
+      "high_value_miss_rate": 0.15491211436073227,
+      "confusion_matrix": {
+        "true_positive": 163686,
+        "false_positive": 48586,
+        "true_negative": 82627,
+        "false_negative": 45722
+      },
+      "mean_score": 0.5994620607651625,
+      "model_segments": {
+        "rare_equipment": 279149,
+        "unique_equipment": 61472
+      }
+    },
+    "test": {
+      "row_count": 340623,
+      "positive_rows": 217608,
+      "negative_rows": 123015,
+      "threshold": 0.5,
+      "precision": 0.7875231458704189,
+      "recall": 0.8091430462115363,
+      "f1": 0.7981867222738502,
+      "search_worthy_miss_rate": 0.19085695378846365,
+      "valuable_as_low_rate": 0.12192952325591637,
+      "high_value_miss_rate": 0.1345735013593283,
+      "confusion_matrix": {
+        "true_positive": 176076,
+        "false_positive": 47506,
+        "true_negative": 75509,
+        "false_negative": 41532
+      },
+      "mean_score": 0.6249784845106077,
+      "model_segments": {
+        "rare_equipment": 273714,
+        "unique_equipment": 66909
+      }
+    }
+  },
+  "elapsed_seconds": 407.66686511039734,
+  "max_rss_mb": 6326.953125,
+  "params": {
+    "random_seed": 42,
+    "iterations": 1000,
+    "learning_rate": 0.05,
+    "depth": 8,
+    "thread_count": -1,
+    "threshold": 0.5,
+    "class_weights": null
+  }
+}

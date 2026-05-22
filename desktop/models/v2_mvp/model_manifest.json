@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-05-22T00:00:00+00:00",
+  "generatedAt": "2026-05-22T16:02:51.305674+00:00",
   "version": 1,
-  "description": "Electron desktop MVP model routing manifest. This checked-in manifest keeps the existing rare/unique classifier working; run npm run prepare:desktop-models to replace it with the full routed bundle.",
+  "description": "Electron desktop MVP model routing manifest.",
   "decisionPolicy": {
     "classifier": {
       "lowMaxScore": 0.5,
@@ -37,9 +37,9 @@
         "rare_equipment",
         "unique_equipment"
       ],
-      "modelPath": "desktop/models/v2_mvp/model.cbm",
-      "schemaPath": "desktop/models/v2_mvp/feature_schema.json",
-      "runInfoPath": "desktop/models/v2_mvp/run_info.json"
+      "modelPath": "desktop/models/v2_mvp/rare_unique_classifier/model.cbm",
+      "schemaPath": "desktop/models/v2_mvp/rare_unique_classifier/feature_schema.json",
+      "runInfoPath": "desktop/models/v2_mvp/rare_unique_classifier/run_info.json"
     },
     "jewel_regressor": {
       "modelType": "regressor",
@@ -47,6 +47,7 @@
       "segments": [
         "jewel"
       ],
+      "targetColumn": "target_price_log1p",
       "modelPath": "desktop/models/v2_mvp/jewel_regressor/model.cbm",
       "schemaPath": "desktop/models/v2_mvp/jewel_regressor/feature_schema.json",
       "runInfoPath": "desktop/models/v2_mvp/jewel_regressor/run_info.json"
@@ -57,9 +58,16 @@
       "segments": [
         "skill_gem"
       ],
+      "targetColumn": "target_price_log1p",
       "modelPath": "desktop/models/v2_mvp/skill_gem_regressor/model.cbm",
       "schemaPath": "desktop/models/v2_mvp/skill_gem_regressor/feature_schema.json",
       "runInfoPath": "desktop/models/v2_mvp/skill_gem_regressor/run_info.json"
     }
+  },
+  "training": {
+    "days": 7,
+    "iterations": 1000,
+    "depth": 8,
+    "learningRate": 0.05
   }
 }

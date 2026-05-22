@@ -1,0 +1,120 @@
+{
+  "generated_at": "2026-05-22T16:02:51.228014+00:00",
+  "manifest_path": "/Users/blockoxyz/Documents/GitHub/PoE1-Local-Item-Value-Prediction-System/artifacts/training-staging/desktop_v1_segments_latest/manifest.json",
+  "split_spec_path": "/Users/blockoxyz/Documents/GitHub/PoE1-Local-Item-Value-Prediction-System/artifacts/training-staging/desktop_v1_segments_latest/split_spec.json",
+  "target_column": "target_price_log1p",
+  "segment": "skill_gem",
+  "feature_columns": [
+    "item_class",
+    "base_type",
+    "rarity",
+    "ilvl",
+    "identified",
+    "corrupted",
+    "fractured",
+    "synthesised",
+    "influence_shaper",
+    "influence_elder",
+    "influence_crusader",
+    "influence_redeemer",
+    "influence_hunter",
+    "influence_warlord",
+    "influence_searing",
+    "influence_tangled",
+    "socket_count",
+    "link_count",
+    "white_socket_count",
+    "explicit_mod_count",
+    "implicit_mod_count",
+    "crafted_mod_count",
+    "fractured_mod_count",
+    "enchant_mod_count",
+    "quality",
+    "armour",
+    "evasion",
+    "energy_shield",
+    "ward",
+    "physical_dps",
+    "elemental_dps",
+    "attack_speed",
+    "crit_chance",
+    "move_speed",
+    "life_roll_sum",
+    "resistance_roll_sum",
+    "attribute_roll_sum",
+    "jewel_type",
+    "cluster_size",
+    "cluster_passive_count",
+    "notable_count",
+    "damage_mod_count",
+    "defence_mod_count",
+    "utility_mod_count",
+    "gem_level",
+    "gem_quality",
+    "is_awakened",
+    "is_vaal",
+    "model_segment",
+    "observed_hour_utc",
+    "observed_weekday_utc"
+  ],
+  "categorical_columns": [
+    "item_class",
+    "base_type",
+    "rarity",
+    "jewel_type",
+    "cluster_size",
+    "model_segment"
+  ],
+  "split_paths": {
+    "train": "/Users/blockoxyz/Documents/GitHub/PoE1-Local-Item-Value-Prediction-System/artifacts/training-staging/desktop_v1_segments_latest/segments/skill_gem/train.csv",
+    "valid": "/Users/blockoxyz/Documents/GitHub/PoE1-Local-Item-Value-Prediction-System/artifacts/training-staging/desktop_v1_segments_latest/segments/skill_gem/valid.csv",
+    "test": "/Users/blockoxyz/Documents/GitHub/PoE1-Local-Item-Value-Prediction-System/artifacts/training-staging/desktop_v1_segments_latest/segments/skill_gem/test.csv"
+  },
+  "split_stats": {
+    "train": {
+      "rowCount": 366921,
+      "minUpdatedAt": "2026-05-15 15:46:40.612128+00",
+      "maxUpdatedAt": "2026-05-22 12:05:50.79562+00"
+    },
+    "valid": {
+      "rowCount": 52010,
+      "minUpdatedAt": "2026-05-22 12:05:50.920475+00",
+      "maxUpdatedAt": "2026-05-22 13:39:05.185202+00"
+    },
+    "test": {
+      "rowCount": 67450,
+      "minUpdatedAt": "2026-05-22 13:39:05.210355+00",
+      "maxUpdatedAt": "2026-05-22 14:41:49.602195+00"
+    }
+  },
+  "metrics": {
+    "train_rows": 366921,
+    "valid_rows": 52010,
+    "test_rows": 67450,
+    "feature_count": 51,
+    "categorical_feature_count": 6,
+    "best_iteration": 999,
+    "fit_elapsed_seconds": 19.096255583688617,
+    "max_rss_mb": 1031.0,
+    "validation": {
+      "target_price_log1p_rmse": 1.7190032373501256,
+      "target_price_log1p_mae": 1.2730753110119075,
+      "target_price_chaos_rmse": 171267.71252044587,
+      "target_price_chaos_mae": 1805.27014223663,
+      "target_price_chaos_mape": 292.6511874251171
+    },
+    "test": {
+      "target_price_log1p_rmse": 1.7446609552471404,
+      "target_price_log1p_mae": 1.2655414968809864,
+      "target_price_chaos_rmse": 10520.126779008622,
+      "target_price_chaos_mae": 1119.7741689297811,
+      "target_price_chaos_mape": 291.03649011383493
+    }
+  },
+  "model_segments_valid": {
+    "skill_gem": 52010
+  },
+  "model_segments_test": {
+    "skill_gem": 67450
+  }
+}
