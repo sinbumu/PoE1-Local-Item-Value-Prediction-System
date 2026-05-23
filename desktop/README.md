@@ -110,14 +110,42 @@ npm start
 
 The final submission target is a Windows installer that includes the Electron app, prepared desktop model bundle, compiled feature builder, prediction script, demo samples, and an embedded Python runtime.
 
-Build prerequisites on a Windows build machine:
+The current intended workflow is:
+
+1. Train and prepare the desktop model bundle on the Mac development machine.
+2. Commit or copy the completed `desktop/models/v2_mvp/` bundle to the Windows build machine.
+3. Build the installer on Windows without retraining models.
+
+### 1. Prepare Models On Mac
+
+Run this from the repository root on the Mac development machine after ETL is up to date:
+
+```bash
+npm install
+npm run prepare:desktop-models -- --days=7
+npm run build
+```
+
+Confirm the prepared desktop bundle exists:
+
+```text
+desktop/models/v2_mvp/model_manifest.json
+desktop/models/v2_mvp/rare_unique_classifier/model.cbm
+desktop/models/v2_mvp/jewel_regressor/model.cbm
+desktop/models/v2_mvp/skill_gem_regressor/model.cbm
+```
+
+Then make sure the Windows build machine receives the same `desktop/models/v2_mvp/` directory. This can be done by committing the model bundle if size is acceptable, or by copying the folder manually before running the installer build.
+
+### 2. Build Installer On Windows
+
+On the Windows build machine, do not run `prepare:desktop-models` unless you intentionally want to retrain there. The expected Windows flow uses the already prepared model files.
 
 ```powershell
 npm install
 cd desktop
 npm install
 cd ..
-npm run prepare:desktop-models -- --days=7
 npm run build
 powershell -ExecutionPolicy Bypass -File .\desktop\scripts\prepare-embedded-python.ps1
 cd desktop
@@ -135,7 +163,7 @@ Packaging notes:
 
 - `desktop/vendor/python-win/` is generated locally and ignored by Git.
 - The installer bundles `desktop/vendor/python-win/` as `resources/python/`.
-- The installer bundles `desktop/models/v2_mvp/` as `resources/models/v2_mvp/`.
+- The installer bundles the already prepared `desktop/models/v2_mvp/` as `resources/models/v2_mvp/`.
 - The installer bundles root `dist/` so the app can build clipboard features without `npm` or `tsx`.
 - In packaged mode, `Run Check` treats `npm` as not required and validates embedded resources instead.
 
