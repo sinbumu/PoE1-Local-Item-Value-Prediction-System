@@ -22,6 +22,7 @@
       "main.js",
       "preload.js",
       "package.json",
+      "assets/**/*",
       "renderer/**/*",
       "floating/**/*"
     ],
@@ -48,11 +49,14 @@
       }
     ],
     "win": {
+      "icon": "assets/icons/app-icon.ico",
       "target": [
         "nsis"
       ]
     },
     "nsis": {
+      "installerIcon": "assets/icons/app-icon.ico",
+      "uninstallerIcon": "assets/icons/app-icon.ico",
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,

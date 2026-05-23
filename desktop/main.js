@@ -96,7 +96,19 @@ function demoSampleDir() {
   return path.join(appRoot(), "samples", "clipboard", "en");
 }
 
+function iconAssetPath(fileName) {
+  return path.join(__dirname, "assets", "icons", fileName);
+}
+
+function appIconPath() {
+  return process.platform === "win32" ? iconAssetPath("app-icon.ico") : iconAssetPath("app-icon.png");
+}
+
 function createTrayIcon() {
+  const trayIcon = nativeImage.createFromPath(iconAssetPath("tray-icon-32.png"));
+  if (!trayIcon.isEmpty()) {
+    return trayIcon;
+  }
   const svg = `
     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
       <rect width="32" height="32" rx="7" fill="#0f172a"/>
@@ -162,6 +174,7 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1000,
     height: 760,
+    icon: appIconPath(),
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       contextIsolation: true,
@@ -197,6 +210,7 @@ function createFloatingWindow() {
     alwaysOnTop: true,
     skipTaskbar: true,
     transparent: false,
+    icon: appIconPath(),
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       contextIsolation: true,
@@ -716,6 +730,9 @@ ipcMain.handle("analyze-item", async (_event, payload) => {
 });
 
 app.whenReady().then(async () => {
+  if (process.platform === "win32") {
+    app.setAppUserModelId("local.poe1.item-value-triage");
+  }
   await loadFloatingPreferences();
   createAppTray();
   createWindow();
