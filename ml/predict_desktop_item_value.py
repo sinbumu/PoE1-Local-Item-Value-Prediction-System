@@ -42,6 +42,29 @@ def resolve_repo_path(value: str) -> Path:
     return path if path.is_absolute() else REPO_ROOT / path
 
 
+def resolve_model_artifact_path(value: str, manifest_path: Path) -> Path:
+    path = Path(value)
+    if path.is_absolute():
+        return path
+
+    manifest_dir = manifest_path.parent
+    normalized = value.replace("\\", "/")
+    candidates = [
+        manifest_dir / normalized,
+        REPO_ROOT / normalized,
+    ]
+
+    for marker in ("desktop/models/v2_mvp/", "models/v2_mvp/"):
+        if normalized.startswith(marker):
+            candidates.insert(0, manifest_dir / normalized[len(marker) :])
+
+    for candidate in candidates:
+        if candidate.exists():
+            return candidate
+
+    return candidates[0]
+
+
 def build_frame(features: dict[str, Any], schema: dict[str, Any]) -> pd.DataFrame:
     feature_columns = schema.get("feature_columns")
     if not isinstance(feature_columns, list) or not feature_columns:
@@ -160,14 +183,14 @@ def select_features(payload: dict[str, Any], model_config: dict[str, Any]) -> di
     raise ValueError(f"Feature payload does not contain feature set: {feature_set}")
 
 
-def run_model(payload: dict[str, Any], manifest: dict[str, Any], model_id: str, args: argparse.Namespace) -> dict[str, Any]:
+def run_model(payload: dict[str, Any], manifest: dict[str, Any], manifest_path: Path, model_id: str, args: argparse.Namespace) -> dict[str, Any]:
     models = manifest.get("models", {})
     model_config = models.get(model_id)
     if not isinstance(model_config, dict):
         return fallback_decision(payload, "direct search recommended", "지원 모델 라우팅을 찾지 못했습니다. 거래소 직접 검색을 권장합니다.", f"missing route model: {model_id}")
 
-    model_path = resolve_repo_path(model_config["modelPath"])
-    schema_path = resolve_repo_path(model_config["schemaPath"])
+    model_path = resolve_model_artifact_path(model_config["modelPath"], manifest_path)
+    schema_path = resolve_model_artifact_path(model_config["schemaPath"], manifest_path)
     if not model_path.exists() or not schema_path.exists():
         return fallback_decision(
             payload,
@@ -236,7 +259,8 @@ def run_model(payload: dict[str, Any], manifest: dict[str, Any], model_id: str, 
 
 def main() -> int:
     args = parse_args()
-    manifest = json.loads(Path(args.manifest).read_text(encoding="utf-8"))
+    manifest_path = Path(args.manifest).resolve()
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     payload = read_input(args.input)
 
     policy_fallback = classify_item_policy(payload, manifest)
@@ -252,7 +276,7 @@ def main() -> int:
     elif not model_id:
         result = fallback_decision(payload, "direct search recommended", "지원 모델이 없는 아이템 타입입니다. 거래소 직접 검색을 권장합니다.", f"no route for segment: {segment}")
     else:
-        result = run_model(payload, manifest, str(model_id), args)
+        result = run_model(payload, manifest, manifest_path, str(model_id), args)
         result["modelSegment"] = segment
 
     sys.stdout.write(f"{json.dumps(result, ensure_ascii=False)}\n")

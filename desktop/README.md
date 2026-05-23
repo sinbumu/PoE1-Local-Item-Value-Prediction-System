@@ -164,6 +164,7 @@ Packaging notes:
 - `desktop/vendor/python-win/` is generated locally and ignored by Git.
 - The installer bundles `desktop/vendor/python-win/` as `resources/python/`.
 - The installer bundles the already prepared `desktop/models/v2_mvp/` as `resources/models/v2_mvp/`.
+- `model_manifest.json` should use paths relative to its own directory, such as `jewel_regressor/model.cbm`; the predictor also tolerates older `desktop/models/v2_mvp/...` paths for compatibility.
 - The installer bundles root `dist/` so the app can build clipboard features without `npm` or `tsx`.
 - In packaged mode, `Run Check` treats `npm` as not required and validates embedded resources instead.
 

@@ -37,9 +37,9 @@
         "rare_equipment",
         "unique_equipment"
       ],
-      "modelPath": "desktop/models/v2_mvp/rare_unique_classifier/model.cbm",
-      "schemaPath": "desktop/models/v2_mvp/rare_unique_classifier/feature_schema.json",
-      "runInfoPath": "desktop/models/v2_mvp/rare_unique_classifier/run_info.json"
+      "modelPath": "rare_unique_classifier/model.cbm",
+      "schemaPath": "rare_unique_classifier/feature_schema.json",
+      "runInfoPath": "rare_unique_classifier/run_info.json"
     },
     "jewel_regressor": {
       "modelType": "regressor",
@@ -48,9 +48,9 @@
         "jewel"
       ],
       "targetColumn": "target_price_log1p",
-      "modelPath": "desktop/models/v2_mvp/jewel_regressor/model.cbm",
-      "schemaPath": "desktop/models/v2_mvp/jewel_regressor/feature_schema.json",
-      "runInfoPath": "desktop/models/v2_mvp/jewel_regressor/run_info.json"
+      "modelPath": "jewel_regressor/model.cbm",
+      "schemaPath": "jewel_regressor/feature_schema.json",
+      "runInfoPath": "jewel_regressor/run_info.json"
     },
     "skill_gem_regressor": {
       "modelType": "regressor",
@@ -59,9 +59,9 @@
         "skill_gem"
       ],
       "targetColumn": "target_price_log1p",
-      "modelPath": "desktop/models/v2_mvp/skill_gem_regressor/model.cbm",
-      "schemaPath": "desktop/models/v2_mvp/skill_gem_regressor/feature_schema.json",
-      "runInfoPath": "desktop/models/v2_mvp/skill_gem_regressor/run_info.json"
+      "modelPath": "skill_gem_regressor/model.cbm",
+      "schemaPath": "skill_gem_regressor/feature_schema.json",
+      "runInfoPath": "skill_gem_regressor/run_info.json"
     }
   },
   "training": {
