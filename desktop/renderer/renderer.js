@@ -28,8 +28,8 @@ const predictionEl = document.querySelector("#prediction");
 const featuresEl = document.querySelector("#features");
 const readClipboardButton = document.querySelector("#readClipboard");
 const analyzeButton = document.querySelector("#analyze");
-const POLL_INTERVAL_MS = 700;
-const DEBOUNCE_MS = 250;
+const POLL_INTERVAL_MS = 250;
+const DEBOUNCE_MS = 100;
 const SAME_ITEM_COOLDOWN_MS = 2000;
 
 let watchTimer = null;

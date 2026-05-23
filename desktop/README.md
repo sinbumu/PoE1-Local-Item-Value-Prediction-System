@@ -12,7 +12,7 @@ The app demonstrates the final local utility flow:
 4. Run the local Python CatBoost classifier/regressor subprocess when a model is available.
 5. Show a user-facing decision card and keep technical JSON details in a collapsible section.
 
-`Auto Watch Clipboard` is enabled by default. It polls the clipboard every `700ms`, ignores ordinary text through a PoE item signature gate, and avoids duplicate analysis with clipboard hashing, debounce, cooldown, and an in-flight guard. The manual paste, `Read Clipboard`, and `Analyze Item` flow remains available as the demo fallback.
+`Auto Watch Clipboard` is enabled by default. It polls the clipboard every `250ms`, ignores ordinary text through a PoE item signature gate, and avoids duplicate analysis with clipboard hashing, debounce, cooldown, and an in-flight guard. The manual paste, `Read Clipboard`, and `Analyze Item` flow remains available as the demo fallback.
 
 When an analysis completes, the app also shows a small always-on-top floating result card. It summarizes the decision, score or predicted chaos value, item name, and recommendation, then hides automatically after a few seconds.
 
