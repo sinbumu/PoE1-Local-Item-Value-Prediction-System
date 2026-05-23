@@ -201,7 +201,7 @@ function createFloatingWindow() {
   const savedBounds = floatingPreferences.bounds;
   floatingWindow = new BrowserWindow({
     width: 420,
-    height: 250,
+    height: 310,
     x: Number.isFinite(savedBounds?.x) ? savedBounds.x : undefined,
     y: Number.isFinite(savedBounds?.y) ? savedBounds.y : undefined,
     show: false,

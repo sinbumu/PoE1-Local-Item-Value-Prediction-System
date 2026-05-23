@@ -11,11 +11,13 @@ body {
 }
 
 .card {
+  display: grid;
+  grid-template-rows: auto auto auto auto minmax(42px, 1fr) auto;
   width: 100vw;
   height: 100vh;
   border: 1px solid #334155;
   background: linear-gradient(135deg, #0b1220, #111827);
-  padding: 16px;
+  padding: 14px 16px;
 }
 
 .drag-region {
@@ -95,7 +97,7 @@ select {
 }
 
 .decision {
-  margin-top: 12px;
+  margin-top: 10px;
   color: #ffffff;
   font-size: 23px;
   font-weight: 900;
@@ -104,7 +106,7 @@ select {
 }
 
 .item-name {
-  margin-top: 6px;
+  margin-top: 4px;
   color: #f8fafc;
   font-size: 16px;
   font-weight: 700;
@@ -114,7 +116,7 @@ select {
 }
 
 .meta-row {
-  margin-top: 10px;
+  margin-top: 8px;
 }
 
 .meta-row span {
@@ -126,13 +128,13 @@ select {
 
 p {
   display: -webkit-box;
-  margin: 12px 0 0;
+  margin: 10px 0 0;
   overflow: hidden;
   color: #cbd5e1;
   font-size: 13px;
   line-height: 1.35;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 3;
 }
 
 .controls {
@@ -140,7 +142,21 @@ p {
   grid-template-columns: minmax(120px, 1fr) minmax(120px, 1fr) 48px;
   gap: 8px;
   align-items: end;
-  margin-top: 12px;
+  margin-top: 10px;
+}
+
+@media (max-height: 270px) {
+  .decision {
+    font-size: 20px;
+  }
+
+  p {
+    -webkit-line-clamp: 2;
+  }
+
+  .controls {
+    grid-template-columns: minmax(110px, 1fr) minmax(100px, 1fr) 44px;
+  }
 }
 
 .controls label {
