@@ -1,4 +1,4 @@
-const { app, BrowserWindow, clipboard, ipcMain } = require("electron");
+const { app, BrowserWindow, clipboard, ipcMain, Menu, nativeImage, Tray } = require("electron");
 const { spawn } = require("node:child_process");
 const { mkdtemp, readFile, readdir, writeFile, rm } = require("node:fs/promises");
 const { existsSync } = require("node:fs");
@@ -26,6 +26,9 @@ const demoSampleIds = [
 let floatingWindow = null;
 let floatingHideTimer = null;
 let latestFloatingResult = null;
+let mainWindow = null;
+let tray = null;
+let isQuitting = false;
 let floatingPreferences = {
   displayMode: "autoHide",
   opacity: 0.95,
@@ -88,8 +91,70 @@ function demoSampleDir() {
   return path.join(appRoot(), "samples", "clipboard", "en");
 }
 
+function createTrayIcon() {
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+      <rect width="32" height="32" rx="7" fill="#0f172a"/>
+      <path d="M8 9h16v4H8zM8 15h11v4H8zM8 21h16v2H8z" fill="#93c5fd"/>
+    </svg>
+  `.trim();
+  return nativeImage.createFromDataURL(`data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`);
+}
+
+function showMainWindow() {
+  if (!mainWindow || mainWindow.isDestroyed()) {
+    createWindow();
+    return;
+  }
+  mainWindow.show();
+  if (mainWindow.isMinimized()) {
+    mainWindow.restore();
+  }
+  mainWindow.focus();
+}
+
+function createAppTray() {
+  if (tray) {
+    return;
+  }
+  tray = new Tray(createTrayIcon());
+  tray.setToolTip("PoE1 Item Value Triage");
+  tray.setContextMenu(
+    Menu.buildFromTemplate([
+      { label: "Open Main Window", click: showMainWindow },
+      {
+        label: "Show Floating Card",
+        click: () => {
+          ensureFloatingWindow().showInactive();
+        },
+      },
+      {
+        label: "Hide Floating Card",
+        click: () => {
+          if (floatingWindow && !floatingWindow.isDestroyed()) {
+            floatingWindow.hide();
+          }
+        },
+      },
+      { type: "separator" },
+      {
+        label: "Quit",
+        click: () => {
+          isQuitting = true;
+          app.quit();
+        },
+      },
+    ]),
+  );
+  tray.on("click", showMainWindow);
+}
+
 function createWindow() {
-  const mainWindow = new BrowserWindow({
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    showMainWindow();
+    return;
+  }
+  mainWindow = new BrowserWindow({
     width: 1000,
     height: 760,
     webPreferences: {
@@ -100,6 +165,18 @@ function createWindow() {
   });
 
   mainWindow.loadFile(path.join(__dirname, "renderer", "index.html"));
+  mainWindow.on("close", (event) => {
+    if (!isQuitting) {
+      event.preventDefault();
+      mainWindow.hide();
+      if (tray) {
+        tray.displayBalloon?.({
+          title: "PoE1 Item Value Triage",
+          content: "앱은 tray에서 계속 실행 중입니다. tray 아이콘으로 다시 열 수 있습니다.",
+        });
+      }
+    }
+  });
 }
 
 function createFloatingWindow() {
@@ -215,8 +292,14 @@ function runCommand(command, args, options = {}) {
     const useShell = process.platform === "win32" && /\.(cmd|bat)$/i.test(command);
     const child = spawn(command, args, {
       cwd: options.cwd ?? appRoot(),
-      env: { ...process.env, ...options.env },
+      env: {
+        ...process.env,
+        PYTHONIOENCODING: "utf-8",
+        PYTHONUTF8: "1",
+        ...options.env,
+      },
       shell: useShell,
+      windowsHide: true,
     });
     let stdout = "";
     let stderr = "";
@@ -629,17 +712,20 @@ ipcMain.handle("analyze-item", async (_event, payload) => {
 
 app.whenReady().then(async () => {
   await loadFloatingPreferences();
+  createAppTray();
   createWindow();
   createFloatingWindow();
   app.on("activate", () => {
-    if (BrowserWindow.getAllWindows().length === 0) {
-      createWindow();
-    }
+    showMainWindow();
   });
 });
 
 app.on("window-all-closed", () => {
-  if (process.platform !== "darwin") {
+  if (isQuitting && process.platform !== "darwin") {
     app.quit();
   }
+});
+
+app.on("before-quit", () => {
+  isQuitting = true;
 });

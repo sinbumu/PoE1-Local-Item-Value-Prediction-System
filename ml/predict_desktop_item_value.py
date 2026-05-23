@@ -5,12 +5,21 @@ import argparse
 import json
 import math
 import sys
+import io
 from pathlib import Path
 from typing import Any
 
 import pandas as pd
 from catboost import CatBoostClassifier, CatBoostRegressor
 
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(encoding="utf-8")
+if not hasattr(sys.stdout, "reconfigure"):
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
+if not hasattr(sys.stderr, "reconfigure"):
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8")
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
