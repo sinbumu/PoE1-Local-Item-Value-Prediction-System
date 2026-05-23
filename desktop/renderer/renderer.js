@@ -7,6 +7,7 @@ const configStatus = document.querySelector("#configStatus");
 const envChecks = document.querySelector("#envChecks");
 const runEnvCheckButton = document.querySelector("#runEnvCheck");
 const autoWatchToggle = document.querySelector("#autoWatchToggle");
+const resetWatchStateButton = document.querySelector("#resetWatchState");
 const watchState = document.querySelector("#watchState");
 const lastAnalyzedAt = document.querySelector("#lastAnalyzedAt");
 const lastDecision = document.querySelector("#lastDecision");
@@ -50,6 +51,15 @@ function setStatus(message, isError = false) {
 
 function setWatchState(message) {
   watchState.textContent = message;
+}
+
+function resetClipboardWatchState(message = "Watch state reset. Waiting for next clipboard item.") {
+  pendingAutoText = null;
+  lastSeenClipboardHash = "";
+  lastAnalyzedHash = "";
+  lastAnalyzedTimestamp = 0;
+  window.clearTimeout(debounceTimer);
+  setWatchState(message);
 }
 
 function formatTime(timestamp) {
@@ -461,9 +471,12 @@ analyzeButton.addEventListener("click", async () => {
 });
 
 autoWatchToggle.addEventListener("change", () => {
-  pendingAutoText = null;
-  window.clearTimeout(debounceTimer);
-  setWatchState(autoWatchToggle.checked ? "Watching clipboard" : "Auto watch paused");
+  resetClipboardWatchState(autoWatchToggle.checked ? "Watching clipboard" : "Auto watch paused");
+});
+
+resetWatchStateButton.addEventListener("click", () => {
+  resetClipboardWatchState();
+  void pollClipboard();
 });
 
 floatingMode.addEventListener("change", () => {

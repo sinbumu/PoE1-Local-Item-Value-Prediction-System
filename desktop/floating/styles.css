@@ -14,7 +14,7 @@ body {
   width: 100vw;
   height: 100vh;
   border: 1px solid #334155;
-  background: #0b1220;
+  background: linear-gradient(135deg, #0b1220, #111827);
   padding: 16px;
 }
 
@@ -31,22 +31,27 @@ input {
 
 .card.search {
   border-color: #2563eb;
+  background: linear-gradient(135deg, #0b1220, #1d4ed8);
 }
 
 .card.high {
   border-color: #a16207;
+  background: linear-gradient(135deg, #0b1220, #92400e);
 }
 
 .card.low {
   border-color: #166534;
+  background: linear-gradient(135deg, #0b1220, #166534);
 }
 
 .card.manual {
   border-color: #854d0e;
+  background: linear-gradient(135deg, #0b1220, #854d0e);
 }
 
 .card.unsupported {
   border-color: #991b1b;
+  background: linear-gradient(135deg, #0b1220, #7f1d1d);
 }
 
 .top-row,
@@ -91,8 +96,10 @@ select {
 
 .decision {
   margin-top: 12px;
+  color: #ffffff;
   font-size: 23px;
   font-weight: 900;
+  text-shadow: 0 1px 2px rgb(0 0 0 / 55%);
   text-transform: capitalize;
 }
 
@@ -108,6 +115,13 @@ select {
 
 .meta-row {
   margin-top: 10px;
+}
+
+.meta-row span {
+  border-radius: 999px;
+  background: rgb(15 23 42 / 65%);
+  padding: 6px 10px;
+  color: #f8fafc;
 }
 
 p {

@@ -7,6 +7,11 @@ const path = require("node:path");
 
 const repoRoot = path.resolve(__dirname, "..");
 const defaultThreshold = "0.70";
+
+app.commandLine.appendSwitch("disable-gpu-shader-disk-cache");
+app.commandLine.appendSwitch("disk-cache-size", "0");
+app.setPath("sessionData", path.join(app.getPath("userData"), "session-data"));
+
 const demoSampleIds = [
   "rare-equipment-001",
   "rare-equipment-002",

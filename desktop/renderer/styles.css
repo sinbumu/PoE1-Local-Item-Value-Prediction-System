@@ -121,6 +121,12 @@ textarea {
   width: auto;
 }
 
+.toggle-row button {
+  padding: 7px 10px;
+  background: #334155;
+  font-size: 12px;
+}
+
 .watch-grid {
   display: grid;
   grid-column: 1 / -1;
