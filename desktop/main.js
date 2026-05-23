@@ -1,4 +1,4 @@
-const { app, BrowserWindow, clipboard, ipcMain, Menu, nativeImage, Tray } = require("electron");
+const { app, BrowserWindow, clipboard, ipcMain, Menu, nativeImage, screen, Tray } = require("electron");
 const { spawn } = require("node:child_process");
 const { mkdtemp, readFile, readdir, writeFile, rm } = require("node:fs/promises");
 const { existsSync } = require("node:fs");
@@ -243,6 +243,19 @@ function createFloatingWindow() {
       floatingHideTimer = null;
     }
   });
+}
+
+function resetFloatingWindowPosition() {
+  const targetWindow = ensureFloatingWindow();
+  const { workArea } = screen.getPrimaryDisplay();
+  const bounds = targetWindow.getBounds();
+  const x = Math.round(workArea.x + workArea.width - bounds.width - 24);
+  const y = Math.round(workArea.y + 24);
+  targetWindow.setBounds({ ...bounds, x, y });
+  floatingPreferences.bounds = targetWindow.getBounds();
+  void saveFloatingPreferences();
+  targetWindow.showInactive();
+  return floatingPreferences;
 }
 
 function ensureFloatingWindow() {
@@ -642,6 +655,8 @@ ipcMain.handle("show-floating-result", (_event, result) => {
 ipcMain.handle("get-floating-preferences", () => floatingPreferences);
 
 ipcMain.handle("set-floating-preferences", (_event, preferences) => applyFloatingPreferences(preferences));
+
+ipcMain.handle("reset-floating-position", () => resetFloatingWindowPosition());
 
 ipcMain.handle("hide-floating-result", () => {
   if (floatingHideTimer) {

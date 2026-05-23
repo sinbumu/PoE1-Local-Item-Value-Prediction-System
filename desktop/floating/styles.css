@@ -91,6 +91,10 @@ select {
   cursor: pointer;
 }
 
+#settingsButton {
+  background: rgb(15 23 42 / 75%);
+}
+
 select {
   min-width: 110px;
   padding: 5px 8px;
@@ -139,10 +143,14 @@ p {
 
 .controls {
   display: grid;
-  grid-template-columns: minmax(120px, 1fr) minmax(120px, 1fr) 48px;
+  grid-template-columns: minmax(110px, 1fr) minmax(110px, 1fr) 48px auto;
   gap: 8px;
   align-items: end;
   margin-top: 10px;
+}
+
+.controls.collapsed {
+  display: none;
 }
 
 @media (max-height: 270px) {
@@ -155,7 +163,7 @@ p {
   }
 
   .controls {
-    grid-template-columns: minmax(110px, 1fr) minmax(100px, 1fr) 44px;
+    grid-template-columns: minmax(100px, 1fr) minmax(90px, 1fr) 44px auto;
   }
 }
 

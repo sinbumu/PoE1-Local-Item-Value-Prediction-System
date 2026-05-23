@@ -6,9 +6,12 @@ const valueEl = document.querySelector("#value");
 const segmentEl = document.querySelector("#segment");
 const recommendationEl = document.querySelector("#recommendation");
 const hideButton = document.querySelector("#hideButton");
+const settingsButton = document.querySelector("#settingsButton");
+const controls = document.querySelector("#controls");
 const displayMode = document.querySelector("#displayMode");
 const opacitySlider = document.querySelector("#opacitySlider");
 const opacityValue = document.querySelector("#opacityValue");
+const resetPosition = document.querySelector("#resetPosition");
 let preferences = {
   displayMode: "autoHide",
   opacity: 0.95,
@@ -79,6 +82,10 @@ hideButton.addEventListener("click", () => {
   void window.poeValueApp.hideFloatingResult();
 });
 
+settingsButton.addEventListener("click", () => {
+  controls.classList.toggle("collapsed");
+});
+
 displayMode.addEventListener("change", () => {
   void syncPreferences();
 });
@@ -86,6 +93,10 @@ displayMode.addEventListener("change", () => {
 opacitySlider.addEventListener("input", () => {
   opacityValue.textContent = `${opacitySlider.value}%`;
   void syncPreferences();
+});
+
+resetPosition.addEventListener("click", () => {
+  void window.poeValueApp.resetFloatingPosition();
 });
 
 window.poeValueApp.onFloatingResult(render);

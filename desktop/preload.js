@@ -10,6 +10,7 @@ contextBridge.exposeInMainWorld("poeValueApp", {
   hideFloatingResult: () => ipcRenderer.invoke("hide-floating-result"),
   getFloatingPreferences: () => ipcRenderer.invoke("get-floating-preferences"),
   setFloatingPreferences: (preferences) => ipcRenderer.invoke("set-floating-preferences", preferences),
+  resetFloatingPosition: () => ipcRenderer.invoke("reset-floating-position"),
   onFloatingPreferences: (callback) => {
     const listener = (_event, preferences) => callback(preferences);
     ipcRenderer.on("floating-preferences", listener);

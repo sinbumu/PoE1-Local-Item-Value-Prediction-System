@@ -11,6 +11,7 @@
       <div class="top-row drag-region">
         <span id="source" class="source">Clipboard</span>
         <span class="drag-hint">Drag to move</span>
+        <button id="settingsButton" class="no-drag" type="button">Settings</button>
         <button id="hideButton" class="no-drag" type="button">Hide</button>
       </div>
       <div id="decision" class="decision">Waiting</div>
@@ -20,7 +21,7 @@
         <span id="segment">-</span>
       </div>
       <p id="recommendation">Copy an English PoE1 item while Auto Watch is enabled.</p>
-      <div class="controls no-drag">
+      <div id="controls" class="controls no-drag collapsed">
         <label>
           <span>Mode</span>
           <select id="displayMode">
@@ -33,6 +34,7 @@
           <input id="opacitySlider" type="range" min="25" max="100" value="95" />
         </label>
         <strong id="opacityValue">95%</strong>
+        <button id="resetPosition" type="button">Reset Pos</button>
       </div>
     </main>
     <script src="./renderer.js"></script>

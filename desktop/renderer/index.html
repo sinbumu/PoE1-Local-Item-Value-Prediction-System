@@ -17,24 +17,27 @@
         </p>
       </header>
 
-      <section class="paths">
-        <label>
-          model_manifest.json
-          <input id="manifestPath" placeholder="desktop/models/v2_mvp/model_manifest.json" />
-        </label>
-        <label>
-          legacy model.cbm
-          <input id="modelPath" placeholder="ml/runs/.../model.cbm" />
-        </label>
-        <label>
-          legacy feature_schema.json
-          <input id="schemaPath" placeholder="ml/runs/.../feature_schema.json" />
-        </label>
-        <label>
-          classifier search threshold
-          <input id="threshold" value="0.70" placeholder="0.70" />
-        </label>
-      </section>
+      <details class="advanced-settings">
+        <summary>Advanced Settings</summary>
+        <section class="paths">
+          <label>
+            model_manifest.json
+            <input id="manifestPath" placeholder="desktop/models/v2_mvp/model_manifest.json" />
+          </label>
+          <label>
+            legacy model.cbm
+            <input id="modelPath" placeholder="ml/runs/.../model.cbm" />
+          </label>
+          <label>
+            legacy feature_schema.json
+            <input id="schemaPath" placeholder="ml/runs/.../feature_schema.json" />
+          </label>
+          <label>
+            classifier search threshold
+            <input id="threshold" value="0.70" placeholder="0.70" />
+          </label>
+        </section>
+      </details>
       <div id="configStatus" class="notice">Loading app configuration...</div>
 
       <section class="watch-card">
@@ -74,6 +77,7 @@
             <input id="floatingOpacity" type="range" min="25" max="100" value="95" />
           </label>
           <strong id="floatingOpacityValue">95%</strong>
+          <button id="resetFloatingPosition" type="button">Reset Floating Position</button>
         </div>
       </section>
 
@@ -137,6 +141,11 @@
         <h2>Item Summary</h2>
         <div id="itemSummary" class="summary-grid"></div>
         <div id="warnings" class="warnings"></div>
+      </section>
+
+      <section class="result-card">
+        <h2>Recent Results</h2>
+        <div id="recentResults" class="recent-results muted">No recent analyses yet.</div>
       </section>
 
       <section class="result-card">

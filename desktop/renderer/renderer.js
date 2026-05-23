@@ -14,6 +14,7 @@ const lastDecision = document.querySelector("#lastDecision");
 const floatingMode = document.querySelector("#floatingMode");
 const floatingOpacity = document.querySelector("#floatingOpacity");
 const floatingOpacityValue = document.querySelector("#floatingOpacityValue");
+const resetFloatingPositionButton = document.querySelector("#resetFloatingPosition");
 const sampleSelect = document.querySelector("#sampleSelect");
 const loadSampleButton = document.querySelector("#loadSample");
 const statusEl = document.querySelector("#status");
@@ -26,6 +27,7 @@ const warningsEl = document.querySelector("#warnings");
 const latencyEl = document.querySelector("#latency");
 const predictionEl = document.querySelector("#prediction");
 const featuresEl = document.querySelector("#features");
+const recentResults = document.querySelector("#recentResults");
 const readClipboardButton = document.querySelector("#readClipboard");
 const analyzeButton = document.querySelector("#analyze");
 const POLL_INTERVAL_MS = 250;
@@ -43,6 +45,7 @@ let floatingPreferences = {
   displayMode: "autoHide",
   opacity: 0.95,
 };
+const recentAnalyses = [];
 
 function setStatus(message, isError = false) {
   statusEl.textContent = message;
@@ -252,6 +255,50 @@ function renderAnalysisResult(result) {
   const analyzedAt = Date.now();
   lastAnalyzedAt.textContent = formatTime(analyzedAt);
   lastDecision.textContent = prediction.decision ?? "-";
+  addRecentResult(result, analyzedAt);
+}
+
+function addRecentResult(result, analyzedAt) {
+  const prediction = result.prediction ?? {};
+  const item = result.features?.item ?? prediction.item ?? {};
+  recentAnalyses.unshift({
+    decision: prediction.decision ?? "unknown",
+    title: [item.itemName, item.baseType].filter(Boolean).join(" / ") || item.baseType || "Unknown item",
+    value:
+      typeof prediction.predictedChaos === "number"
+        ? `${prediction.predictedChaos.toFixed(1)}c`
+        : typeof prediction.score === "number"
+          ? `score ${prediction.score.toFixed(2)}`
+          : prediction.modelSegment ?? result.features?.routing?.modelSegment ?? "-",
+    time: formatTime(analyzedAt),
+  });
+  recentAnalyses.splice(5);
+  renderRecentResults();
+}
+
+function renderRecentResults() {
+  recentResults.innerHTML = "";
+  if (recentAnalyses.length === 0) {
+    recentResults.textContent = "No recent analyses yet.";
+    recentResults.className = "recent-results muted";
+    return;
+  }
+  recentResults.className = "recent-results";
+  for (const result of recentAnalyses) {
+    const row = document.createElement("div");
+    row.className = "recent-item";
+    const decision = document.createElement("span");
+    decision.className = "recent-decision";
+    decision.textContent = result.decision;
+    const title = document.createElement("span");
+    title.className = "recent-title";
+    title.textContent = result.title;
+    const meta = document.createElement("span");
+    meta.className = "recent-meta";
+    meta.textContent = `${result.value} | ${result.time}`;
+    row.append(decision, title, meta);
+    recentResults.append(row);
+  }
 }
 
 function buildFloatingResult(result, source) {
@@ -486,6 +533,10 @@ floatingMode.addEventListener("change", () => {
 floatingOpacity.addEventListener("input", () => {
   floatingOpacityValue.textContent = `${floatingOpacity.value}%`;
   void syncFloatingPreferences();
+});
+
+resetFloatingPositionButton.addEventListener("click", async () => {
+  renderFloatingPreferences(await window.poeValueApp.resetFloatingPosition());
 });
 
 window.poeValueApp.onFloatingPreferences(renderFloatingPreferences);
