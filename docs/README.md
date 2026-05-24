@@ -42,6 +42,8 @@
   - desktop 앱용 모델 라우팅, 자동 배치 명령, decision policy, 검증 명령 정리
 - `DESKTOP_APP_CURRENT_STATUS_AND_NEXT_STEPS_2026-05-23.md`
   - desktop 앱 현재 구현 상태, Windows 검증 항목, installer 준비 상황, 리포트 작성 포인트 정리
+- `DESKTOP_APP_FINAL_MVP_STATUS_2026-05-24.md`
+  - installer 검증 이후 desktop 앱 최종 MVP 상태, 최근 Windows 이슈 대응, 발표용 시연 흐름 정리
 
 ## 현재 활성 설계 문서
 
@@ -73,6 +75,8 @@
   - rare/unique classifier와 jewel/skill_gem regressor 라우팅 구현 기준
 - `DESKTOP_APP_CURRENT_STATUS_AND_NEXT_STEPS_2026-05-23.md`
   - 최종 보고서/발표/다음 개발 계획 작성 시 참고할 desktop 앱 현황 문서
+- `DESKTOP_APP_FINAL_MVP_STATUS_2026-05-24.md`
+  - desktop 앱 최종 MVP 상태와 발표/제출 전 smoke test 기준 문서
 
 ## Legacy 문서
 
@@ -119,6 +123,7 @@
 13. Electron 앱 최종 발표 방향 논의 시 `ELECTRON_MVP_CURRENT_STATUS_2026-05-20.md`
 14. desktop 모델 라우팅/배치 구조 확인 시 `DESKTOP_MODEL_ROUTING_IMPLEMENTATION_2026-05-22.md`
 15. desktop 앱 최종 상태와 남은 Windows 검증 항목 확인 시 `DESKTOP_APP_CURRENT_STATUS_AND_NEXT_STEPS_2026-05-23.md`
+16. installer 검증 이후 최종 MVP 상태 확인 시 `DESKTOP_APP_FINAL_MVP_STATUS_2026-05-24.md`
 
 클립보드/추론 이슈를 볼 경우:
 
@@ -129,6 +134,7 @@
 5. `ELECTRON_MVP_CURRENT_STATUS_2026-05-20.md`
 6. `DESKTOP_MODEL_ROUTING_IMPLEMENTATION_2026-05-22.md`
 7. `DESKTOP_APP_CURRENT_STATUS_AND_NEXT_STEPS_2026-05-23.md`
+8. `DESKTOP_APP_FINAL_MVP_STATUS_2026-05-24.md`
 
 과거 맥락이 필요할 경우:
 
