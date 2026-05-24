@@ -1,0 +1,8 @@
+| 항목 | 값 | 비고 |
+| --- | --- | --- |
+| release tag | 미지정 | 아직 별도 tag 없음 |
+| installer filename | 추가 확인 필요: Windows build machine의 desktop/release/ 산출물명 기입 | Windows release 폴더 확인 후 기입 |
+| installer size | 추가 확인 필요 | desktop/release 산출물 크기 확인 필요 |
+| commit hash | fd4d81a | 현재 작업 트리 기준 short hash |
+| build environment | Windows build machine | embedded Python 준비 후 npm run dist:win |
+| known issue | installed app model path issue fixed after discovery | 재빌드 후 설치판 재확인 권장 |

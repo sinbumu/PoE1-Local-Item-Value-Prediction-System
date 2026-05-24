@@ -1,0 +1,9 @@
+시연 샘플 ID,아이템 유형,예상 routing,실제 decision,비고
+rare-equipment-001,rare equipment,rare_unique_classifier,search-worthy,CLI 검증 완료
+unique-equipment-001,unique equipment,rare_unique_classifier,미기록,앱 데모용 캡처 필요
+normal-jewel-001,jewel,jewel_regressor,search-worthy,CLI 검증 완료
+skill-gem-001,skill gem,skill_gem_regressor,search-worthy 또는 manual check,모델 번들 버전에 따라 chaos 값 변동 가능
+currency-001,currency,external_price_lookup_recommended,external price lookup recommended,CLI 검증 완료
+map-001,map,external_price_lookup_recommended,external price lookup recommended,CLI 검증 완료
+divination-card-001,divination card,external_price_lookup_recommended,external price lookup recommended,CLI 검증 완료
+parse-failure-001,malformed input,unsupported_or_parse_failed,parse failed,CLI 검증 완료

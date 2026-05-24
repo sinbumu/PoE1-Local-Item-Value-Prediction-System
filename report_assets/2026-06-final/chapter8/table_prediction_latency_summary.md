@@ -1,0 +1,7 @@
+| 샘플 | feature generation ms | prediction ms | total ms | 비고 |
+| --- | --- | --- | --- | --- |
+| rare-equipment-001 | N/A | N/A | N/A | Electron UI 내부 timings 표시. 보고서용 정량 캡처는 추가 측정 필요 |
+| normal-jewel-001 | N/A | N/A | N/A | CLI pipeline smoke test는 수행했으나 split timing 미기록 |
+| skill-gem-001 | N/A | N/A | N/A | 설치판 smoke test에서 UI latency 캡처 권장 |
+| currency-001 | N/A | N/A | N/A | fallback route라 model prediction 없음 |
+| parse-failure-001 | N/A | N/A | N/A | fallback route |

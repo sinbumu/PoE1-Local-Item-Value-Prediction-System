@@ -1,0 +1,357 @@
+{
+  "createdAt": "2026-05-24T14:26:17.639184+00:00",
+  "commitHash": "fd4d81a",
+  "releaseTag": "미지정",
+  "installerFilename": "추가 확인 필요: Windows build machine의 desktop/release/ 산출물명 기입",
+  "root": "/Users/blockoxyz/Documents/GitHub/PoE1-Local-Item-Value-Prediction-System/report_assets/2026-06-final",
+  "assets": [
+    {
+      "file": "FINAL_REPORT_CH7_8_9_HANDOFF.md",
+      "description": "제7장-제9장 작성용 핵심 문장, 주장 가능/불가 문장, 한계 정리",
+      "recommended_chapter": "chapter7/8/9",
+      "status": "generated"
+    },
+    {
+      "file": "README.md",
+      "description": "Asset bundle 목적, 장별 사용 가이드, 검증 상태 요약",
+      "recommended_chapter": "asset guide",
+      "status": "generated"
+    },
+    {
+      "file": "appendix/glossary_app_terms.md",
+      "description": "desktop app 관련 용어 정의",
+      "recommended_chapter": "appendix",
+      "status": "generated"
+    },
+    {
+      "file": "appendix/table_demo_sample_inventory.csv",
+      "description": "부록용 demo sample inventory 표",
+      "recommended_chapter": "appendix",
+      "status": "generated"
+    },
+    {
+      "file": "appendix/table_demo_sample_inventory.md",
+      "description": "부록용 demo sample inventory 표",
+      "recommended_chapter": "appendix",
+      "status": "generated"
+    },
+    {
+      "file": "appendix/table_environment_check_details.csv",
+      "description": "부록용 환경 점검 세부 항목 표",
+      "recommended_chapter": "appendix",
+      "status": "generated"
+    },
+    {
+      "file": "appendix/table_environment_check_details.md",
+      "description": "부록용 환경 점검 세부 항목 표",
+      "recommended_chapter": "appendix",
+      "status": "generated"
+    },
+    {
+      "file": "appendix/table_reference_documents.csv",
+      "description": "부록용 참고 문서 목록 표",
+      "recommended_chapter": "appendix",
+      "status": "generated"
+    },
+    {
+      "file": "appendix/table_reference_documents.md",
+      "description": "부록용 참고 문서 목록 표",
+      "recommended_chapter": "appendix",
+      "status": "generated"
+    },
+    {
+      "file": "appendix/table_release_artifact_manifest.csv",
+      "description": "부록용 release artifact manifest 표",
+      "recommended_chapter": "appendix",
+      "status": "generated"
+    },
+    {
+      "file": "appendix/table_release_artifact_manifest.md",
+      "description": "부록용 release artifact manifest 표",
+      "recommended_chapter": "appendix",
+      "status": "generated"
+    },
+    {
+      "file": "captions.md",
+      "description": "보고서에 바로 붙일 수 있는 그림/표 캡션 모음",
+      "recommended_chapter": "chapter7/8",
+      "status": "generated"
+    },
+    {
+      "file": "chapter7/table_decision_labels.csv",
+      "description": "Decision label 의미와 사용자 안내 문구 표",
+      "recommended_chapter": "chapter7",
+      "status": "generated"
+    },
+    {
+      "file": "chapter7/table_decision_labels.md",
+      "description": "Decision label 의미와 사용자 안내 문구 표",
+      "recommended_chapter": "chapter7",
+      "status": "generated"
+    },
+    {
+      "file": "chapter7/table_desktop_components.csv",
+      "description": "Desktop 앱 구성 요소, 역할, 관련 파일 표",
+      "recommended_chapter": "chapter7",
+      "status": "generated"
+    },
+    {
+      "file": "chapter7/table_desktop_components.md",
+      "description": "Desktop 앱 구성 요소, 역할, 관련 파일 표",
+      "recommended_chapter": "chapter7",
+      "status": "generated"
+    },
+    {
+      "file": "chapter7/table_desktop_requirements.csv",
+      "description": "Desktop 앱 요구사항, 구현 여부, 비고 표",
+      "recommended_chapter": "chapter7",
+      "status": "generated"
+    },
+    {
+      "file": "chapter7/table_desktop_requirements.md",
+      "description": "Desktop 앱 요구사항, 구현 여부, 비고 표",
+      "recommended_chapter": "chapter7",
+      "status": "generated"
+    },
+    {
+      "file": "chapter7/table_item_routing_current.csv",
+      "description": "아이템 유형별 현재 처리 방식 표",
+      "recommended_chapter": "chapter7",
+      "status": "generated"
+    },
+    {
+      "file": "chapter7/table_item_routing_current.md",
+      "description": "아이템 유형별 현재 처리 방식 표",
+      "recommended_chapter": "chapter7",
+      "status": "generated"
+    },
+    {
+      "file": "chapter7/table_packaging_structure.csv",
+      "description": "Packaged resources 구조 표",
+      "recommended_chapter": "chapter7",
+      "status": "generated"
+    },
+    {
+      "file": "chapter7/table_packaging_structure.md",
+      "description": "Packaged resources 구조 표",
+      "recommended_chapter": "chapter7",
+      "status": "generated"
+    },
+    {
+      "file": "chapter8/table_app_known_issues.csv",
+      "description": "현재 알려진 앱 이슈와 대응 상태 표",
+      "recommended_chapter": "chapter8",
+      "status": "generated"
+    },
+    {
+      "file": "chapter8/table_app_known_issues.md",
+      "description": "현재 알려진 앱 이슈와 대응 상태 표",
+      "recommended_chapter": "chapter8",
+      "status": "generated"
+    },
+    {
+      "file": "chapter8/table_demo_scenarios.csv",
+      "description": "발표용 demo scenario와 routing/decision 표",
+      "recommended_chapter": "chapter8",
+      "status": "generated"
+    },
+    {
+      "file": "chapter8/table_demo_scenarios.md",
+      "description": "발표용 demo scenario와 routing/decision 표",
+      "recommended_chapter": "chapter8",
+      "status": "generated"
+    },
+    {
+      "file": "chapter8/table_model_bundle_manifest.csv",
+      "description": "model_manifest.json 기준 모델 번들 목록 표",
+      "recommended_chapter": "chapter8",
+      "status": "generated"
+    },
+    {
+      "file": "chapter8/table_model_bundle_manifest.md",
+      "description": "model_manifest.json 기준 모델 번들 목록 표",
+      "recommended_chapter": "chapter8",
+      "status": "generated"
+    },
+    {
+      "file": "chapter8/table_prediction_latency_summary.csv",
+      "description": "Prediction latency 측정 현황 및 미측정 사유 표",
+      "recommended_chapter": "chapter8",
+      "status": "generated"
+    },
+    {
+      "file": "chapter8/table_prediction_latency_summary.md",
+      "description": "Prediction latency 측정 현황 및 미측정 사유 표",
+      "recommended_chapter": "chapter8",
+      "status": "generated"
+    },
+    {
+      "file": "chapter8/table_release_installer_summary.csv",
+      "description": "Release/installer artifact 요약 표",
+      "recommended_chapter": "chapter8",
+      "status": "generated"
+    },
+    {
+      "file": "chapter8/table_release_installer_summary.md",
+      "description": "Release/installer artifact 요약 표",
+      "recommended_chapter": "chapter8",
+      "status": "generated"
+    },
+    {
+      "file": "chapter8/table_windows_smoke_test.csv",
+      "description": "Windows smoke test 항목별 결과 요약 표",
+      "recommended_chapter": "chapter8",
+      "status": "generated"
+    },
+    {
+      "file": "chapter8/table_windows_smoke_test.md",
+      "description": "Windows smoke test 항목별 결과 요약 표",
+      "recommended_chapter": "chapter8",
+      "status": "generated"
+    },
+    {
+      "file": "figures/figure_desktop_app_flow.png",
+      "description": "PoE Ctrl+C부터 floating card까지 desktop app 전체 흐름 도식",
+      "recommended_chapter": "chapter7/8",
+      "status": "generated"
+    },
+    {
+      "file": "figures/figure_desktop_app_flow.svg",
+      "description": "PoE Ctrl+C부터 floating card까지 desktop app 전체 흐름 도식",
+      "recommended_chapter": "chapter7/8",
+      "status": "generated_editable_source"
+    },
+    {
+      "file": "figures/figure_end_to_end_demo_sequence.png",
+      "description": "발표/검증용 end-to-end demo sequence 도식",
+      "recommended_chapter": "chapter7/8",
+      "status": "generated"
+    },
+    {
+      "file": "figures/figure_end_to_end_demo_sequence.svg",
+      "description": "발표/검증용 end-to-end demo sequence 도식",
+      "recommended_chapter": "chapter7/8",
+      "status": "generated_editable_source"
+    },
+    {
+      "file": "figures/figure_model_routing_layer.png",
+      "description": "item type별 model/fallback routing layer 도식",
+      "recommended_chapter": "chapter7/8",
+      "status": "generated"
+    },
+    {
+      "file": "figures/figure_model_routing_layer.svg",
+      "description": "item type별 model/fallback routing layer 도식",
+      "recommended_chapter": "chapter7/8",
+      "status": "generated_editable_source"
+    },
+    {
+      "file": "figures/figure_packaged_app_runtime_layout.png",
+      "description": "Windows packaged app resources/runtime layout 도식",
+      "recommended_chapter": "chapter7/8",
+      "status": "generated"
+    },
+    {
+      "file": "figures/figure_packaged_app_runtime_layout.svg",
+      "description": "Windows packaged app resources/runtime layout 도식",
+      "recommended_chapter": "chapter7/8",
+      "status": "generated_editable_source"
+    },
+    {
+      "file": "screenshots/screenshot_capture_checklist.md",
+      "description": "실제 Windows 화면에서 캡처해야 할 screenshot 파일명과 조건 checklist",
+      "recommended_chapter": "chapter7/8",
+      "status": "generated"
+    },
+    {
+      "file": "screenshots/screenshot_demo_jewel_result.png",
+      "description": "실제 Windows 앱 화면 캡처 필요 placeholder",
+      "recommended_chapter": "chapter7/8",
+      "status": "capture_required"
+    },
+    {
+      "file": "screenshots/screenshot_demo_rare_result.png",
+      "description": "실제 Windows 앱 화면 캡처 필요 placeholder",
+      "recommended_chapter": "chapter7/8",
+      "status": "capture_required"
+    },
+    {
+      "file": "screenshots/screenshot_demo_skill_gem_result.png",
+      "description": "실제 Windows 앱 화면 캡처 필요 placeholder",
+      "recommended_chapter": "chapter7/8",
+      "status": "capture_required"
+    },
+    {
+      "file": "screenshots/screenshot_demo_unique_result.png",
+      "description": "실제 Windows 앱 화면 캡처 필요 placeholder",
+      "recommended_chapter": "chapter7/8",
+      "status": "capture_required"
+    },
+    {
+      "file": "screenshots/screenshot_external_lookup_result.png",
+      "description": "실제 Windows 앱 화면 캡처 필요 placeholder",
+      "recommended_chapter": "chapter7/8",
+      "status": "capture_required"
+    },
+    {
+      "file": "screenshots/screenshot_floating_card_low_or_manual.png",
+      "description": "실제 Windows 앱 화면 캡처 필요 placeholder",
+      "recommended_chapter": "chapter7/8",
+      "status": "capture_required"
+    },
+    {
+      "file": "screenshots/screenshot_floating_card_search_worthy.png",
+      "description": "실제 Windows 앱 화면 캡처 필요 placeholder",
+      "recommended_chapter": "chapter7/8",
+      "status": "capture_required"
+    },
+    {
+      "file": "screenshots/screenshot_main_window.png",
+      "description": "실제 Windows 앱 화면 캡처 필요 placeholder",
+      "recommended_chapter": "chapter7/8",
+      "status": "capture_required"
+    },
+    {
+      "file": "screenshots/screenshot_parse_failed_result.png",
+      "description": "실제 Windows 앱 화면 캡처 필요 placeholder",
+      "recommended_chapter": "chapter7/8",
+      "status": "capture_required"
+    },
+    {
+      "file": "screenshots/screenshot_run_check_ok.png",
+      "description": "실제 Windows 앱 화면 캡처 필요 placeholder",
+      "recommended_chapter": "chapter7/8",
+      "status": "capture_required"
+    },
+    {
+      "file": "screenshots/screenshot_settings_or_technical_details.png",
+      "description": "실제 Windows 앱 화면 캡처 필요 placeholder",
+      "recommended_chapter": "chapter7/8",
+      "status": "capture_required"
+    },
+    {
+      "file": "screenshots/screenshot_tray_menu.png",
+      "description": "실제 Windows 앱 화면 캡처 필요 placeholder",
+      "recommended_chapter": "chapter7/8",
+      "status": "capture_required"
+    }
+  ],
+  "verificationSummary": {
+    "verified": [
+      "routing CLI checks",
+      "external lookup route",
+      "parse failed route",
+      "Windows dev mode basic behavior",
+      "installer app launch reported",
+      "installer app model prediction verified"
+    ],
+    "partial": [
+      "actual PoE1 Ctrl+C long-run behavior"
+    ],
+    "missing": [
+      "final installer filename/size",
+      "screenshots",
+      "latency measurements"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+document,purpose,recommended chapter
+docs/DESKTOP_APP_FINAL_MVP_STATUS_2026-05-24.md,desktop app final MVP status,"7, 8, 9"
+docs/DESKTOP_APP_CURRENT_STATUS_AND_NEXT_STEPS_2026-05-23.md,pre-final desktop status and next steps,"7, 8"
+docs/DESKTOP_MODEL_ROUTING_IMPLEMENTATION_2026-05-22.md,model routing and deployment details,"7, 8"
+desktop/README.md,run/build/test guide,appendix
+docs/MODEL_SCOPE.md,model target and excluded scope,"7, 9"
+docs/TRAINING_FEATURES.md,training feature definitions,7
+docs/TRAINING_BASELINE_REPORT_2026-04-19.md,model baseline context,8
+docs/TRAINING_FEATURE_IMPORTANCE_SUMMARY_2026-04-23.md,feature importance discussion,8
+docs/REPORT_HANDOFF.md,project handoff summary,9

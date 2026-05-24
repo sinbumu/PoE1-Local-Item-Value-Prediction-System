@@ -1,0 +1,8 @@
+이슈,영향,대응 상태
+Listed price 기반 label limitation,실제 체결가 보장 불가,보고서에서 검색/판매 우선순위 판단으로 명시
+Floating card fullscreen issue,exclusive fullscreen 위 표시 불안정 가능,windowed/windowed fullscreen 테스트 권장
+Embedded Python size,installer 용량 증가,최종 size 측정 필요
+External lookup recommendation only,외부 시세 API 직접 연동 없음,fallback 안내로 범위 제한
+Windows clipboard intermittent stale read,복사 후 갱신 지연 가능,Reset Watch 버튼 및 빠른 polling 적용
+Packaged model path mismatch,설치판에서 모델 없음 fallback,manifest-relative path 및 predictor compatibility 수정
+Recommendation text encoding,Windows 한글 깨짐,UTF-8 env/reconfigure 적용

@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1190" height="170" viewBox="0 0 1190 170">
+<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#facc15"/></marker></defs>
+<rect width="100%" height="100%" fill="#020617"/>
+<text x="595.0" y="30" fill="#f8fafc" font-family="Arial" font-size="20" font-weight="800" text-anchor="middle">Desktop App End-to-End Flow</text>
+<line x1="165" y1="99" x2="190" y2="99" stroke="#facc15" stroke-width="2" marker-end="url(#arrow)"/>
+<line x1="335" y1="99" x2="360" y2="99" stroke="#facc15" stroke-width="2" marker-end="url(#arrow)"/>
+<line x1="490" y1="99" x2="515" y2="99" stroke="#facc15" stroke-width="2" marker-end="url(#arrow)"/>
+<line x1="660" y1="99" x2="685" y2="99" stroke="#facc15" stroke-width="2" marker-end="url(#arrow)"/>
+<line x1="830" y1="99" x2="855" y2="99" stroke="#facc15" stroke-width="2" marker-end="url(#arrow)"/>
+<line x1="990" y1="99" x2="1020" y2="99" stroke="#facc15" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="30" y="70" width="135" height="58" rx="12" fill="#0f172a" stroke="#93c5fd" stroke-width="2"/><text x="97.5" y="94" fill="#e5e7eb" font-family="Arial" font-size="13" font-weight="700" text-anchor="middle"><tspan x="97.5" dy="0">PoE Ctrl+C</tspan></text>
+<rect x="190" y="70" width="145" height="58" rx="12" fill="#0f172a" stroke="#93c5fd" stroke-width="2"/><text x="262.5" y="94" fill="#e5e7eb" font-family="Arial" font-size="13" font-weight="700" text-anchor="middle"><tspan x="262.5" dy="0">Clipboard</tspan><tspan x="262.5" dy="16">Auto Watch</tspan></text>
+<rect x="360" y="70" width="130" height="58" rx="12" fill="#0f172a" stroke="#93c5fd" stroke-width="2"/><text x="425.0" y="94" fill="#e5e7eb" font-family="Arial" font-size="13" font-weight="700" text-anchor="middle"><tspan x="425.0" dy="0">Signature</tspan><tspan x="425.0" dy="16">Gate</tspan></text>
+<rect x="515" y="70" width="145" height="58" rx="12" fill="#0f172a" stroke="#93c5fd" stroke-width="2"/><text x="587.5" y="94" fill="#e5e7eb" font-family="Arial" font-size="13" font-weight="700" text-anchor="middle"><tspan x="587.5" dy="0">Feature</tspan><tspan x="587.5" dy="16">Builder</tspan></text>
+<rect x="685" y="70" width="145" height="58" rx="12" fill="#0f172a" stroke="#93c5fd" stroke-width="2"/><text x="757.5" y="94" fill="#e5e7eb" font-family="Arial" font-size="13" font-weight="700" text-anchor="middle"><tspan x="757.5" dy="0">Manifest</tspan><tspan x="757.5" dy="16">Router</tspan></text>
+<rect x="855" y="70" width="135" height="58" rx="12" fill="#0f172a" stroke="#93c5fd" stroke-width="2"/><text x="922.5" y="94" fill="#e5e7eb" font-family="Arial" font-size="13" font-weight="700" text-anchor="middle"><tspan x="922.5" dy="0">Model or</tspan><tspan x="922.5" dy="16">Fallback</tspan></text>
+<rect x="1020" y="70" width="140" height="58" rx="12" fill="#0f172a" stroke="#93c5fd" stroke-width="2"/><text x="1090.0" y="94" fill="#e5e7eb" font-family="Arial" font-size="13" font-weight="700" text-anchor="middle"><tspan x="1090.0" dy="0">Decision +</tspan><tspan x="1090.0" dy="16">Floating Card</tspan></text>
+</svg>

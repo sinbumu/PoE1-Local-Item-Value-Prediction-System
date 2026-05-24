@@ -1,0 +1,7 @@
+Packaged resource path,내용,비고
+resources/dist/,빌드된 desktop feature builder JS 및 관련 모듈,packaged mode에서 npm/tsx 없이 feature 생성
+resources/models/v2_mvp/,model_manifest.json 및 CatBoost model/schema/run_info,manifest-relative path 사용
+resources/ml/predict_desktop_item_value.py,통합 Python predictor,classifier/regressor/fallback 처리
+resources/python/,embedded Python runtime 및 ML dependencies,Windows build machine에서 생성
+resources/samples/clipboard/en/,발표용 demo sample,실게임 환경 불안정 시 fallback
+app.asar/main.js,Electron main process,path resolver가 resourcesPath 기준 사용

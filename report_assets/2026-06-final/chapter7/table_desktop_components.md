@@ -1,0 +1,12 @@
+| 구성 요소 | 역할 | 관련 파일 |
+| --- | --- | --- |
+| Electron main process | 창 생성, tray, subprocess, packaged path resolver, 환경 점검 | desktop/main.js |
+| Preload bridge | renderer에서 IPC API 호출 노출 | desktop/preload.js |
+| Renderer UI | main window, Auto Watch, demo sample, recent results | desktop/renderer/index.html; desktop/renderer/renderer.js; desktop/renderer/styles.css |
+| Floating card UI | always-on-top 결과 카드와 floating 설정 | desktop/floating/index.html; desktop/floating/renderer.js; desktop/floating/styles.css |
+| Desktop feature payload builder | clipboard text에서 V1/V2 feature payload 생성 | src/services/desktop-feature-payload.service.ts |
+| V1 summary feature builder | jewel/skill_gem용 clipboard-safe V1 feature 생성 | src/services/clipboard-v1-summary-feature-builder.service.ts |
+| V2 mod-aware feature builder | rare/unique용 mod-aware feature 생성 | src/services/v2-mod-feature-builder.service.ts |
+| Python predictor | manifest 기반 classifier/regressor/fallback 통합 추론 | ml/predict_desktop_item_value.py |
+| Model manifest | item route, model path, decision policy 정의 | desktop/models/v2_mvp/model_manifest.json |
+| Installer packaging | Windows NSIS installer 및 resources bundle | desktop/package.json; desktop/scripts/prepare-embedded-python.ps1 |
