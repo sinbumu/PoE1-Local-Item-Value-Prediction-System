@@ -2,6 +2,9 @@ artifact,status,path/value,notes
 Electron app source,available,desktop/,main/preload/renderer/floating
 desktop model bundle,available,desktop/models/v2_mvp/,prepared bundle included
 app icon assets,available,desktop/assets/icons/,tray/app/installer icons
-installer output,capture required,desktop/release/,Windows build machine에서 파일명/크기 기록 필요
+release tag,confirmed,desktop-v0.1.0,GitHub release 기준
+release URI,confirmed,https://github.com/sinbumu/PoE1-Local-Item-Value-Prediction-System/releases/tag/desktop-v0.1.0,최종 보고서 reference용
+release commit,confirmed,8a82b4c9cad68ec5173896d60bdbfdef409921ba,release 기준 commit
+installer output,confirmed,PoE1.Item.Value.Triage.Setup.0.1.0.exe,installer size 266 MB
 embedded Python runtime,generated locally,desktop/vendor/python-win/,ignored by Git
 demo samples,available,samples/clipboard/en/,presentation fallback

@@ -14,6 +14,7 @@
 - 표 7-3 현재 item type별 routing 정책.
 - 표 7-4 Decision label의 의미와 사용자 안내 문구.
 - 표 7-5 Windows packaged app resource 구조.
+- 표 7-6 모델 출력값과 앱 Decision Label 변환 정책.
 - 표 8-1 Windows smoke test 결과 요약.
 - 표 8-2 발표용 demo scenario 목록.
 - 표 8-3 Windows installer release artifact 요약.

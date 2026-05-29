@@ -1,9 +1,11 @@
 # Final Report Assets for Chapters 7-9
 
 생성 시각: `2026-05-24T14:26:17.639184+00:00`  
-기준 commit: `fd4d81a`  
-release tag: `미지정`  
-installer filename: `추가 확인 필요: Windows build machine의 desktop/release/ 산출물명 기입`
+기준 commit: `8a82b4c9cad68ec5173896d60bdbfdef409921ba`  
+release tag: `desktop-v0.1.0`  
+installer filename: `PoE1.Item.Value.Triage.Setup.0.1.0.exe`  
+installer size: `266 MB`  
+release URI: `https://github.com/sinbumu/PoE1-Local-Item-Value-Prediction-System/releases/tag/desktop-v0.1.0`
 
 ## 목적
 
@@ -16,6 +18,7 @@ installer filename: `추가 확인 필요: Windows build machine의 desktop/rele
   - `chapter7/table_desktop_components.*`
   - `chapter7/table_item_routing_current.*`
   - `chapter7/table_decision_labels.*`
+  - `chapter7/table_decision_policy_mapping.*`
   - `chapter7/table_packaging_structure.*`
   - `figures/figure_desktop_app_flow.png`
   - `figures/figure_model_routing_layer.png`
@@ -35,6 +38,7 @@ installer filename: `추가 확인 필요: Windows build machine의 desktop/rele
   - `FINAL_REPORT_CH7_8_9_HANDOFF.md`
   - `appendix/glossary_app_terms.md`
   - `appendix/table_reference_documents.*`
+  - `references/domain_data_limitations.md`
 
 ## 검증 완료/미완료 요약
 
@@ -54,8 +58,6 @@ installer filename: `추가 확인 필요: Windows build machine의 desktop/rele
 
 ### 미완료 / 추가 확인 필요
 
-- 최종 installer 파일명과 크기
-- release tag
 - 보고서에 넣을 실제 screenshot PNG
 - 정량 latency 측정표
 

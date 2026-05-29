@@ -1,8 +1,8 @@
 {
   "createdAt": "2026-05-24T14:26:17.639184+00:00",
-  "commitHash": "fd4d81a",
-  "releaseTag": "미지정",
-  "installerFilename": "추가 확인 필요: Windows build machine의 desktop/release/ 산출물명 기입",
+  "commitHash": "8a82b4c9cad68ec5173896d60bdbfdef409921ba",
+  "releaseTag": "desktop-v0.1.0",
+  "installerFilename": "PoE1.Item.Value.Triage.Setup.0.1.0.exe",
   "root": "/Users/blockoxyz/Documents/GitHub/PoE1-Local-Item-Value-Prediction-System/report_assets/2026-06-final",
   "assets": [
     {
@@ -86,6 +86,18 @@
     {
       "file": "chapter7/table_decision_labels.md",
       "description": "Decision label 의미와 사용자 안내 문구 표",
+      "recommended_chapter": "chapter7",
+      "status": "generated"
+    },
+    {
+      "file": "chapter7/table_decision_policy_mapping.csv",
+      "description": "model_manifest.json decisionPolicy 기준 모델 출력값과 앱 Decision Label 변환 정책 표",
+      "recommended_chapter": "chapter7",
+      "status": "generated"
+    },
+    {
+      "file": "chapter7/table_decision_policy_mapping.md",
+      "description": "model_manifest.json decisionPolicy 기준 모델 출력값과 앱 Decision Label 변환 정책 표",
       "recommended_chapter": "chapter7",
       "status": "generated"
     },
@@ -258,100 +270,100 @@
       "status": "generated_editable_source"
     },
     {
+      "file": "references/domain_data_limitations.md",
+      "description": "Public Stash API/listing price 기반 label 한계와 보고서 표현 가이드",
+      "recommended_chapter": "chapter8/9",
+      "status": "generated"
+    },
+    {
+      "file": "screenshots/screenshot_auto_watch_enabled.png",
+      "description": "실제 Windows 설치판 또는 release 화면 캡처 필요 placeholder",
+      "recommended_chapter": "chapter7/8",
+      "status": "capture_required"
+    },
+    {
       "file": "screenshots/screenshot_capture_checklist.md",
-      "description": "실제 Windows 화면에서 캡처해야 할 screenshot 파일명과 조건 checklist",
+      "description": "Windows 설치판 기준 screenshot 캡처 파일명과 촬영 조건 checklist",
       "recommended_chapter": "chapter7/8",
       "status": "generated"
     },
     {
-      "file": "screenshots/screenshot_demo_jewel_result.png",
-      "description": "실제 Windows 앱 화면 캡처 필요 placeholder",
+      "file": "screenshots/screenshot_external_lookup_recommended.png",
+      "description": "실제 Windows 설치판 또는 release 화면 캡처 필요 placeholder",
       "recommended_chapter": "chapter7/8",
       "status": "capture_required"
     },
     {
-      "file": "screenshots/screenshot_demo_rare_result.png",
-      "description": "실제 Windows 앱 화면 캡처 필요 placeholder",
-      "recommended_chapter": "chapter7/8",
-      "status": "capture_required"
-    },
-    {
-      "file": "screenshots/screenshot_demo_skill_gem_result.png",
-      "description": "실제 Windows 앱 화면 캡처 필요 placeholder",
-      "recommended_chapter": "chapter7/8",
-      "status": "capture_required"
-    },
-    {
-      "file": "screenshots/screenshot_demo_unique_result.png",
-      "description": "실제 Windows 앱 화면 캡처 필요 placeholder",
-      "recommended_chapter": "chapter7/8",
-      "status": "capture_required"
-    },
-    {
-      "file": "screenshots/screenshot_external_lookup_result.png",
-      "description": "실제 Windows 앱 화면 캡처 필요 placeholder",
-      "recommended_chapter": "chapter7/8",
-      "status": "capture_required"
-    },
-    {
-      "file": "screenshots/screenshot_floating_card_low_or_manual.png",
-      "description": "실제 Windows 앱 화면 캡처 필요 placeholder",
+      "file": "screenshots/screenshot_floating_card_high_value_or_manual_check.png",
+      "description": "실제 Windows 설치판 또는 release 화면 캡처 필요 placeholder",
       "recommended_chapter": "chapter7/8",
       "status": "capture_required"
     },
     {
       "file": "screenshots/screenshot_floating_card_search_worthy.png",
-      "description": "실제 Windows 앱 화면 캡처 필요 placeholder",
+      "description": "실제 Windows 설치판 또는 release 화면 캡처 필요 placeholder",
+      "recommended_chapter": "chapter7/8",
+      "status": "capture_required"
+    },
+    {
+      "file": "screenshots/screenshot_installed_app_start.png",
+      "description": "실제 Windows 설치판 또는 release 화면 캡처 필요 placeholder",
       "recommended_chapter": "chapter7/8",
       "status": "capture_required"
     },
     {
       "file": "screenshots/screenshot_main_window.png",
-      "description": "실제 Windows 앱 화면 캡처 필요 placeholder",
+      "description": "실제 Windows 설치판 또는 release 화면 캡처 필요 placeholder",
       "recommended_chapter": "chapter7/8",
       "status": "capture_required"
     },
     {
-      "file": "screenshots/screenshot_parse_failed_result.png",
-      "description": "실제 Windows 앱 화면 캡처 필요 placeholder",
+      "file": "screenshots/screenshot_parse_failed.png",
+      "description": "실제 Windows 설치판 또는 release 화면 캡처 필요 placeholder",
+      "recommended_chapter": "chapter7/8",
+      "status": "capture_required"
+    },
+    {
+      "file": "screenshots/screenshot_release_page_or_installer_file.png",
+      "description": "실제 Windows 설치판 또는 release 화면 캡처 필요 placeholder",
       "recommended_chapter": "chapter7/8",
       "status": "capture_required"
     },
     {
       "file": "screenshots/screenshot_run_check_ok.png",
-      "description": "실제 Windows 앱 화면 캡처 필요 placeholder",
-      "recommended_chapter": "chapter7/8",
-      "status": "capture_required"
-    },
-    {
-      "file": "screenshots/screenshot_settings_or_technical_details.png",
-      "description": "실제 Windows 앱 화면 캡처 필요 placeholder",
+      "description": "실제 Windows 설치판 또는 release 화면 캡처 필요 placeholder",
       "recommended_chapter": "chapter7/8",
       "status": "capture_required"
     },
     {
       "file": "screenshots/screenshot_tray_menu.png",
-      "description": "실제 Windows 앱 화면 캡처 필요 placeholder",
+      "description": "실제 Windows 설치판 또는 release 화면 캡처 필요 placeholder",
       "recommended_chapter": "chapter7/8",
       "status": "capture_required"
     }
   ],
   "verificationSummary": {
     "verified": [
-      "routing CLI checks",
-      "external lookup route",
-      "parse failed route",
       "Windows dev mode basic behavior",
+      "external lookup route",
       "installer app launch reported",
-      "installer app model prediction verified"
+      "installer app model prediction verified",
+      "installer app standalone launch verified",
+      "installer size confirmed",
+      "parse failed route",
+      "release metadata confirmed",
+      "routing CLI checks"
     ],
     "partial": [
-      "actual PoE1 Ctrl+C long-run behavior"
+      "actual PoE1 Ctrl+C long-run behavior",
+      "tray menu screenshot pending",
+      "unique demo screenshot pending"
     ],
     "missing": [
-      "final installer filename/size",
       "screenshots",
       "latency measurements"
     ]
-  }
+  },
+  "installerSize": "266 MB",
+  "releaseUri": "https://github.com/sinbumu/PoE1-Local-Item-Value-Prediction-System/releases/tag/desktop-v0.1.0"
 }

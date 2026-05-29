@@ -1,0 +1,10 @@
+| route_type | input_value | condition | decision_label | user_meaning |
+| --- | --- | --- | --- | --- |
+| classifier | score | score < 0.50 | low listed value | 모델 점수가 낮아 검색/판매 시도 우선순위가 낮은 후보 |
+| classifier | score | 0.50 <= score < 0.70 | manual check | 자동 판단만으로 버리기 애매해 거래소 직접 확인이 필요한 중간 후보 |
+| classifier | score | 0.70 <= score < 0.88 | search-worthy | 검색 또는 판매 시도 가치가 있을 가능성이 있는 후보 |
+| classifier | score | 0.88 <= score | high-value candidate | 고가 가능성이 있어 반드시 거래소 직접 확인이 필요한 후보 |
+| regressor | predicted chaos | predicted chaos < 5 | low listed value | 예측 chaos 기준 검색/판매 시도 우선순위가 낮은 후보 |
+| regressor | predicted chaos | 5 <= predicted chaos < 30 | manual check | 중저가 구간으로 직접 확인 후 처리하는 것이 적절한 후보 |
+| regressor | predicted chaos | 30 <= predicted chaos < 300 | search-worthy | 검색 또는 판매 시도 가치가 있을 가능성이 있는 후보 |
+| regressor | predicted chaos | 300 <= predicted chaos | high-value candidate | 고가 후보로 분류되어 거래소 직접 확인이 필요한 후보 |
