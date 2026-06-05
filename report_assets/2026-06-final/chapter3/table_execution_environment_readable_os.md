@@ -1,0 +1,6 @@
+| item | value | source_or_note |
+| --- | --- | --- |
+| local development OS | macOS 26.3.1 (a), build 25D771280a | sw_vers |
+| local hardware architecture | Apple Silicon arm64 | uname -m |
+| local CPU | Apple M3 Max | sysctl -n machdep.cpu.brand_string |
+| Windows installer validation OS | 추가 확인 필요 | 저장소 문서에는 Windows installer 검증 완료만 있고 Windows 10/11 세부 버전은 없음 |

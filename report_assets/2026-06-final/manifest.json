@@ -78,6 +78,54 @@
       "status": "generated"
     },
     {
+      "file": "chapter3/table_execution_environment_readable_os.csv",
+      "description": "보고서 표기용 로컬 OS/하드웨어 실행 환경 요약표",
+      "recommended_chapter": "chapter3",
+      "status": "generated"
+    },
+    {
+      "file": "chapter3/table_execution_environment_readable_os.md",
+      "description": "보고서 표기용 로컬 OS/하드웨어 실행 환경 요약표",
+      "recommended_chapter": "chapter3",
+      "status": "generated"
+    },
+    {
+      "file": "chapter4/table_collector_polling_behavior.csv",
+      "description": "collector poll interval 기본값과 동적 대기 구조 요약표",
+      "recommended_chapter": "chapter4",
+      "status": "generated"
+    },
+    {
+      "file": "chapter4/table_collector_polling_behavior.md",
+      "description": "collector poll interval 기본값과 동적 대기 구조 요약표",
+      "recommended_chapter": "chapter4",
+      "status": "generated"
+    },
+    {
+      "file": "chapter6/table_chaos_rmse_exact_values.csv",
+      "description": "jewel/skill_gem global/segment target_price_chaos_rmse 원본 소수값 표",
+      "recommended_chapter": "chapter6",
+      "status": "generated"
+    },
+    {
+      "file": "chapter6/table_chaos_rmse_exact_values.md",
+      "description": "jewel/skill_gem global/segment target_price_chaos_rmse 원본 소수값 표",
+      "recommended_chapter": "chapter6",
+      "status": "generated"
+    },
+    {
+      "file": "chapter6/table_feature_importance_top3_summary.csv",
+      "description": "본문 축약용 세그먼트별 top-3 feature importance 요약표",
+      "recommended_chapter": "chapter6",
+      "status": "generated"
+    },
+    {
+      "file": "chapter6/table_feature_importance_top3_summary.md",
+      "description": "본문 축약용 세그먼트별 top-3 feature importance 요약표",
+      "recommended_chapter": "chapter6",
+      "status": "generated"
+    },
+    {
       "file": "chapter7/table_decision_labels.csv",
       "description": "Decision label 의미와 사용자 안내 문구 표",
       "recommended_chapter": "chapter7",
@@ -270,9 +318,27 @@
       "status": "generated_editable_source"
     },
     {
+      "file": "followups/final_report_additional_checks_2026-06-06.md",
+      "description": "최종 보고서 후속 요청 5.1-5.6 저장소 기준 확인값 종합 정리",
+      "recommended_chapter": "chapter3/4/6/appendix",
+      "status": "generated"
+    },
+    {
       "file": "references/domain_data_limitations.md",
       "description": "Public Stash API/listing price 기반 label 한계와 보고서 표현 가이드",
       "recommended_chapter": "chapter8/9",
+      "status": "generated"
+    },
+    {
+      "file": "references/final_report_reference_candidates.csv",
+      "description": "최종 보고서 참고문헌 보강용 공식/웹 문서 후보 목록",
+      "recommended_chapter": "references",
+      "status": "generated"
+    },
+    {
+      "file": "references/final_report_reference_candidates.md",
+      "description": "최종 보고서 참고문헌 보강용 공식/웹 문서 후보 목록",
+      "recommended_chapter": "references",
       "status": "generated"
     },
     {

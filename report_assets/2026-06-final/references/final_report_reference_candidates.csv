@@ -1,0 +1,14 @@
+title,organization_or_author,url,accessed_date,usage_note
+Path of Exile Developer Documentation,Grinding Gear Games,https://www.pathofexile.com/developer/docs/index,2026-06-06,OAuth 및 공식 developer docs 진입점
+Path of Exile Public Stash API,Grinding Gear Games,https://www.pathofexile.com/developer/docs/reference,2026-06-06,Public Stash API reference. Report may cite endpoint as /public-stash-tabs.
+Path of Exile OAuth Documentation,Grinding Gear Games,https://www.pathofexile.com/developer/docs/authorization,2026-06-06,OAuth client credentials 및 API 인증 설명
+CatBoost Documentation,CatBoost Contributors / Yandex,https://catboost.ai/docs/,2026-06-06,CatBoost 학습/feature importance/Pool 사용 근거
+CatBoost: unbiased boosting with categorical features,Prokhorenkova et al.,https://arxiv.org/abs/1706.09516,2026-06-06,CatBoost 알고리즘 논문
+Electron Documentation,OpenJS Foundation / Electron,https://www.electronjs.org/docs/latest/,2026-06-06,Electron desktop app 구현 근거
+electron-builder Documentation,electron-userland,https://www.electron.build/,2026-06-06,Windows NSIS installer packaging 근거
+poe.ninja API Data Endpoint,poe.ninja,https://poe.ninja/api/data,2026-06-06,currencyoverview 기반 chaos equivalent 환율 보조 데이터
+RePoE fork repository,repoe-fork contributors,https://github.com/repoe-fork/repoe,2026-06-06,affix/base item/static data snapshot source
+RePoE fork static exports,repoe-fork contributors,https://repoe-fork.github.io,2026-06-06,mods/stats/stat_translations/base_items export source
+PostgreSQL Documentation,PostgreSQL Global Development Group,https://www.postgresql.org/docs/,2026-06-06,로컬 primary data store 및 SQL 처리 근거
+Node.js Documentation,OpenJS Foundation / Node.js,https://nodejs.org/docs/latest/api/,2026-06-06,collector/ETL runtime 근거
+TypeScript Documentation,Microsoft,https://www.typescriptlang.org/docs/,2026-06-06,Node.js/TypeScript 구현 언어 근거

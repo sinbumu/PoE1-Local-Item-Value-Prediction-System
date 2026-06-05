@@ -1,0 +1,6 @@
+model_name,top_features,interpretation
+global,base_type (18.984771); ilvl (15.919448); quality (6.729972),"전체 모델은 base type, item level, quality처럼 아이템 기본 속성의 설명력이 가장 크게 나타난다."
+rare_equipment,ilvl (22.517027); base_type (21.970764); crafted_mod_count (12.209435),"Rare 장비는 ilvl/base type과 crafted mod 수가 중요해, 베이스와 제작 상태가 가격 차이를 크게 만든다."
+jewel,ilvl (14.935823); explicit_mod_count (11.223651); implicit_mod_count (9.233566),"Jewel은 ilvl과 explicit/implicit mod 수가 상위에 있어, 옵션 개수와 기본 레벨 정보가 핵심 신호로 작용한다."
+unique_equipment,base_type (25.362812); attribute_roll_sum (11.398368); resistance_roll_sum (11.300866),"Unique 장비는 base type과 attribute/resistance roll summary가 중요해, 고유 아이템 종류와 수치 롤 차이가 가격에 반영된다."
+skill_gem,gem_level (34.396114); base_type (16.677535); explicit_mod_count (10.789701),"Skill gem은 gem level 영향이 가장 크고 base type, explicit mod count가 뒤따라 젬 종류와 레벨 중심으로 판단된다."
