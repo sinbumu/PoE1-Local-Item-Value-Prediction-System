@@ -4,6 +4,19 @@ Path of Exile 1 `public-stash-tabs` 데이터를 로컬에서 수집하고, 정�
 
 현재 기준선은 `collector + ETL + CatBoost 학습 파이프라인 + English clipboard affix dictionary V1 + Electron MVP 앱`까지 포함합니다. Electron 앱의 상세 실행 가이드는 `desktop/README.md`를 기준으로 봅니다.
 
+## 프로젝트 기간 누적 수집 기록
+
+학기 프로젝트 기간 동안 로컬 collector가 남긴 `ingestion_activity_summaries` day bucket 누적 로그 기준으로, `Mirage` 리그에서 다음 규모의 데이터 처리 이벤트가 기록되었습니다.
+
+| 구분 | 집계 기간 | 누적량 |
+| --- | --- | ---: |
+| Raw API response cycle | 2026-03-31 ~ 2026-06-05 | 471,817 |
+| Filtered raw stash | 2026-03-31 ~ 2026-06-05 | 30,084,451 |
+| Normalized priced listing 처리 이벤트 | 2026-03-25 ~ 2026-06-05 | 781,154,298 |
+| poe.ninja exchange snapshot | 2026-03-03 ~ 2026-04-23 | 158,460 |
+
+주의: 이 값은 현재 DB에 남아 있는 row count가 아니라, 오래된 raw/normalized 데이터를 주기적으로 정리한 뒤에도 별도 summary bucket에 누적된 처리량입니다. `Normalized priced listing 처리 이벤트`는 collector가 정규화해 upsert 경로에 넘긴 row의 누적 합계이므로, 같은 listing이 다시 관측되어 update된 경우도 포함됩니다.
+
 ## 현재까지 확인된 전제
 
 이 프로젝트는 공식 Path of Exile 개발자 문서를 기준으로 구현되어 있습니다.
