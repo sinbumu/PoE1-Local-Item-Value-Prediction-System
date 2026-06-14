@@ -1,0 +1,13 @@
+split,actual_class,predicted_class,count
+train,actual_search_worthy_1,predicted_search_worthy_1,1219172
+train,actual_search_worthy_1,predicted_low_0,357629
+train,actual_low_0,predicted_search_worthy_1,399158
+train,actual_low_0,predicted_low_0,749014
+valid,actual_search_worthy_1,predicted_search_worthy_1,163686
+valid,actual_search_worthy_1,predicted_low_0,45722
+valid,actual_low_0,predicted_search_worthy_1,48586
+valid,actual_low_0,predicted_low_0,82627
+test,actual_search_worthy_1,predicted_search_worthy_1,176076
+test,actual_search_worthy_1,predicted_low_0,41532
+test,actual_low_0,predicted_search_worthy_1,47506
+test,actual_low_0,predicted_low_0,75509

@@ -324,6 +324,42 @@
       "status": "generated"
     },
     {
+      "file": "followups/rare_unique_classifier_report_handoff.md",
+      "description": "제6장 regression baseline과 제7장 classifier app 적용 연결 문단 및 보고서용 표 초안",
+      "recommended_chapter": "chapter6/7",
+      "status": "generated"
+    },
+    {
+      "file": "followups/rare_unique_classifier_training_summary.md",
+      "description": "rare_unique_classifier 학습 여부, 데이터 범위, target, split, feature, CatBoost 설정, app route 확인 요약",
+      "recommended_chapter": "chapter6/7",
+      "status": "generated"
+    },
+    {
+      "file": "followups/table_rare_unique_classifier_confusion_matrix.csv",
+      "description": "rare_unique_classifier train/valid/test confusion matrix CSV",
+      "recommended_chapter": "chapter6/7",
+      "status": "generated"
+    },
+    {
+      "file": "followups/table_rare_unique_classifier_confusion_matrix.md",
+      "description": "rare_unique_classifier train/valid/test confusion matrix 표",
+      "recommended_chapter": "chapter6/7",
+      "status": "generated"
+    },
+    {
+      "file": "followups/table_rare_unique_classifier_metrics.csv",
+      "description": "rare_unique_classifier train/valid/test accuracy, precision, recall, F1 및 class별 metric CSV",
+      "recommended_chapter": "chapter6/7",
+      "status": "generated"
+    },
+    {
+      "file": "followups/table_rare_unique_classifier_metrics.md",
+      "description": "rare_unique_classifier train/valid/test accuracy, precision, recall, F1 및 class별 metric 표",
+      "recommended_chapter": "chapter6/7",
+      "status": "generated"
+    },
+    {
       "file": "references/domain_data_limitations.md",
       "description": "Public Stash API/listing price 기반 label 한계와 보고서 표현 가이드",
       "recommended_chapter": "chapter8/9",
